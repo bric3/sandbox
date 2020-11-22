@@ -8,6 +8,12 @@ $ ./gradlew installCmemExecutable
 $ ./build/install/cmem/cmem
 ----
 
+[source, shell]
+----
+$ gcc -Wall -Wpedantic -o test-mem test-mem.c
+$ clang -Wall -Wpedantic -o heap-mem test-mem.c
+----
+
 
 .Interesting links
 * https://docs.gradle.org/current/userguide/native_software.html[Building native software]
