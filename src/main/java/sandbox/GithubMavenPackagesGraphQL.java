@@ -14,7 +14,7 @@ public class GithubMavenPackagesGraphQL {
   public static void main(String[] args) throws IOException, InterruptedException {
     final HttpClient build = HttpClient.newBuilder().build();
 
-    if(args.length != 4) {
+    if (args.length != 4) {
       System.err.println("First arg is the github token");
       System.exit(1);
     }

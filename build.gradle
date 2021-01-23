@@ -1,25 +1,26 @@
 plugins {
-    id 'java-library'
+  id 'java-library'
 }
 
 repositories {
-    jcenter()
+  jcenter()
 }
 
-sourceCompatibility = 11
-targetCompatibility = 11
-
 dependencies {
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
-    api('org.apache.commons:commons-math3:3.6.1')
+  // This dependency is exported to consumers, that is to say found on their compile classpath.
+  api('org.apache.commons:commons-math3:3.6.1')
 
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation('com.google.guava:guava:29.0-jre')
+  // This dependency is used internally, and not exposed to consumers on their own compile classpath.
+  implementation('com.google.guava:guava:29.0-jre')
 
-    implementation('net.bytebuddy:byte-buddy:1.10.13')
-    implementation('net.bytebuddy:byte-buddy-agent:1.10.13')
-    implementation('org.conscrypt:conscrypt-openjdk-uber:2.4.0')
+  implementation('net.bytebuddy:byte-buddy:1.10.13')
+  implementation('net.bytebuddy:byte-buddy-agent:1.10.13')
+  implementation('org.conscrypt:conscrypt-openjdk-uber:2.4.0')
 
-    // Use JUnit test framework
-    testImplementation('junit:junit:4.13')
+  testImplementation('org.junit.jupiter:junit-jupiter:5.7.0')
+  testImplementation('org.testcontainers:testcontainers:1.15.1')
+}
+
+tasks.withType(JavaCompile) {
+  options.release.set(11)
 }
