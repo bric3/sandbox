@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2021 Brice Dutheil <brice.dutheil@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package sandbox;
 
 import java.io.BufferedOutputStream;
@@ -8,8 +32,7 @@ import java.net.ServerSocket;
 import java.util.Date;
 
 /**
- * jar xvf security-auth.jar BOOT-INF/lib/conscrypt-openjdk-uber-2.2.1.jar
- * java -cp BOOT-INF/lib/conscrypt-openjdk-uber-2.2.1.jar -javaagent:newrelic-agent.jar -Djavax.net.debug=all sandbox.PokeHttpServer.java 4000 2>&1
+ * java -cp ./lib/conscrypt-openjdk-uber-2.2.1.jar -javaagent:newrelic-agent.jar -Djavax.net.debug=all sandbox.PokeHttpServer.java 4000 2>&1
  */
 public class PokeHttpServer {
   static int port = 8080;
@@ -18,9 +41,10 @@ public class PokeHttpServer {
     if (args.length == 1) {
       port = Integer.parseInt(args[0]);
     }
-//        Security.insertProviderAt(Conscrypt.newProvider(), 1);
+//    Security.insertProviderAt(Conscrypt.newProvider(), 1);
     try {
       var serverSocket = new ServerSocket(port);
+      System.out.printf("Starts listening on %d%n", port);
 
       while (true) {
         try (var connection = serverSocket.accept();
