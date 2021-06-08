@@ -41,3 +41,9 @@ tasks.register('runSparkline', JavaExec) {
   main = 'sandbox.Sparkline'
   classpath = sourceSets.main.runtimeClasspath
 }
+
+tasks.register('runIsATTY', JavaExec) {
+  dependsOn compileJava
+  main = 'sandbox.IsATTY'
+  classpath = sourceSets.main.runtimeClasspath
+}
