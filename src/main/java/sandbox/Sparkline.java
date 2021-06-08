@@ -61,7 +61,7 @@ public class Sparkline {
 
       String arg = argsDeque.pollFirst();
       switch (arg) {
-        case "-f":
+        case "-f" -> {
           if (stdin != null) {
             stderr.printf("The -f option can only be set once.%n%n");
             help();
@@ -84,13 +84,9 @@ public class Sparkline {
             }
             stdin = Files.newInputStream(file);
           }
-          break;
-
-        case "--no-downsample":
-          samples = -1;
-          break;
-        case "-d":
-        case "--downsample-to":
+        }
+        case "--no-downsample" -> samples = -1;
+        case "-d", "--downsample-to" -> {
           String size = argsDeque.pollFirst();
           if (size == null) {
             stderr.printf("Downsampling requires a positive integer.%n%n");
@@ -98,17 +94,19 @@ public class Sparkline {
             return;
           }
           samples = Integer.parseInt(size);
-          break;
-        case "-h":
-        case "--help":
+        }
+        case "-h", "--help" -> {
           help();
           return;
-        case "--example-usage":
+        }
+        case "--example-usage" -> {
           example_usage();
           return;
-        default:
+        }
+        default -> {
           argsDeque.addFirst(arg);
           parsed = true;
+        }
       }
     }
 
@@ -126,9 +124,9 @@ public class Sparkline {
 
     if (doubles == null) {
       doubles = argsDeque.stream()
-          .flatMap(arg -> Arrays.stream(DELIMITER.split(arg)))
-          .mapToDouble(Double::parseDouble)
-          .toArray();
+                         .flatMap(arg -> Arrays.stream(DELIMITER.split(arg)))
+                         .mapToDouble(Double::parseDouble)
+                         .toArray();
     }
 
     if (doubles.length != 0) {
@@ -145,23 +143,23 @@ public class Sparkline {
   private static void example_usage() {
     stdout.println(
         """
-            # Magnitude of earthquakes worldwide 2.5 and above in the last 24 hours
-            curl -s https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.csv |
-              sed '1d' |
-              cut -d, -f5 |
-              java Sparkline.java -
-                   
-            # Number of commits in a repo, by author
-            git shortlog -s | cut -f1 | java Sparkline.java -
-                    
-            # commits for the las 60 days
-            for day in $(seq 60 -1 0); do
-                git log --before="${day} days" --after="$[${day}+1] days" --format=oneline |
-                wc -l
-            done | java Sparkline.java -
-                    
-            More example here could be found on https://github.com/holman/spark/wiki/Wicked-Cool-Usage
-            """
+        # Magnitude of earthquakes worldwide 2.5 and above in the last 24 hours
+        curl -s https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.csv |
+          sed '1d' |
+          cut -d, -f5 |
+          java Sparkline.java -
+               
+        # Number of commits in a repo, by author
+        git shortlog -s | cut -f1 | java Sparkline.java -
+                
+        # commits for the las 60 days
+        for day in $(seq 60 -1 0); do
+            git log --before="${day} days" --after="$[${day}+1] days" --format=oneline |
+            wc -l
+        done | java Sparkline.java -
+                
+        More example here could be found on https://github.com/holman/spark/wiki/Wicked-Cool-Usage
+        """
     );
   }
 
@@ -212,15 +210,15 @@ public class Sparkline {
         """
         Comma or spaces can be used to separate the data, the dot indicates
         a double number.
-        
+                
         java Sparkline 0,30,55,80 33,150 20,100,2.1 33.4
         ▁▂▄▅▃█▂▆▁▃
-        
+                
         Note this program use a slightly differently scaling algorithm than
         https://github.com/holman/spark which may produce slightly different rendering.
-        
+                
         More example with --example-usage
-        """
+        """.replace("Sparkline", sparkline)
     );
   }
 
@@ -252,12 +250,12 @@ public class Sparkline {
     double scale = range / (TICKS.length - 1);
     double mid = TICKS.length / 2d;
     final var line = Arrays.stream(doubles)
-        .mapToInt(v -> Double.isNaN(v) ? ' ' : TICKS[(int) (range == 0 ? mid : Math.round((v - bounds.min) / scale))])
-        .collect(
-            StringBuilder::new,
-            (stringBuilder, i) -> stringBuilder.append((char) i),
-            StringBuilder::append
-        );
+                           .mapToInt(v -> Double.isNaN(v) ? ' ' : TICKS[(int) (range == 0 ? mid : Math.round((v - bounds.min) / scale))])
+                           .collect(
+                               StringBuilder::new,
+                               (stringBuilder, i) -> stringBuilder.append((char) i),
+                               StringBuilder::append
+                           );
     return line.toString();
   }
 
@@ -265,15 +263,15 @@ public class Sparkline {
     var ttyConfig = getTtyConfig();
 
     return Arrays.stream(new String[]{
-            "\\b([0-9]+)\\s+" + "columns" + "\\b",
-            "\\b" + "columns" + "\\s+([0-9]+)\\b",
-            "\\b" + "columns" + "\\s*=\\s*([0-9]+)\\b"
-        })
-        .map(pattern -> Pattern.compile(pattern).matcher(ttyConfig))
-        .filter(Matcher::find)
-        .findFirst()
-        .map(matcher -> Integer.parseInt(matcher.group(1)))
-        .orElse(-1);
+                     "\\b([0-9]+)\\s+" + "columns" + "\\b",
+                     "\\b" + "columns" + "\\s+([0-9]+)\\b",
+                     "\\b" + "columns" + "\\s*=\\s*([0-9]+)\\b"
+                 })
+                 .map(pattern -> Pattern.compile(pattern).matcher(ttyConfig))
+                 .filter(Matcher::find)
+                 .findFirst()
+                 .map(matcher -> Integer.parseInt(matcher.group(1)))
+                 .orElse(-1);
   }
 
   private static CharSequence getTtyConfig() throws IOException {
@@ -282,7 +280,9 @@ public class Sparkline {
     // which is not always the case (eg with pipes).
     // However, it happens that trying to read from /dev/tty works
     // when the application is connected to a terminal, and fails when not
-    // with the message '(Device not configured)'.
+    // with the message
+    //     on macOS '(Device not configured)'
+    //     on Linux 'No such device or address'
     //
     // Unfortunately Files::notExists or Files::isReadable don't fail.
     //noinspection EmptyTryBlock
@@ -299,7 +299,7 @@ public class Sparkline {
     try (var stdout = p.getInputStream();
          var stderr = p.getErrorStream();
          var outReader = new BufferedReader(new InputStreamReader(stdout));
-         var errReader = new BufferedReader(new InputStreamReader(stderr));
+         var errReader = new BufferedReader(new InputStreamReader(stderr))
     ) {
       String line;
       while ((line = outReader.readLine()) != null) {
