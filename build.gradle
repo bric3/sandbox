@@ -32,4 +32,12 @@ test {
 
 tasks.withType(JavaCompile) {
   options.release.set(16)
+  options.compilerArgs = ['--add-modules=jdk.incubator.foreign']
+}
+
+// pass args this way ./gradlew runSparkline --args="-f numbers"
+tasks.register('runSparkline', JavaExec) {
+  dependsOn compileJava
+  main = 'sandbox.Sparkline'
+  classpath = sourceSets.main.runtimeClasspath
 }
