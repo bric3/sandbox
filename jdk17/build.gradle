@@ -30,5 +30,5 @@ java {
 
 tasks.withType(JavaCompile) {
   options.release.set(17)
-  options.compilerArgs = ['--add-modules=jdk.incubator.foreign']
+  options.compilerArgs = ['--add-modules=jdk.incubator.foreign', '--enable-preview', '-Xlint:preview']
 }
