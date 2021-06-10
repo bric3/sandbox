@@ -8,3 +8,5 @@
  */
 
 rootProject.name = 'sandbox'
+
+include("jdk11", "jdk16", "jdk17")

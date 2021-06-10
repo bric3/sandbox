@@ -24,11 +24,22 @@
 
 package sandbox;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
+import java.io.PrintStream;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -61,7 +72,7 @@ public class Sparkline {
 
       String arg = argsDeque.pollFirst();
       switch (arg) {
-        case "-f" -> {
+        case "-f":
           if (stdin != null) {
             stderr.printf("The -f option can only be set once.%n%n");
             help();
@@ -84,9 +95,12 @@ public class Sparkline {
             }
             stdin = Files.newInputStream(file);
           }
-        }
-        case "--no-downsample" -> samples = -1;
-        case "-d", "--downsample-to" -> {
+          break;
+        case "--no-downsample":
+          samples = -1;
+          break;
+        case "-d":
+        case "--downsample-to":
           String size = argsDeque.pollFirst();
           if (size == null) {
             stderr.printf("Downsampling requires a positive integer.%n%n");
@@ -94,19 +108,18 @@ public class Sparkline {
             return;
           }
           samples = Integer.parseInt(size);
-        }
-        case "-h", "--help" -> {
+          break;
+        case "-h":
+        case "--help":
           help();
           return;
-        }
-        case "--example-usage" -> {
+        case "--example-usage":
           example_usage();
           return;
-        }
-        default -> {
+        default:
           argsDeque.addFirst(arg);
           parsed = true;
-        }
+
       }
     }
 
@@ -142,29 +155,34 @@ public class Sparkline {
 
   private static void example_usage() {
     stdout.println(
-        """
-        # Magnitude of earthquakes worldwide 2.5 and above in the last 24 hours
-        curl -s https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.csv |
-          sed '1d' |
-          cut -d, -f5 |
-          java Sparkline.java -
-               
-        # Number of commits in a repo, by author
-        git shortlog -s | cut -f1 | java Sparkline.java -
-                
-        # commits for the las 60 days
-        for day in $(seq 60 -1 0); do
-            git log --before="${day} days" --after="$[${day}+1] days" --format=oneline |
-            wc -l
-        done | java Sparkline.java -
-                
-        More example here could be found on https://github.com/holman/spark/wiki/Wicked-Cool-Usage
-        """
+        "# Magnitude of earthquakes worldwide 2.5 and above in the last 24 hours\n" +
+        "curl -s https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.csv |\n" +
+        "  sed '1d' |\n" +
+        "  cut -d, -f5 |\n" +
+        "  java Sparkline.java -\n" +
+        "\n" +
+        "# Number of commits in a repo, by author\n" +
+        "git shortlog -s | cut -f1 | java Sparkline.java -\n" +
+        "\n" +
+        "# commits for the las 60 days\n" +
+        "for day in $(seq 60 -1 0); do\n" +
+        "    git log --before=\"${day} days\" --after=\"$[${day}+1] days\" --format=oneline |\n" +
+        "    wc -l\n" +
+        "done | java Sparkline.java -\n" +
+        "\n" +
+        "More example here could be found on https://github.com/holman/spark/wiki/Wicked-Cool-Usage\n"
     );
   }
 
   private static void help() {
-    var sparkline = ProcessHandle.current().info().arguments().map(a -> a[0]).orElse("Sparkline");
+    var sparkline = ProcessHandle.current()
+                                 .info()
+                                 .arguments()
+                                 .stream()
+                                 .flatMap(Arrays::stream)
+                                 .filter(a -> a.contains("Sparkline"))
+                                 .findFirst()
+                                 .orElse("Sparkline");
 
     int[] intArray = {1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1};
     stdout.println("java " + sparkline + " " + Arrays.stream(intArray).mapToObj(String::valueOf).collect(Collectors.joining(" ")));
@@ -182,24 +200,22 @@ public class Sparkline {
     stdout.println();
 
     stdout.println(
-        """
-        Options
-            
-            -f,--file FILE
-            This option indicates the number will be taken from a file. To use stdin, use '-' as a value.
-            
-            --no-downsample
-            Toggle off downsampling of the data.
-            
-            -d,--downsample-to SAMPLES
-            Toggle on downsampling of the data with the number of SAMPLES.
-            
-            -h,--help
-            This message.
-            
-            --example-usage
-            Additional examples of use
-        """
+        "Options\n" +
+        "\n" +
+        "    -f,--file FILE\n" +
+        "    This option indicates the number will be taken from a file. To use stdin, use '-' as a value.\n" +
+        "\n" +
+        "    --no-downsample\n" +
+        "    Toggle off downsampling of the data.\n" +
+        "\n" +
+        "    -d,--downsample-to SAMPLES\n" +
+        "    Toggle on downsampling of the data with the number of SAMPLES.\n" +
+        "\n" +
+        "    -h,--help\n" +
+        "    This message.\n" +
+        "\n" +
+        "    --example-usage\n" +
+        "    Additional examples of use\n"
     );
 
     stdout.println();
@@ -207,18 +223,16 @@ public class Sparkline {
     stdout.println();
 
     stdout.println(
-        """
-        Comma or spaces can be used to separate the data, the dot indicates
-        a double number.
-                
-        java Sparkline 0,30,55,80 33,150 20,100,2.1 33.4
-        ▁▂▄▅▃█▂▆▁▃
-                
-        Note this program use a slightly differently scaling algorithm than
-        https://github.com/holman/spark which may produce slightly different rendering.
-                
-        More example with --example-usage
-        """.replace("Sparkline", sparkline)
+        ("Comma or spaces can be used to separate the data, the dot indicates\n" +
+         "a double number.\n" +
+         "\n" +
+         "java Sparkline 0,30,55,80 33,150 20,100,2.1 33.4\n" +
+         "▁▂▄▅▃█▂▆▁▃\n" +
+         "\n" +
+         "Note this program use a slightly differently scaling algorithm than\n" +
+         "https://github.com/holman/spark which may produce slightly different rendering.\n" +
+         "\n" +
+         "More example with --example-usage\n").replace("Sparkline", sparkline)
     );
   }
 

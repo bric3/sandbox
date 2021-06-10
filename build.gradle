@@ -1,49 +1,20 @@
 plugins {
-  id("java-library")
-  id("com.github.ben-manes.versions") version ("0.38.0")
+  id("com.github.ben-manes.versions") version ("0.39.0")
 }
 
-repositories {
-  mavenCentral()
-}
+subprojects {
+  apply(plugin: "java-library")
 
-dependencies {
-  api('org.apache.commons:commons-math3:3.6.1')
+  repositories {
+    mavenCentral()
+  }
 
-  implementation('com.google.guava:guava:30.1.1-jre')
-
-  implementation('net.bytebuddy:byte-buddy:1.11.0')
-  implementation('net.bytebuddy:byte-buddy-agent:1.11.0')
-  implementation('org.conscrypt:conscrypt-openjdk-uber:2.5.2')
-
-  testImplementation('org.junit.jupiter:junit-jupiter:5.7.2')
-  testImplementation('org.assertj:assertj-core:3.19.0')
-  testImplementation('org.testcontainers:testcontainers:1.15.3')
-}
-
-test {
+  test {
     useJUnitPlatform()
     testLogging {
-        showStandardStreams = true
-        exceptionFormat = "full"
-        events("skipped", "failed")
+      showStandardStreams = true
+      exceptionFormat = "full"
+      events("skipped", "failed")
     }
-}
-
-tasks.withType(JavaCompile) {
-  options.release.set(16)
-  options.compilerArgs = ['--add-modules=jdk.incubator.foreign']
-}
-
-// pass args this way ./gradlew runSparkline --args="-f numbers"
-tasks.register('runSparkline', JavaExec) {
-  dependsOn compileJava
-  main = 'sandbox.Sparkline'
-  classpath = sourceSets.main.runtimeClasspath
-}
-
-tasks.register('runIsATTY', JavaExec) {
-  dependsOn compileJava
-  main = 'sandbox.IsATTY'
-  classpath = sourceSets.main.runtimeClasspath
+  }
 }
