@@ -22,10 +22,24 @@
  * SOFTWARE.
  */
 
+plugins {
+  id('java-library')
+}
+
 java {
   toolchain {
     languageVersion = JavaLanguageVersion.of(17)
   }
+}
+
+// For some reasons, IJ fails with this, instead run the built class directly
+// java -cp build/classes/java/main -Dforeign.restricted=permit --add-modules=jdk.incubator.foreign sandbox.TryStuff
+tasks.withType(JavaExec) {
+  // java -Dforeign.restricted=permit --add-modules jdk.incubator.foreign
+  jvmArgs(
+          "--enable-native-access=ALL-UNNAMED",
+          "--add-modules=jdk.incubator.foreign"
+  )
 }
 
 tasks.withType(JavaCompile) {
