@@ -32,6 +32,11 @@ java {
   }
 }
 
+repositories {
+  mavenCentral()
+}
+
+
 // For some reasons, IJ fails with this, instead run the built class directly
 // java -cp build/classes/java/main -Dforeign.restricted=permit --add-modules=jdk.incubator.foreign sandbox.TryStuff
 tasks.withType(JavaExec) {
@@ -45,4 +50,51 @@ tasks.withType(JavaExec) {
 tasks.withType(JavaCompile) {
   options.release.set(17)
   options.compilerArgs = ['--add-modules=jdk.incubator.foreign', '--enable-preview', '-Xlint:preview']
+}
+
+task("showToolchain") {
+  doLast{
+    def launcher = javaToolchains.launcherFor {
+      languageVersion = JavaLanguageVersion.of(17)
+    }
+
+    println launcher.get().executablePath
+    println launcher.get().metadata.installationPath
+  }
+}
+
+task jextractSDLHeaders {
+  // TODO extract headers, check for SDL headers availability
+  // Currently it's not possible to get precisely the
+  // a panama JDK, see https://github.com/gradle/gradle/issues/18168
+  
+  // jextract --source -d src/main/java -t sdl2 \                                                                                                               11:11:06  100%
+  //    -I /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include \
+  //    -I /usr/local/include/SDL2 -l SDL2 \
+  //    --header-class-name LibSDL2 \
+  //    sdl-foo.h
+
+
+  // Also see https://github.com/krakowski/gradle-jextract
+}
+
+
+task runSDLFoo(type: JavaExec) {
+  // JAVA_LIBRARY_PATH=:/usr/local/lib java \
+  //    -cp build/classes/java/main \
+  //    --enable-native-access=ALL-UNNAMED \
+  //    --add-modules=jdk.incubator.foreign \
+  //    -XstartOnFirstThread \
+  //    sandbox.SDLFoo
+  mainClass.set('sandbox.SDLFoo')
+  jvmArgs(
+          "--enable-native-access=ALL-UNNAMED",
+          "--add-modules=jdk.incubator.foreign",
+          "-XstartOnFirstThread"
+  )
+  environment("JAVA_LIBRARY_PATH", ":/usr/local/lib")
+  classpath(sourceSets.main.runtimeClasspath)
+  
+  // need to set the project's toolchain explicitly see: https://github.com/gradle/gradle/issues/16791
+  javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
