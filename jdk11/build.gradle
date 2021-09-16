@@ -3,15 +3,15 @@ dependencies {
 
   implementation('com.google.guava:guava:30.1.1-jre')
 
-  implementation('net.bytebuddy:byte-buddy:1.11.1')
-  implementation('net.bytebuddy:byte-buddy-agent:1.11.0')
+  implementation('net.bytebuddy:byte-buddy:1.11.15')
+  implementation('net.bytebuddy:byte-buddy-agent:1.11.15')
   implementation('org.conscrypt:conscrypt-openjdk-uber:2.5.2')
 
   implementation(files("lib/spring-jdbc-4.1.6.RELEASE.jar"))
 
   testImplementation('org.junit.jupiter:junit-jupiter:5.7.2')
-  testImplementation('org.assertj:assertj-core:3.19.0')
-  testImplementation('org.testcontainers:testcontainers:1.15.3')
+  testImplementation('org.assertj:assertj-core:3.20.2')
+  testImplementation('org.testcontainers:testcontainers:1.16.0')
 }
 
 
@@ -28,12 +28,12 @@ tasks.withType(JavaCompile) {
 // pass args this way ./gradlew runSparkline --args="-f numbers"
 tasks.register('runSparkline', JavaExec) {
   dependsOn compileJava
-  main = 'sandbox.Sparkline'
+  mainClass = 'sandbox.Sparkline'
   classpath = sourceSets.main.runtimeClasspath
 }
 
 tasks.register('runIsATTY', JavaExec) {
   dependsOn compileJava
-  main = 'sandbox.IsATTY'
+  mainClass = 'sandbox.IsATTY'
   classpath = sourceSets.main.runtimeClasspath
 }
