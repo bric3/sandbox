@@ -1,0 +1,18 @@
+plugins {
+    id 'c'
+}
+
+model {
+    components {
+        cmem(NativeExecutableSpec) {
+            baseName = "test-cmem"
+        }
+        dlopen(NativeExecutableSpec) {
+            baseName = "test-dlopen"
+            binaries.all {
+                linker.args "-ldl"
+            }
+        }
+    }
+}
+

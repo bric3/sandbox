@@ -1,0 +1,22 @@
+= cmem
+
+Simple example for building a native executable with gradle
+
+[source, shell]
+----
+$ ./gradlew installCmemExecutable
+$ ./build/install/cmem/cmem
+----
+
+[source, shell]
+----
+$ gcc -Wall -Wpedantic -o test-mem test-mem.c
+$ clang -Wall -Wpedantic -o heap-mem test-mem.c
+----
+
+
+.Interesting links
+* https://docs.gradle.org/current/userguide/native_software.html[Building native software]
+
+* http://ysb33r.gitlab.io/NativeGradle/[Building Modern Native Applications with Gradle] 
+(https://gitlab.com/ysb33r/NativeGradle[source project]) by https://twitter.com/ysb33r[Schalk W. Cronjé]
