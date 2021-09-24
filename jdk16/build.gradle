@@ -35,6 +35,13 @@ java {
 // For some reasons, IJ fails with this, instead run the built class directly
 // java -cp build/classes/java/main -Dforeign.restricted=permit --add-modules=jdk.incubator.foreign sandbox.TryStuff
 tasks.withType(JavaExec) {
+  dependsOn compileJava
+  group "class-with-main"
+  classpath = sourceSets.main.runtimeClasspath
+
+  // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
+  javaLauncher.set(javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(16) })
+
   // java -Dforeign.restricted=permit --add-modules jdk.incubator.foreign
   jvmArgs(
           "-Dforeign.restricted=permit",
@@ -45,4 +52,8 @@ tasks.withType(JavaExec) {
 tasks.withType(JavaCompile) {
   options.release.set(16)
   options.compilerArgs = ['--add-modules=jdk.incubator.foreign']
+}
+
+tasks.register('innerClassStaticFields', JavaExec) {
+  mainClass = 'sandbox.StaticFieldInnerClass'
 }

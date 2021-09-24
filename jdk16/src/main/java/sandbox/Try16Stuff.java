@@ -34,9 +34,9 @@ import java.lang.invoke.MethodType;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-public class TryStuff {
+public class Try16Stuff {
     public static void main(String[] args) throws Throwable {
-        var tryStuff = new TryStuff();
+        var tryStuff = new Try16Stuff();
         System.out.println("pid: " + tryStuff.c_getpid_smokeTest());
         tryStuff.c_printf_smokeTest("Hello C", StandardCharsets.UTF_8);
 

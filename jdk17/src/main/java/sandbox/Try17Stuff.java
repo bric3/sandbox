@@ -34,9 +34,9 @@ import jdk.incubator.foreign.ResourceScope;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 
-public class TryStuff {
+public class Try17Stuff {
   public static void main(String[] args) throws Throwable {
-    var tryStuff = new TryStuff();
+    var tryStuff = new Try17Stuff();
     System.out.println("pid: " + tryStuff.c_getpid_smokeTest());
     tryStuff.c_printf_smokeTest("Hello C\n");
 

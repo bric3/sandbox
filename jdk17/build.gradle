@@ -35,7 +35,13 @@ java {
 // For some reasons, IJ fails with this, instead run the built class directly
 // java -cp build/classes/java/main -Dforeign.restricted=permit --add-modules=jdk.incubator.foreign sandbox.TryStuff
 tasks.withType(JavaExec) {
-  // java -Dforeign.restricted=permit --add-modules jdk.incubator.foreign
+  dependsOn compileJava
+  group "class-with-main"
+  classpath = sourceSets.main.runtimeClasspath
+
+  // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
+  javaLauncher.set(javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) })
+
   jvmArgs(
           "--enable-native-access=ALL-UNNAMED",
           "--add-modules=jdk.incubator.foreign"
@@ -46,3 +52,9 @@ tasks.withType(JavaCompile) {
   options.release.set(17)
   options.compilerArgs = ['--add-modules=jdk.incubator.foreign', '--enable-preview', '-Xlint:preview']
 }
+
+tasks.register('defineAnonymousClass', JavaExec) {
+  mainClass = 'sandbox.DefineAnonymousClass'
+  args = [ "Goodbye Unsafe::defineAnonymousClass" ]
+}
+
