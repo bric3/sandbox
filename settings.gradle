@@ -14,29 +14,4 @@ include("jdk11", "jdk16", "jdk17")
 // Doc https://docs.gradle.org/7.2/userguide/platforms.html
 // API https://docs.gradle.org/7.2/javadoc/org/gradle/api/initialization/dsl/VersionCatalogBuilder.html
 enableFeaturePreview('VERSION_CATALOGS')
-dependencyResolutionManagement {
-  versionCatalogs {
-    libs {
-      alias('commons-math').to('org.apache.commons', 'commons-math3').version("3.6.1")
-      alias('guava').to('com.google.guava:guava:30.1.1-jre')
-      version('okhttp', '4.9.1')
-      alias('okhttp').to('com.squareup.okhttp3', 'okhttp').versionRef('okhttp')
-      alias('okhttp-tls').to('com.squareup.okhttp3', 'okhttp-tls').versionRef('okhttp')
-      alias('okhttp-dnsoverhttps').to('com.squareup.okhttp3', 'okhttp-dnsoverhttps').versionRef('okhttp')
-      alias('okhttp-logging').to('com.squareup.okhttp3', 'logging-interceptor').versionRef('okhttp')
-      bundle('okhttp', ['okhttp', 'okhttp-tls', 'okhttp-dnsoverhttps', 'okhttp-logging'])
-      alias('conscrypt').to('org.conscrypt:conscrypt-openjdk-uber:2.5.2')
-
-      version('bytebuddy', '1.11.18')
-      alias('bytebuddy').to('net.bytebuddy', 'byte-buddy').versionRef('bytebuddy')
-      alias('bytebuddy-agent').to('net.bytebuddy', 'byte-buddy-agent').versionRef('bytebuddy')
-      bundle('bytebuddy', ['bytebuddy', 'bytebuddy-agent'])
-
-      version('junit-jupiter', '5.8.0')
-      alias('junit-jupiter').to('org.junit.jupiter', 'junit-jupiter').versionRef('junit-jupiter')
-
-      alias('assertj').to('org.assertj:assertj-core:3.20.2')
-      alias('testcontainers').to('org.testcontainers:testcontainers:1.16.0')
-    }
-  }
-}
+// version catalog declared in ./gradle/libs.versions.toml
