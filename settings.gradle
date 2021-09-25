@@ -10,7 +10,7 @@
 rootProject.name = 'sandbox'
 
 include("jdk11", "jdk16", "jdk17")
-include("cmem")
+include("cmem", "swift-app", "swift-library")
 
 // Doc https://docs.gradle.org/7.2/userguide/platforms.html
 // API https://docs.gradle.org/7.2/javadoc/org/gradle/api/initialization/dsl/VersionCatalogBuilder.html
