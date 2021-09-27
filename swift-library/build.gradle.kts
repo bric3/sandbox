@@ -33,12 +33,27 @@ library {
   linkage.set(listOf(Linkage.SHARED, Linkage.STATIC))
   targetMachines.set(listOf(machines.linux.x86_64, machines.macOS.x86_64))
   module.set("TouchIdDemoLib")
+
+  // Set compiler flags here due to bug
+  // https://github.com/gradle/gradle/issues/18439
+  binaries.configureEach(SwiftSharedLibrary::class) {
+    compileTask.get().run {
+      optimized.set(false)
+      debuggable.set(false)
+    }
+  }
+  binaries.configureEach(SwiftStaticLibrary::class) {
+    compileTask.get().run {
+      optimized.set(false)
+      debuggable.set(false)
+    }
+  }
 }
 
-tasks.withType(SwiftCompile::class.java).configureEach {
-  // Define a compiler options
-  compilerArgs.add("-O")
-}
+//tasks.withType<SwiftCompile>().configureEach {
+//  // Define a compiler options
+//  optimized.set(false)
+//}
 
 tasks.assemble {
   tasks.findByName("assembleReleaseStaticMacos")?.let {

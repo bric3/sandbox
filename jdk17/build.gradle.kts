@@ -50,6 +50,7 @@ tasks.register("swiftLib") {
 
 // Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope
 tasks.withType<JavaExec>().configureEach {
+  dependsOn(tasks.compileJava, "swiftLib") // for IntelliJ run main class
   group = "class-with-main"
   classpath(sourceSets.main.get().runtimeClasspath)
 
@@ -62,7 +63,7 @@ tasks.withType<JavaExec>().configureEach {
   )
 
   environment = mapOf(
-          "JAVA_LIBRARY_PATH" to sourceSets.main.get().output.resourcesDir!!
+          "JAVA_LIBRARY_PATH" to sourceSets.main.get().output.resourcesDir!! // for IntelliJ run main class
 //          "JAVA_LIBRARY_PATH" to ".:/usr/local/lib"
   )
 }
@@ -85,4 +86,8 @@ tasks.register<JavaExec>("defineAnonymousClass") {
 tasks.register<JavaExec>("touchId") {
   dependsOn(tasks.compileJava, "swiftLib")
   mainClass.set("sandbox.TouchId")
+  environment = mapOf(
+          "JAVA_LIBRARY_PATH" to sourceSets.main.get().output.resourcesDir!!
+//          "JAVA_LIBRARY_PATH" to ".:/usr/local/lib"
+  )
 }
