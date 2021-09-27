@@ -22,39 +22,43 @@
  * SOFTWARE.
  */
 
-plugins {
-  id('java-library')
-}
-
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
+    languageVersion.set(JavaLanguageVersion.of(17))
   }
 }
 
-// For some reasons, IJ fails with this, instead run the built class directly
-// java -cp build/classes/java/main -Dforeign.restricted=permit --add-modules=jdk.incubator.foreign sandbox.TryStuff
-tasks.withType(JavaExec) {
-  dependsOn compileJava
-  group "class-with-main"
-  classpath = sourceSets.main.runtimeClasspath
+// TODO
+// https://docs.gradle.org/current/userguide/declaring_dependencies_between_subprojects.html
+
+// Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope
+tasks.withType<JavaExec>().configureEach {
+  dependsOn(tasks.compileJava)
+  group = "class-with-main"
+  classpath(configurations.runtimeClasspath)
 
   // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
-  javaLauncher.set(javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) })
-
+  javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(17)) })
   jvmArgs(
           "--enable-native-access=ALL-UNNAMED",
-          "--add-modules=jdk.incubator.foreign"
+          "--add-modules=jdk.incubator.foreign",
+          "--enable-preview"
+  )
+
+  // env ? JAVA_LIBRARY_PATH=.:/usr/local/lib
+}
+
+tasks.withType<JavaCompile>().configureEach {
+  options.release.set(17)
+  options.compilerArgs = listOf(
+          "--add-modules=jdk.incubator.foreign",
+          "--enable-preview",
+          "-Xlint:preview"
   )
 }
 
-tasks.withType(JavaCompile) {
-  options.release.set(17)
-  options.compilerArgs = ['--add-modules=jdk.incubator.foreign', '--enable-preview', '-Xlint:preview']
-}
-
-tasks.register('defineAnonymousClass', JavaExec) {
-  mainClass = 'sandbox.DefineAnonymousClass'
-  args = [ "Goodbye Unsafe::defineAnonymousClass" ]
+tasks.register<JavaExec>("defineAnonymousClass") {
+  mainClass.set("sandbox.DefineAnonymousClass")
+  args = listOf("Goodbye Unsafe::defineAnonymousClass")
 }
 

@@ -7,12 +7,12 @@
  * in the user manual at https://docs.gradle.org/6.5.1/userguide/multi_project_builds.html
  */
 
-rootProject.name = 'sandbox'
+rootProject.name = "sandbox"
 
 include("jdk11", "jdk16", "jdk17")
 include("cmem", "swift-app", "swift-library")
 
 // Doc https://docs.gradle.org/7.2/userguide/platforms.html
 // API https://docs.gradle.org/7.2/javadoc/org/gradle/api/initialization/dsl/VersionCatalogBuilder.html
-enableFeaturePreview('VERSION_CATALOGS')
+enableFeaturePreview("VERSION_CATALOGS")
 // version catalog declared in ./gradle/libs.versions.toml

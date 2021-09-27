@@ -22,38 +22,42 @@
  * SOFTWARE.
  */
 
-plugins {
-  id('java-library')
+dependencies {
+  api(libs.commons.math)
+
+  implementation(libs.guava)
+
+  implementation(libs.bundles.bytebuddy)
+  implementation(libs.bundles.okhttp)
+  implementation(libs.conscrypt)
+
+  implementation(files("lib/spring-jdbc-4.1.6.RELEASE.jar"))
+
+  testImplementation(libs.junit.jupiter)
+  testImplementation(libs.assertj)
+  testImplementation(libs.testcontainers)
 }
+
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(16)
+    languageVersion.set(JavaLanguageVersion.of(11))
   }
 }
 
-// For some reasons, IJ fails with this, instead run the built class directly
-// java -cp build/classes/java/main -Dforeign.restricted=permit --add-modules=jdk.incubator.foreign sandbox.TryStuff
-tasks.withType(JavaExec) {
-  dependsOn compileJava
-  group "class-with-main"
-  classpath = sourceSets.main.runtimeClasspath
-
-  // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
-  javaLauncher.set(javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(16) })
-
-  // java -Dforeign.restricted=permit --add-modules jdk.incubator.foreign
-  jvmArgs(
-          "-Dforeign.restricted=permit",
-          "--add-modules=jdk.incubator.foreign"
-  )
+tasks.withType<JavaCompile>() {
+  options.release.set(11)
 }
 
-tasks.withType(JavaCompile) {
-  options.release.set(16)
-  options.compilerArgs = ['--add-modules=jdk.incubator.foreign']
+// pass args this way ./gradlew runSparkline --args="-f numbers"
+tasks.register<JavaExec>("runSparkline") {
+  dependsOn(tasks.compileJava)
+  mainClass.set("sandbox.Sparkline")
+  classpath(configurations.runtimeClasspath)
 }
 
-tasks.register('innerClassStaticFields', JavaExec) {
-  mainClass = 'sandbox.StaticFieldInnerClass'
+tasks.register<JavaExec>("runIsATTY") {
+  dependsOn(tasks.compileJava)
+  mainClass.set("sandbox.IsATTY")
+  classpath(configurations.runtimeClasspath)
 }
