@@ -1,3 +1,5 @@
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 /*
  * MIT License
  *
@@ -28,14 +30,28 @@ java {
   }
 }
 
-// TODO
-// https://docs.gradle.org/current/userguide/declaring_dependencies_between_subprojects.html
+// See https://docs.gradle.org/current/userguide/cross_project_publications.html
+
+tasks.register("swiftLib") {
+  val os = DefaultNativePlatform.getCurrentOperatingSystem()
+  if (!os.isMacOsX && !os.isLinux) {
+    throw GradleException("Swift compilation is only working on macOS and Linux")
+  }
+
+  dependsOn(":swift-library:assembleReleaseSharedMacos")
+  doLast {
+    val sharedLib = tasks.getByPath(":swift-library:linkReleaseSharedMacos").outputs.files.filter { it.isFile }
+    copy {
+      from(sharedLib.asFileTree)
+      into(sourceSets.main.get().output.resourcesDir!!)
+    }
+  }
+}
 
 // Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope
 tasks.withType<JavaExec>().configureEach {
-  dependsOn(tasks.compileJava)
   group = "class-with-main"
-  classpath(configurations.runtimeClasspath)
+  classpath(sourceSets.main.get().runtimeClasspath)
 
   // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
   javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(17)) })
@@ -45,7 +61,10 @@ tasks.withType<JavaExec>().configureEach {
           "--enable-preview"
   )
 
-  // env ? JAVA_LIBRARY_PATH=.:/usr/local/lib
+  environment = mapOf(
+          "JAVA_LIBRARY_PATH" to sourceSets.main.get().output.resourcesDir!!
+//          "JAVA_LIBRARY_PATH" to ".:/usr/local/lib"
+  )
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -62,3 +81,8 @@ tasks.register<JavaExec>("defineAnonymousClass") {
   args = listOf("Goodbye Unsafe::defineAnonymousClass")
 }
 
+// JAVA_LIBRARY_PATH=jdk17/build/resources/main/ java --enable-native-access=ALL-UNNAMED --add-modules=jdk.incubator.foreign -cp jdk17/build/classes/java/main sandbox.TouchId
+tasks.register<JavaExec>("touchId") {
+  dependsOn(tasks.compileJava, "swiftLib")
+  mainClass.set("sandbox.TouchId")
+}

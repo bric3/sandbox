@@ -26,16 +26,39 @@
 
 plugins {
   `swift-library`
+  // `xctest` to support building and running test executables (linux) or bundles (macos)
 }
 
-
-
+library {
+  linkage.set(listOf(Linkage.SHARED, Linkage.STATIC))
+  targetMachines.set(listOf(machines.linux.x86_64, machines.macOS.x86_64))
+  module.set("TouchIdDemoLib")
+}
 
 tasks.withType(SwiftCompile::class.java).configureEach {
   // Define a compiler options
   compilerArgs.add("-O")
 }
 
-library {
-  linkage.set(listOf(Linkage.SHARED))
+tasks.assemble {
+  tasks.findByName("assembleReleaseStaticMacos")?.let {
+    dependsOn(it)
+    doLast {
+      println("static") // if Linkage.STATIC
+      println("release " + (tasks.named("createReleaseStaticMacos").get() as CreateStaticLibrary).outputFile.get())
+      println("debug " + (tasks.named("createDebugStaticMacos").get() as CreateStaticLibrary).outputFile.get())
+    }
+  }
+
+  tasks.findByName("assembleReleaseSharedMacos")?.let {
+    dependsOn(it)
+    doLast {
+      println("lib") // if Linkage.SHARED
+      println("release " + (tasks.named("linkReleaseSharedMacos").get() as LinkSharedLibrary).linkedFile.get())
+      println("debug " + (tasks.named("linkDebugSharedMacos").get() as LinkSharedLibrary).linkedFile.get())
+
+//      tasks.named("linkRelease").get().outputs.files.filter { it.isFile }.forEach { println(it) }
+//      println(tasks.named("linkRelease").get().outputs.files.filter { it.isDirectory }.asPath)
+    }
+  }
 }

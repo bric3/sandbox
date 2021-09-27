@@ -34,16 +34,21 @@ import java.lang.invoke.MethodType;
 public class TouchId {
 
   public static void main(String[] args) throws Throwable {
-    System.load("/Users/brice.dutheil/opensource/sandbox/swift-library/build/lib/main/debug/libSwiftLibrary.dylib");
+//    System.err.println(Arrays.toString(ProcessHandle.current().info().arguments().get()));
+//    System.err.println(ProcessHandle.current().info().command().get());
+//    System.err.println(ProcessHandle.current().info().commandLine().get());
+//    System.err.println(Paths.get(".").toAbsolutePath());
 
-    // $ nm swift-library/build/lib/main/debug/libSwiftLibrary.dylib
+//    System.load("path/to/libTouchIdDemoLib.dylib");
+    System.loadLibrary("TouchIdDemoLib");
+
+    // $ nm swift-library/build/lib/main/debug/libTouchIdDemoLib.dylib
     // ...
     // 00000000000037c0 T _authenticate_user
     // ...
     var authenticate_user = CLinker.getInstance()
                                    .downcallHandle(
-//                                       MemoryAddress.ofLong(HexFormat.fromHexDigitsToLong("0000000000003fa0" + actual library address ?)),
-                                       SymbolLookup.loaderLookup().lookup("_authenticate_user").get(), // NPE, symbol not found
+                                       SymbolLookup.loaderLookup().lookup("authenticate_user_touchid").get(),
                                        MethodType.methodType(void.class),
                                        FunctionDescriptor.ofVoid()
                                    );
