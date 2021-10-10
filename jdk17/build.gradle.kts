@@ -55,7 +55,7 @@ tasks.withType<JavaExec>().configureEach {
   classpath(sourceSets.main.get().runtimeClasspath)
 
   // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
-  javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(17)) })
+  javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
   jvmArgs(
           "--enable-native-access=ALL-UNNAMED",
           "--add-modules=jdk.incubator.foreign",
