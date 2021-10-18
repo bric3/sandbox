@@ -1,51 +1,51 @@
-// class App {
-//     class func hello(_ s: String) -> String {
-//         return "Hello " + s
-//     }
-// }
+import LocalAuthentication
 
-// let result = App.hello("World")
-// print(result)
+@_cdecl("authenticate")
+public func authenticateUser() {
+    let context = LAContext()
 
-// https://trycombine.com/posts/swift-actors/
-import Foundation
-import CryptoKit
+    context.localizedFallbackTitle = "Please use your password"
+    context.localizedCancelTitle = "Abort"
 
-@available(macOS 9999, *)
-@main
-struct App {
-  static let cache = HashCache()
-  
-  static func main() async {
-    await cache.addHash(for: 7778)
-    await cache.compute()
-    await print(cache.hashes[34]!)
-  }
-}
+    var authorizationError: NSError?
+    let permissions = context.canEvaluatePolicy(
+            LAPolicy.deviceOwnerAuthenticationWithBiometrics, // TouchId or passcode
+            error: &authorizationError
+    )
 
-@available(macOS 9999, *)
-actor HashCache {
-  private(set) var hashes = [Int: String]()
-  
-  func addHash(for number: Int) {
-    let string = SHA512.hash(data: 
-      Data(String(number).utf8)
-    ).description
-        
-    hashes[number] = string
-  }
-  
-  func compute() async {
-    addHash(for: 42)
-    
-    await withTaskGroup(of: Bool.self) { group in
-      for number in 0 ... 15_000 {
-        group.spawn {
-          await self.addHash(for: number)
-          return true
-        }
-      }
+    if !permissions {
+        let ac = "Touch ID not available, Or Your device is not configured for Touch ID."
+        print(ac)
+        return
     }
-  }
-  
+
+    let biometry = context.biometryType
+    if (biometry != LABiometryType.touchID) {
+        print("TouchID not available")
+        return
+    }
+
+    let reason = "Identify yourself!"
+    print(reason)
+
+    var waitForResult = true
+    context.evaluatePolicy(
+            LAPolicy.deviceOwnerAuthentication,
+            localizedReason: reason
+    ) { (success: Bool, error: Error?) -> Void in
+          if success {
+              print("✅ You may enter")
+          } else {
+              print("⛔️ Authentication failed")
+              print(error?.localizedDescription ?? "Failed to authenticate")
+          }
+          waitForResult = false
+          return
+    }
+
+    while waitForResult {} // block here without a loop
+//   RunLoop.main.run()
 }
+
+authenticateUser()
+print("bye")
