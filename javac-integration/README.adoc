@@ -1,0 +1,66 @@
+= The javac Tree API
+:author: Sundar Athijegannathan
+:date: September 20, 2021
+:java17-javadoc: https://docs.oracle.com/en/java/javase/17/docs/api
+
+
+Original article: https://inside.java/2021/09/20/javac-tree-api/
+
+https://twitter.com/richardstartin/status/1438520611622383621
+
+== javac as a library
+
+This is where the javac Tree API can help as javac is not just a command-line tool.
+It can be used as a library as well. javac (and few other JDK bin tools) supports the
+{java17-javadoc}/java.compiler/javax/tools/ToolProvider.html[`ToolProvider`] API.
+Using this API you can get a
+{java17-javadoc}/java.compiler/javax/tools/JavaCompiler.html[`JavaCompiler`] instance.
+Using this compiler instance, you can create a
+{java17-javadoc}/java.compiler/javax/tools/JavaCompiler.CompilationTask.html[`JavaCompiler.CompilationTask`].
+Once you set up a compilation task, you can use the
+{java17-javadoc}/java.compiler/javax/tools/JavaCompiler.CompilationTask.html#call()[`call`]
+method on it to start the compilation.
+
+But in this case, you do not want to compile java source files as you just need
+to parse source files to get the https://en.wikipedia.org/wiki/Abstract_syntax_tree[Abstract Syntax Tree].
+There is a subtype of `CompilationTask` known as
+{java17-javadoc}/jdk.compiler/com/sun/source/util/JavacTask.html[`JavacTask`].
+This class provides finer control of the compilation process.
+The {java17-javadoc}/jdk.compiler/com/sun/source/util/JavacTask.html#parse()[`parse`]
+method is the required one.
+There are additional methods for subsequent compilation steps such as
+{java17-javadoc}/jdk.compiler/com/sun/source/util/JavacTask.html#analyze()[`analyze`]
+to type check, generate to code
+{java17-javadoc}/jdk.compiler/com/sun/source/util/JavacTask.html#generate()[`generate`], etc.
+
+== Tree API’s parse method
+
+The {java17-javadoc}/jdk.compiler/com/sun/source/util/JavacTask.html#parse()[`parse`] method
+returns a list of {java17-javadoc}/jdk.compiler/com/sun/source/tree/CompilationUnitTree.html[`CompilationUnitTree`]
+objects. `CompilationUnitTree` is a subtype of
+{java17-javadoc}/jdk.compiler/com/sun/source/tree/Tree.html[`Tree`].
+Once you have compilation unit trees for the java source files, you can use the
+https://en.wikipedia.org/wiki/Visitor_pattern[visitor pattern] to walk through
+the tree to perform the necessary coding style checks. To visit Trees, `Tree`
+interface supports
+{java17-javadoc}/jdk.compiler/com/sun/source/tree/Tree.html#accept(com.sun.source.tree.TreeVisitor,D)[`accept`] method.
+You just need to implement {java17-javadoc}/jdk.compiler/com/sun/source/tree/TreeVisitor.html[`TreeVisitor`]
+to pass to accept method.
+
+== Visitor and `ForLoopTree`
+
+For the particular coding style checker, you don’t really care about all the `visitXYZ`
+methods of `TreeVisitor`! You just care about `visitForLoop` method.
+Fortunately, the JDK already provides a `TreeScanner` class.
+You just need to subclass {java17-javadoc}/jdk.compiler/com/sun/source/util/TreeScanner.html[`TreeScanner`]
+and override `visitForLoop` for the analysis.
+In your `visitForLoop` method, you get a `ForLoopTree`.
+From the `ForLoopTree` object, you can get the loop update expressions using the
+{java17-javadoc}/jdk.compiler/com/sun/source/tree/ForLoopTree.html#getUpdate()[`getUpdate`] method.
+If there is any update expression (note that a for loop need not have update expression
+always, it can be empty!), you have to see if it is a
+{java17-javadoc}/jdk.compiler/com/sun/source/tree/UnaryTree.html[`UnaryTree`] of kind
+{java17-javadoc}/jdk.compiler/com/sun/source/tree/Tree.Kind.html#PREFIX_INCREMENT[`PREFIX_INCREMENT`] or
+{java17-javadoc}/jdk.compiler/com/sun/source/tree/Tree.Kind.html#PREFIX_DECREMENT[`PREFIX_DECREMENT`].
+If you find that, you have to report it with file name, line number and column number.
+That’s all!
