@@ -22,43 +22,13 @@
  * SOFTWARE.
  */
 
-dependencies {
-  api(libs.commons.math)
+package sandbox.jna;
 
-  implementation(libs.guava)
-
-  implementation(libs.bundles.bytebuddy)
-  implementation(libs.bundles.okhttp)
-  implementation(libs.conscrypt)
-  implementation(libs.jna)
-
-  implementation(files("lib/spring-jdbc-4.1.6.RELEASE.jar"))
-
-  testImplementation(libs.junit.jupiter)
-  testImplementation(libs.assertj)
-  testImplementation(libs.testcontainers)
-}
+import com.sun.jna.Library;
+import com.sun.jna.Native;
 
 
-java {
-  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(11))
-  }
-}
-
-tasks.withType<JavaCompile>() {
-  options.release.set(11)
-}
-
-// pass args this way ./gradlew runSparkline --args="-f numbers"
-tasks.register<JavaExec>("runSparkline") {
-  dependsOn(tasks.compileJava)
-  mainClass.set("sandbox.Sparkline")
-  classpath(configurations.runtimeClasspath)
-}
-
-tasks.register<JavaExec>("runIsATTY") {
-  dependsOn(tasks.compileJava)
-  mainClass.set("sandbox.IsATTY")
-  classpath(configurations.runtimeClasspath)
+public interface IsATTY_JNA extends Library {
+  IsATTY_JNA INSTANCE = (IsATTY_JNA) Native.load("c", IsATTY_JNA.class); // (1)
+  boolean isatty(int fileDescriptor); // (2)
 }
