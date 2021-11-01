@@ -21,6 +21,7 @@ assertj = { module = "org.assertj:assertj-core", version = "3.20.2" }
 testcontainers = { module = "org.testcontainers:testcontainers", version = "1.16.0" }
 
 jna = { module = "net.java.dev.jna:jna", version = "5.9.0" }
+jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.8" }
 
 
 [bundles]
