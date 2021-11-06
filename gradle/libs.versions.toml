@@ -1,12 +1,12 @@
 [versions]
 okhttp =  '4.9.1'
-bytebuddy = '1.11.18'
-junit-jupiter =  '5.8.0'
+bytebuddy = '1.12.0'
+junit-jupiter =  '5.8.1'
 
 
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
-guava = { module = "com.google.guava:guava", version = "30.1.1-jre" }
+guava = { module = "com.google.guava:guava", version = "31.0.1-jre" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-tls = { group = "com.squareup.okhttp3", name = "okhttp-tls", version.ref = "okhttp" }
 okhttp-dnsoverhttps = { group = "com.squareup.okhttp3", name = "okhttp-dnsoverhttps", version.ref = "okhttp" }
@@ -17,8 +17,8 @@ bytebuddy = { group = "net.bytebuddy", name = "byte-buddy", version.ref = "byteb
 bytebuddy-agent = { group = "net.bytebuddy", name = "byte-buddy-agent", version.ref = "bytebuddy" }
 
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit-jupiter" }
-assertj = { module = "org.assertj:assertj-core", version = "3.20.2" }
-testcontainers = { module = "org.testcontainers:testcontainers", version = "1.16.0" }
+assertj = { module = "org.assertj:assertj-core", version = "3.21.0" }
+testcontainers = { module = "org.testcontainers:testcontainers", version = "1.16.2" }
 
 jna = { module = "net.java.dev.jna:jna", version = "5.9.0" }
 jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.8" }
