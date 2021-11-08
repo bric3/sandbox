@@ -24,6 +24,11 @@
 
 plugins {
   id("me.champeau.jmh") version "0.6.6"
+  id("java")
+}
+
+repositories {
+  mavenCentral()
 }
 
 // taskset -c 0 java -jar target/benchmarks.jar -wi 5 -i 5 -w 1 -r 1 -f 1 -bm avgt -tu ns Increments

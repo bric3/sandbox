@@ -1,0 +1,21 @@
+
+https://github.com/joshjdevl/libsodium-jni
+Note this lib doesn't include the JNI glue library, see https://github.com/joshjdevl/libsodium-jni/issues/66
+So I need to build the jni wrapper myself
+
+Inspired by `jnilib.sh`
+
+[source, bash]
+----
+brew install autoconf automake libtool swig libsodium
+git clone --depth 1 --branch v2.0.2 git@github.com:joshjdevl/libsodium-jni.git
+
+jnidest=$(pwd)
+jnilib=libsodiumjni.jnilib     # .so on Linux
+
+pushd libsodium-jni/jni
+swig -java -package org.libsodium.jni -outdir ../src/main/java/org/libsodium/jni sodium.i
+gcc -I../libsodium/src/libsodium/include -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -I${JAVA_HOME}/include/darwin sodium_wrap.c -shared -fPIC -L/usr/local/lib -L/usr/lib -lsodium -o $jnilib
+cp $jnilib $jnidest
+popd
+----

@@ -2,9 +2,9 @@ plugins {
   id("com.github.ben-manes.versions") version ("0.39.0")
 }
 
-
+val jmhProjects = listOf(project(":jmh-stuff"), project(":jmh-panama"))
 // lookout for TYPESAFE_PROJECT_ACCESSORS feature preview
-val javaProjects = subprojects - project(":swift-app") - project(":swift-library")
+val javaProjects = subprojects - jmhProjects - project(":swift-app") - project(":swift-library")
 
 configure(javaProjects) {
   apply(plugin = "java-library")
