@@ -176,6 +176,7 @@ tasks.create<Exec>("jextractSDLHeaders") {
 
 
 tasks.create<JavaExec>("runSDLFoo") {
+  dependsOn("jextractSDLHeaders")
   // JAVA_LIBRARY_PATH=:/usr/local/lib java \
   //    -cp build/classes/java/main \
   //    --enable-native-access=ALL-UNNAMED \
