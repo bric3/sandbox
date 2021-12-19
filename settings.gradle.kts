@@ -8,7 +8,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "sandbox"
 
-include("jmh-stuff")
+include("jmh-stuff", "jmh-panama")
 include("jdk11", "jdk16", "jdk17")
 include("cmem", "swift-app", "swift-library")
 

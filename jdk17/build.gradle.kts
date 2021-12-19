@@ -27,6 +27,11 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 
+dependencies {
+  implementation("org.jsoup:jsoup:1.14.3")
+}
+
+
 java {
   toolchain {
     languageVersion.set(JavaLanguageVersion.of(17))
@@ -34,7 +39,6 @@ java {
 }
 
 // See https://docs.gradle.org/current/userguide/cross_project_publications.html
-
 tasks.register("swiftLib") {
   val os = DefaultNativePlatform.getCurrentOperatingSystem()
   if (!os.isMacOsX && !os.isLinux) {
@@ -78,6 +82,11 @@ tasks.withType<JavaCompile>().configureEach {
           "--enable-preview",
           "-Xlint:preview"
   )
+}
+
+tasks.register<JavaExec>("ra") {
+  mainClass.set("other.RaScraper")
+  environment = System.getenv() as Map<String, Any>
 }
 
 tasks.register<JavaExec>("defineAnonymousClass") {
