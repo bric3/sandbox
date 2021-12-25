@@ -85,7 +85,7 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 tasks.register<JavaExec>("ra") {
-  mainClass.set("other.RaScraper")
+  mainClass.set("other.RaAssembler")
   environment = System.getenv() as Map<String, Any>
 }
 

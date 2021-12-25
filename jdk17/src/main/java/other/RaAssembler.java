@@ -1,3 +1,6 @@
+///usr/bin/env jbang "$0" "$@" ; exit $?
+//JAVA 17
+//DEPS org.jsoup:jsoup:1.14.3
 /*
  * MIT License
  *
@@ -22,6 +25,17 @@
  * SOFTWARE.
  */
 
+/*
+ * Note that Ra is the work of Sam Hughes, and is not licensed under the MIT license.
+ *
+ * You should definitely try to buy a copy of Ra to support the author, I did.
+ * Here's a few links:
+ * https://www.amazon.com/Ra-Sam-Hughes/dp/B08YQCQNYM
+ * https://gumroad.com/l/Unpv
+ *
+ * More paid editions are listed here : https://qntm.org/ra
+ */
+
 package other;
 
 
@@ -31,24 +45,24 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
 
-public class RaScraper {
+public class RaAssembler {
   public static void main(String[] args) throws IOException, InterruptedException {
-    if (new ProcessBuilder("which", "ebook-convert").inheritIO().start().waitFor() != 0) {
+    var whichEbookConvert = new ProcessBuilder("which", "ebook-convert").start();
+    if (whichEbookConvert.waitFor() != 0) {
       System.err.println("ebook-convert not found on PATH");
       System.exit(1);
     }
+    System.out.printf("Found '%s'%n", new String(whichEbookConvert.getInputStream().readAllBytes(), StandardCharsets.UTF_8).trim());
 
     var raUrl = "https://qntm.org/ra";
     var connection = Jsoup.newSession().userAgent("Java").timeout(20 * 1000);
     var source = connection.newRequest().url(raUrl).get();
-
-//    var dateHeader = source.connection().response().header("Date");
-//    System.out.println(LocalDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME));
+    System.out.printf("Fetching Ra at '%s'%n", raUrl);
 
     var output = Jsoup.parse("<html></html>");
     output.body().appendElement("h1").attr("id", "ra").text("Ra");
@@ -64,6 +78,7 @@ public class RaScraper {
       var absLink = link.absUrl("href");
       return CompletableFuture.supplyAsync(() -> {
         try {
+          System.out.printf("Fetching chapter '%s'%n", link.text());
           return connection.newRequest().url(absLink).get();
         } catch (IOException e) {
           throw new UncheckedIOException(e);
@@ -92,8 +107,11 @@ public class RaScraper {
       });
     }).join();
 
+
+    var tempFile = Files.createTempFile(null, "ra.html");
+    tempFile.toFile().deleteOnExit();
     try (var appendable = Files.newBufferedWriter(
-        Path.of("/tmp/ra.html"),
+        tempFile,
         StandardOpenOption.CREATE,
         StandardOpenOption.TRUNCATE_EXISTING
     )) {
