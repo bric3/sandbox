@@ -20,7 +20,7 @@ junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.r
 assertj = { module = "org.assertj:assertj-core", version = "3.21.0" }
 testcontainers = { module = "org.testcontainers:testcontainers", version = "1.16.2" }
 
-jna = { module = "net.java.dev.jna:jna", version = "5.9.0" }
+jna = { module = "net.java.dev.jna:jna", version = "5.10.0" }
 jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.11" }
 
 
