@@ -64,6 +64,7 @@ tasks.withType<JavaExec>().configureEach {
   // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
   javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
   jvmArgs(
+          "-ea",
           "--enable-native-access=ALL-UNNAMED",
           "--add-modules=jdk.incubator.foreign",
           "--enable-preview"
@@ -118,6 +119,7 @@ sourceSets {
     java.srcDirs("$buildDir/generated/sources/jextract/java")
     resources.srcDirs("$buildDir/generated/sources/jextract/resources")
   }
+  @Suppress("UNUSED_VARIABLE")
   val main by getting {
     java.srcDirs(jextract.java.srcDirs)
     resources.srcDirs(jextract.resources.srcDirs)
