@@ -30,7 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-public class MappedFiles {
+public class MappedFilesAndNMT {
   public static void main(String[] args) throws Exception {
     System.out.printf("nmt baseline: %n");
     new ProcessBuilder("jcmd", Long.toString(ProcessHandle.current().pid()), "VM.native_memory", "baseline")
