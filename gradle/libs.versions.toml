@@ -1,6 +1,6 @@
 [versions]
 okhttp =  '4.9.3'
-bytebuddy = '1.12.8'
+bytebuddy = '1.12.9'
 junit-jupiter =  '5.8.2'
 
 
