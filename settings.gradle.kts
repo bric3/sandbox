@@ -1,7 +1,3 @@
-import org.gradle.internal.jvm.inspection.JvmMetadataDetector
-import org.gradle.jvm.toolchain.internal.JavaInstallationRegistry
-
-
 // Required for nokee...
 // See
 // * https://github.com/nokeedev/gradle-native/issues/349
@@ -47,6 +43,6 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 rootProject.name = "sandbox"
 
 include("jmh-stuff", "jmh-panama")
-include("jdk11", "jdk16", "jdk17")
+include("jdk11", "jdk16", "jdk17", "jdk18")
 include("cmem", "swift-app", "swift-library")
 include("jmh-panama")
