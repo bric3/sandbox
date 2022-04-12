@@ -45,7 +45,7 @@ public class MappedFilesAndPs {
         var scheduledFuture = scheduledExecutorService
                 .scheduleAtFixedRate(MappedFilesAndPs::ps, 10, 10, TimeUnit.SECONDS);
 
-        try (var fileChannel = (FileChannel) Files.newByteChannel(src, StandardOpenOption.READ)) {
+        try (var fileChannel = FileChannel.open(src, StandardOpenOption.READ)) {
             switch (mode) {
                 case "mapped_full_load": {
                     var mappedByteBuffer = fileChannel.map(
