@@ -41,9 +41,9 @@ public class MemoryMappedFiles {
       // A mapped byte buffer and the file mapping that it represents remain
       // valid until the buffer itself is garbage-collected.
       var mappedByteBuffer = fileChannel.map(
-          FileChannel.MapMode.READ_ONLY,
-          0,
-          fileChannel.size());
+              FileChannel.MapMode.READ_ONLY,
+              0,
+              fileChannel.size());
 
       // do something with the mapped buffer
     } catch (IOException e) {
@@ -55,11 +55,11 @@ public class MemoryMappedFiles {
     try (var scope = ResourceScope.newConfinedScope()) {
       var fileSize = Files.size(src);
       var mappedFile = MemorySegment.mapFile(
-          src,
-          0,
-          fileSize,
-          FileChannel.MapMode.READ_ONLY,
-          scope);
+              src,
+              0,
+              fileSize,
+              FileChannel.MapMode.READ_ONLY,
+              scope);
 
       // do something with the mapped buffer
     } catch (IOException e) {

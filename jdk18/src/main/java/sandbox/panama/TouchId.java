@@ -46,9 +46,9 @@ public class TouchId {
     // ...
     var authenticate_user = CLinker.systemCLinker()
                                    .downcallHandle(
-                                       SymbolLookup.loaderLookup().lookup("authenticate_user_touchid").get(),
-                                       FunctionDescriptor.ofVoid()
-                                                  );
+                                           SymbolLookup.loaderLookup().lookup("authenticate_user_touchid").get(),
+                                           FunctionDescriptor.ofVoid()
+                                   );
 
 
     try (var scope = ResourceScope.newConfinedScope()) {
