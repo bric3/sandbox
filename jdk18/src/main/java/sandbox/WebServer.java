@@ -39,6 +39,21 @@ public class WebServer {
 
 
     server.start();
+
+
+    // var jsonHeaders = Headers.of("Content-Type", "application/json");
+    // var getHandler = HttpHandlers.of(200, jsonHeaders, Files.readString(Paths.get("http-static2/get/get_request.json").toAbsolutePath()));
+    // var postHandler = HttpHandlers.of(200, jsonHeaders, Files.readString(Paths.get("http-static2/post/post_request.json").toAbsolutePath()));
+    // Predicate<Request> IS_GET = r -> r.getRequestMethod().equals("GET");
+    // Predicate<Request> IS_POST = r -> r.getRequestMethod().equals("POST");
+    // var notAllowedHandler = HttpHandlers.of(405,
+    //                                         Headers.of("Access-Control-Allow-Methods", "GET,POST"),
+    //                                         "Sorry, not allowed method");
+    // var h1 = HttpHandlers.handleOrElse(IS_GET, getHandler, notAllowedHandler);
+    // var h2 = HttpHandlers.handleOrElse(IS_POST, postHandler, h1);
+    // var server = HttpServer.create(new InetSocketAddress(8001), 2,
+    //                                "/", h2, SimpleFileServer.createOutputFilter(System.out, OutputLevel.INFO));
+    server.start();
   }
 
   private static class SomeHandler implements HttpHandler {
