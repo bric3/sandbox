@@ -1,3 +1,13 @@
+////
+sandbox
+
+Copyright (c) 2021,today - Brice Dutheil <brice.dutheil@gmail.com>
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+////
+
 The goal is to benchmark various implementation of native bindings of the
 https://blog.arkey.fr/2021/09/04/a-practical-look-at-jep-412-in-jdk17-with-libsodium/#_the_crypto_sealed_box_example[example used in this blog post]
 using *libsodium*.

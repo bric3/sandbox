@@ -1,10 +1,13 @@
 /*
- * Author : Richard Startin
- * Source https://github.com/apache/pinot/pull/7442#issuecomment-934674765
+ * sandbox
  *
- * To be run as
- *   taskset -c 0 java -jar target/benchmarks.jar -wi 5 -i 5 -w 1 -r 1 -f 1 -bm avgt -tu ns Increments
+ * Copyright (c) 2021,today - Brice Dutheil <brice.dutheil@gmail.com>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
+
 package sandbox.jmh;
 
 import org.openjdk.jmh.annotations.*;

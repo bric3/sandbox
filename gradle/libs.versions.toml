@@ -1,7 +1,17 @@
+#
+# sandbox
+#
+# Copyright (c) 2021,today - Brice Dutheil <brice.dutheil@gmail.com>
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
 [versions]
-okhttp =  '4.9.3'
-bytebuddy = '1.12.9'
-junit-jupiter =  '5.8.2'
+okhttp =  "4.9.3"
+bytebuddy = "1.12.9"
+junit-jupiter =  "5.8.2"
+graalvm = "22.0.0.2"
 
 
 [libraries]
@@ -23,10 +33,14 @@ testcontainers = { module = "org.testcontainers:testcontainers", version = "1.17
 jna = { module = "net.java.dev.jna:jna", version = "5.11.0" }
 jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.12" }
 
+graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }
+graal-js = { module = "org.graalvm.js:js", version.ref = "graalvm" }
+graal-js-scriptengine = { module = "org.graalvm.js:js-scriptengine", version.ref = "graalvm" }
+
 
 [bundles]
 okhttp = ['okhttp', 'okhttp-tls', 'okhttp-dnsoverhttps', 'okhttp-logging']
 bytebuddy = ['bytebuddy', 'bytebuddy-agent']
-
+graal-js = ["graal-js", "graal-js-scriptengine"]
 
 [plugins]

@@ -1,3 +1,14 @@
+/*
+ * sandbox
+ *
+ * Copyright (c) 2021,today - Brice Dutheil <brice.dutheil@gmail.com>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
 // Required for nokee...
 // See
 // * https://github.com/nokeedev/gradle-native/issues/349
@@ -44,5 +55,10 @@ rootProject.name = "sandbox"
 
 include("jmh-stuff", "jmh-panama")
 include("jdk11", "jdk16", "jdk17", "jdk18")
-include("cmem", "swift-app", "swift-library")
+include("cmem","swift-app", "swift-library")
 include("jmh-panama")
+
+val os = DefaultNativePlatform.getCurrentOperatingSystem()
+if (os.isMacOsX) {
+  include("swift-app", "swift-library")
+}

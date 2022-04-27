@@ -8,14 +8,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+plugins {
+  // Playing with graal compiler
+  id("org.graalvm.plugin.compiler") version "0.1.0-alpha2"
+}
 
-package sandbox.jna;
-
-import com.sun.jna.Library;
-import com.sun.jna.Native;
-
-
-public interface IsATTY_JNA extends Library {
-  IsATTY_JNA INSTANCE = (IsATTY_JNA) Native.load("c", IsATTY_JNA.class); // (1)
-  boolean isatty(int fileDescriptor); // (2)
+graal {
+  version = libs.versions.graalvm.get()
 }
