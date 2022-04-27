@@ -57,6 +57,7 @@ include("jmh-stuff", "jmh-panama")
 include("jdk11", "jdk16", "jdk17", "jdk18")
 include("cmem","swift-app", "swift-library")
 include("jmh-panama")
+include("graal:run-with-graal", "graal:run-with-libgraal")
 
 val os = DefaultNativePlatform.getCurrentOperatingSystem()
 if (os.isMacOsX) {

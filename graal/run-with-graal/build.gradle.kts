@@ -13,6 +13,22 @@ plugins {
   id("org.graalvm.plugin.compiler") version "0.1.0-alpha2"
 }
 
+
 graal {
   version = libs.versions.graalvm.get()
 }
+
+tasks.withType<JavaExec>().configureEach {
+  group = "class-with-main"
+  classpath(sourceSets.main.get().runtimeClasspath)
+
+  jvmArgs(
+    "-ea"
+  )
+}
+
+/* Note when changing versions this can happen:
+ *
+ * Error occurred during initialization of boot layer
+ * java.lang.module.FindException: Two versions of module org.graalvm.sdk found in .../graal/run-with-graal/build/graalCompiler (graal-sdk-22.0.0.2.jar and graal-sdk-22.1.0.jar)
+ */
