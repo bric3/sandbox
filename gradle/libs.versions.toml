@@ -11,7 +11,7 @@
 okhttp =  "4.9.3"
 bytebuddy = "1.12.10"
 junit-jupiter =  "5.8.2"
-graalvm = "22.1.0"
+graalvm = "22.1.0.1"
 
 
 [libraries]
