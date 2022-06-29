@@ -1,0 +1,3 @@
+
+
+https://finnhub.io/api/v1/quote?symbol=^HSI&token={{FINNHUB_API_TOKEN}}
