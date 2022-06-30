@@ -76,13 +76,17 @@ public class Stonks {
             "ORAN",
             "CRTO",
 
-            "GC=F", // TODO no company profile for gold
-            "SI=F", // TODO no company profile for silver
-            "CL=F", // TODO no company profile for crude oil
-            "EURUSD=X", // TODO no company profile for euro/usd
+            "GC=F", // no company profile for gold
+            "SI=F", // no company profile for silver
+            "CL=F", // no company profile for crude oil
+            "EURUSD=X", // no company profile for euro/usd
+            "BTC-USD",
+            "BTC-EUR",
+            "ETH-USD",
+            "ETH-EUR",
 
-            "YM=F", // TODO no company profile for Dow Futures
-            "NQ=F", // TODO no company profile for nasdaq
+            "YM=F", // no company profile for Dow Futures
+            "NQ=F", // no company profile for nasdaq
 
             // not available in the free tier
             // "NASDAQ",
@@ -92,10 +96,6 @@ public class Stonks {
             // "^N225",
             // "^GDAXI",
             // "^FTSE",
-            "BTC-USD",
-            "BTC-EUR",
-            "ETH-USD",
-            "ETH-EUR",
             ""
     );
 
