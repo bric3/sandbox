@@ -1,3 +1,10 @@
 
 
-https://finnhub.io/api/v1/quote?symbol=^HSI&token={{FINNHUB_API_TOKEN}}
+### Quote
+GET https://finnhub.io/api/v1/quote?symbol=GC=F
+X-Finnhub-Token: {{FINNHUB_API_TOKEN}}
+
+
+### Company profile
+GET https://finnhub.io/api/v1/stock/profile2?symbol=SPY
+X-Finnhub-Token: {{FINNHUB_API_TOKEN}}
