@@ -37,8 +37,9 @@ tasks.withType<JavaExec>().configureEach {
   )
 
   environment = mapOf(
-    "JAVA_LIBRARY_PATH" to sourceSets.main.get().output.resourcesDir!! // for IntelliJ run main class
-//          "JAVA_LIBRARY_PATH" to ".:/usr/local/lib"
+    "JAVA_LIBRARY_PATH" to sourceSets.main.get().output.resourcesDir!!, // for IntelliJ run main class
+    // "JAVA_LIBRARY_PATH" to ".:/usr/local/lib",
+    "FINNHUB_TOKEN" to System.getenv("FINNHUB_TOKEN")
   )
 }
 

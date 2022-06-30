@@ -24,6 +24,12 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/*
+ Run with
+
+ environment variable: FINNHUB_TOKEN={the token}
+ JFR: -XX:StartFlightRecording:filename=stonks.jfr,+jdk.VirtualThreadStart#enabled=true,+jdk.VirtualThreadEnd#enabled=true
+*/
 public class Stonks {
   private volatile boolean rateLimitAnnounceInProgress = false;
   private volatile long rateLimitResetSeconds = 0;
@@ -33,13 +39,9 @@ public class Stonks {
   public static void main(String[] args) throws Exception {
     // https://finnhub.io/pricing
     // 60 API calls/minute
-    if (args.length == 0) {
-      System.out.println("Needs token");
-      System.exit(1);
-    }
-    var finnhubToken = args[0];
-    if (finnhubToken.isBlank()) {
-      System.out.println("Needs non empty token");
+    var finnhubToken = System.getenv("FINNHUB_TOKEN");
+    if (finnhubToken ==null || finnhubToken.isBlank()) {
+      System.out.println("Needs non empty token set in the environment variable FINNHUB_TOKEN");
       System.exit(1);
     }
 
