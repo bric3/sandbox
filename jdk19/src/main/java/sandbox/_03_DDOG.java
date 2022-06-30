@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class _03_DDOG {
   private volatile boolean rateLimitExceeded = false;
   private volatile long rateLimitResetSeconds = 0;
-  private Pattern fieldMatcher = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"?(-?\\d+(?:.\\d+)?|[^\"]+)\"?");
+  private final Pattern fieldMatcher = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"?(-?\\d+(?:.\\d+)?|[^\"]+)\"?");
   private HttpClient httpClient;
 
   public static void main(String[] args) throws Exception {
@@ -75,7 +75,7 @@ public class _03_DDOG {
             "ORAN",
             "CRTO",
 
-            "GC=F",
+            "GC=F", // TODO no company profile for gold
 
             // not available in the free tier
             // "NASDAQ",
@@ -100,31 +100,31 @@ public class _03_DDOG {
     try (var es = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("finnhub-fetcher").factory())) {
       var tickerTasks = tickers.stream().filter(Predicate.not(String::isBlank)).map(ticker -> CompletableFuture.runAsync(() -> {
         try {
-          var quoteResponse = sendWithRetry(
+          var quoteResponse = CompletableFuture.supplyAsync(() -> sendWithRetry(
                   ticker,
                   HttpRequest.newBuilder(URI.create("https://finnhub.io/api/v1/quote?symbol=" + URLEncoder.encode(ticker, StandardCharsets.UTF_8)))
                              .GET()
                              .header("X-Finnhub-Token", finnhubToken)
                              .build(),
                   BodyHandlers.ofString()
-          );
+          ), es);
 
-          var profile2Response = sendWithRetry(
+          var profile2Response = CompletableFuture.supplyAsync(() -> sendWithRetry(
                   ticker,
                   HttpRequest.newBuilder(URI.create("https://finnhub.io/api/v1/stock/profile2?symbol=" + URLEncoder.encode(ticker, StandardCharsets.UTF_8)))
                              .GET()
                              .header("X-Finnhub-Token", finnhubToken)
                              .build(),
                   BodyHandlers.ofString()
-          );
+          ), es);
 
-          displayQuote(ticker, quoteResponse, profile2Response);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
+          displayQuote(
+                  ticker,
+                  quoteResponse.get(),
+                  profile2Response.get()
+          );
         } catch (Exception e) {
-          System.out.println("Error for " + ticker + ": " + e);
+          e.printStackTrace(System.err);
         }
       }, es)).toArray(CompletableFuture[]::new);
 
@@ -150,22 +150,29 @@ public class _03_DDOG {
     }
   }
 
-  private <T> HttpResponse<T> sendWithRetry(String ticker, HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) throws IOException, InterruptedException {
-    var response = httpClient.send(request, responseBodyHandler);
+  private <T> HttpResponse<T> sendWithRetry(String ticker, HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) {
+    try {
+      var response = httpClient.send(request, responseBodyHandler);
 
-    var limit = response.headers().firstValueAsLong("x-ratelimit-limit").orElseThrow();
-    var remaining = response.headers().firstValueAsLong("x-ratelimit-remaining").orElseThrow();
-    if (remaining < 4) {
-      System.err.println("[Rate limit] remaining: " + remaining + " / " + limit);
+      var limit = response.headers().firstValueAsLong("x-ratelimit-limit").orElseThrow();
+      var remaining = response.headers().firstValueAsLong("x-ratelimit-remaining").orElseThrow();
+      if (remaining < 4) {
+        System.err.println("[Rate limit] remaining: " + remaining + " / " + limit);
+      }
+      while (response.statusCode() == 429) {
+        rateLimitExceeded = true;
+        rateLimitResetSeconds = response.headers().firstValueAsLong("x-ratelimit-reset").orElseThrow();
+        waitIfRateLimited(ticker);
+        response = httpClient.send(request, responseBodyHandler);
+      }
+      rateLimitExceeded = false;
+      return response;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException(e);
     }
-    while (response.statusCode() == 429) {
-      rateLimitExceeded = true;
-      rateLimitResetSeconds = response.headers().firstValueAsLong("x-ratelimit-reset").orElseThrow();
-      waitIfRateLimited(ticker);
-      response = httpClient.send(request, responseBodyHandler);
-    }
-    rateLimitExceeded = false;
-    return response;
   }
 
   private void displayQuote(String ticker, HttpResponse<String> quoteResponse, HttpResponse<String> profile2Response) {
@@ -191,7 +198,8 @@ public class _03_DDOG {
     var highPriceOfTheDay = Double.parseDouble(quotePayload.get("h"));
     var lowPriceOfTheDay = Double.parseDouble(quotePayload.get("l"));
 
-    https:// finnhub.io/docs/api/company-profile2
+    https:
+// finnhub.io/docs/api/company-profile2
     matcher = fieldMatcher.matcher(profile2Response.body());
     var profile2Payload = matcher.results().collect(Collectors.toMap(
             m -> m.group(1),
