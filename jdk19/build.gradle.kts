@@ -34,7 +34,6 @@ tasks.withType<JavaExec>().configureEach {
     // "--add-modules=jdk.incubator.foreign",
     "--add-modules=jdk.incubator.concurrent",
     "--enable-preview",
-    "-Xlog:os+container",
   )
 
   environment = mapOf(

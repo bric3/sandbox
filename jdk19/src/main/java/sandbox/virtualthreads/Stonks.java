@@ -148,7 +148,6 @@ public class Stonks {
         this.rateLimitAnnounceInProgress = true;
         System.err.println("[Rate limit] Pausing for " + amount + "s");
       }
-      var start = System.currentTimeMillis();
       try {
         Thread.sleep(Duration.of(amount, ChronoUnit.SECONDS));
       } catch (InterruptedException e) {
