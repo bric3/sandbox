@@ -1,6 +1,7 @@
 package sandbox;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -23,8 +24,8 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class _03_DDOG {
-  private volatile boolean rateLimitExceeded = false;
+public class _03_STONKS {
+  private volatile boolean rateLimitAnnounceInProgress = false;
   private volatile long rateLimitResetSeconds = 0;
   private final Pattern fieldMatcher = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"?(-?\\d+(?:.\\d+)?|[^\"]+)\"?");
   private HttpClient httpClient;
@@ -42,7 +43,7 @@ public class _03_DDOG {
       System.exit(1);
     }
 
-    new _03_DDOG().run(finnhubToken);
+    new _03_STONKS().run(finnhubToken);
   }
 
   private void run(String finnhubToken) throws InterruptedException, ExecutionException, TimeoutException {
@@ -76,6 +77,12 @@ public class _03_DDOG {
             "CRTO",
 
             "GC=F", // TODO no company profile for gold
+            "SI=F", // TODO no company profile for silver
+            "CL=F", // TODO no company profile for crude oil
+            "EURUSD=X", // TODO no company profile for euro/usd
+
+            "YM=F", // TODO no company profile for Dow Futures
+            "NQ=F", // TODO no company profile for nasdaq
 
             // not available in the free tier
             // "NASDAQ",
@@ -85,11 +92,10 @@ public class _03_DDOG {
             // "^N225",
             // "^GDAXI",
             // "^FTSE",
-            // "BTC-USD",
-            // "BTC-EUR",
-            // "ETH-USD",
-            // "ETH-EUR",
-            // "EUR/USD",
+            "BTC-USD",
+            "BTC-EUR",
+            "ETH-USD",
+            "ETH-EUR",
             ""
     );
 
@@ -101,7 +107,6 @@ public class _03_DDOG {
       var tickerTasks = tickers.stream().filter(Predicate.not(String::isBlank)).map(ticker -> CompletableFuture.runAsync(() -> {
         try {
           var quoteResponse = CompletableFuture.supplyAsync(() -> sendWithRetry(
-                  ticker,
                   HttpRequest.newBuilder(URI.create("https://finnhub.io/api/v1/quote?symbol=" + URLEncoder.encode(ticker, StandardCharsets.UTF_8)))
                              .GET()
                              .header("X-Finnhub-Token", finnhubToken)
@@ -110,7 +115,6 @@ public class _03_DDOG {
           ), es);
 
           var profile2Response = CompletableFuture.supplyAsync(() -> sendWithRetry(
-                  ticker,
                   HttpRequest.newBuilder(URI.create("https://finnhub.io/api/v1/stock/profile2?symbol=" + URLEncoder.encode(ticker, StandardCharsets.UTF_8)))
                              .GET()
                              .header("X-Finnhub-Token", finnhubToken)
@@ -132,43 +136,47 @@ public class _03_DDOG {
     }
   }
 
-  private void waitIfRateLimited(String ticker) {
-    if (rateLimitExceeded) {
-      var rateLimitResetSeconds = this.rateLimitResetSeconds;
-      assert rateLimitResetSeconds > 0;
+  private void waitIfRateLimited(long reset) {
+    if (reset > this.rateLimitResetSeconds) {
+      this.rateLimitResetSeconds = reset;
+    }
+    var rateLimitResetSeconds = this.rateLimitResetSeconds;
+    var announceInProgress = this.rateLimitAnnounceInProgress;
+    if (rateLimitResetSeconds > 0) {
       var amount = rateLimitResetSeconds - ((int) (System.currentTimeMillis() / 1000));
-      System.err.println("[Rate limit] Waiting for " + ticker + ", reset in " + amount + "s");
+      if (!announceInProgress) {
+        this.rateLimitAnnounceInProgress = true;
+        System.err.println("[Rate limit] Pausing for " + amount + "s");
+      }
       var start = System.currentTimeMillis();
       try {
         Thread.sleep(Duration.of(amount, ChronoUnit.SECONDS));
       } catch (InterruptedException e) {
-        System.err.printf("VirtualThread %s - %s interrupted%n", ticker, Thread.currentThread().getName());
+        Thread.currentThread().interrupt();
       } finally {
-        // System.err.println("[Rate limit] Waited for " + ticker + " " + (System.currentTimeMillis() - start) / 1000 + "s");
-        System.err.printf("[Rate limit] VirtualThread %s - %s woke up, slept %dms%n", ticker, Thread.currentThread().getName(), (System.currentTimeMillis() - start));
+        if (!announceInProgress) {
+          System.err.println("[Rate limit] Resuming");
+        }
       }
     }
   }
 
-  private <T> HttpResponse<T> sendWithRetry(String ticker, HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) {
+  private <T> HttpResponse<T> sendWithRetry(HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) {
     try {
       var response = httpClient.send(request, responseBodyHandler);
 
-      var limit = response.headers().firstValueAsLong("x-ratelimit-limit").orElseThrow();
-      var remaining = response.headers().firstValueAsLong("x-ratelimit-remaining").orElseThrow();
-      if (remaining < 4) {
-        System.err.println("[Rate limit] remaining: " + remaining + " / " + limit);
-      }
+      // var limit = response.headers().firstValueAsLong("x-ratelimit-limit").orElseThrow();
+      // var remaining = response.headers().firstValueAsLong("x-ratelimit-remaining").orElseThrow();
+      // if (remaining < 4) {
+      //   System.err.println("[Rate limit] remaining: " + remaining + " / " + limit);
+      // }
       while (response.statusCode() == 429) {
-        rateLimitExceeded = true;
-        rateLimitResetSeconds = response.headers().firstValueAsLong("x-ratelimit-reset").orElseThrow();
-        waitIfRateLimited(ticker);
+        waitIfRateLimited(response.headers().firstValueAsLong("x-ratelimit-reset").orElseThrow());
         response = httpClient.send(request, responseBodyHandler);
       }
-      rateLimitExceeded = false;
       return response;
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new UncheckedIOException(e);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new RuntimeException(e);
@@ -198,8 +206,7 @@ public class _03_DDOG {
     var highPriceOfTheDay = Double.parseDouble(quotePayload.get("h"));
     var lowPriceOfTheDay = Double.parseDouble(quotePayload.get("l"));
 
-    https:
-// finnhub.io/docs/api/company-profile2
+    // https://finnhub.io/docs/api/company-profile2
     matcher = fieldMatcher.matcher(profile2Response.body());
     var profile2Payload = matcher.results().collect(Collectors.toMap(
             m -> m.group(1),

@@ -1,10 +1,14 @@
 
 
 ### Quote
-GET https://finnhub.io/api/v1/quote?symbol=GC=F
+GET https://finnhub.io/api/v1/quote?symbol=ETH-EUR
 X-Finnhub-Token: {{FINNHUB_API_TOKEN}}
 
 
 ### Company profile
-GET https://finnhub.io/api/v1/stock/profile2?symbol=SPY
+GET https://finnhub.io/api/v1/stock/profile2?symbol=BTC-USD
+X-Finnhub-Token: {{FINNHUB_API_TOKEN}}
+
+### Company profile
+GET https://finnhub.io/api/v1/search?q=BTC-USD
 X-Finnhub-Token: {{FINNHUB_API_TOKEN}}
