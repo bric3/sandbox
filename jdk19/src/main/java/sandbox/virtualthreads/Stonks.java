@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -34,18 +35,27 @@ public class Stonks {
   private volatile boolean rateLimitAnnounceInProgress = false;
   private volatile long rateLimitResetSeconds = 0;
   private final Pattern fieldMatcher = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"?(-?\\d+(?:.\\d+)?|[^\"]+)\"?");
-  private HttpClient httpClient;
+  private final HttpClient httpClient;
 
   public static void main(String[] args) throws Exception {
     // https://finnhub.io/pricing
     // 60 API calls/minute
     var finnhubToken = System.getenv("FINNHUB_TOKEN");
-    if (finnhubToken ==null || finnhubToken.isBlank()) {
+    if (finnhubToken == null || finnhubToken.isBlank()) {
       System.out.println("Needs non empty token set in the environment variable FINNHUB_TOKEN");
       System.exit(1);
     }
 
     new Stonks().run(finnhubToken);
+  }
+
+  public Stonks() {
+    int httpClientCarrierThreads = Integer.parseInt(Objects.requireNonNullElse(System.getenv("HTTP_CLIENT_CARRIER_THREADS"), "1"));
+    httpClient = HttpClient.newBuilder()
+                           .executor(Executors.newFixedThreadPool(httpClientCarrierThreads, Thread.ofVirtual().name("HttpClient-virtual").factory()))
+                           .connectTimeout(Duration.ofSeconds(10))
+                           .build();
+
   }
 
   private void run(String finnhubToken) throws InterruptedException, ExecutionException, TimeoutException {
@@ -101,10 +111,6 @@ public class Stonks {
             ""
     );
 
-    httpClient = HttpClient.newBuilder()
-                           .connectTimeout(Duration.ofSeconds(10))
-                           .build();
-
     try (var es = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("finnhub-fetcher").factory())) {
       var tickerTasks = tickers.stream().filter(Predicate.not(String::isBlank)).map(ticker -> CompletableFuture.runAsync(() -> {
         try {
@@ -130,6 +136,7 @@ public class Stonks {
                   profile2Response.get()
           );
         } catch (Exception e) {
+          System.err.println("Failure on " + ticker);
           e.printStackTrace(System.err);
         }
       }, es)).toArray(CompletableFuture[]::new);
