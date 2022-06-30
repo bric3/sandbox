@@ -1,4 +1,4 @@
-package sandbox;
+package sandbox.virtualthreads;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class _03_STONKS {
+public class Stonks {
   private volatile boolean rateLimitAnnounceInProgress = false;
   private volatile long rateLimitResetSeconds = 0;
   private final Pattern fieldMatcher = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"?(-?\\d+(?:.\\d+)?|[^\"]+)\"?");
@@ -43,7 +43,7 @@ public class _03_STONKS {
       System.exit(1);
     }
 
-    new _03_STONKS().run(finnhubToken);
+    new Stonks().run(finnhubToken);
   }
 
   private void run(String finnhubToken) throws InterruptedException, ExecutionException, TimeoutException {

@@ -7,13 +7,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-package sandbox;
+package sandbox.virtualthreads;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
-public class _02_ExecutorService {
+public class ExecutorService {
   public static void main(String[] args) {
     // Simple executor implementation with Executors.newVirtualThreadPerTaskExecutor()
     var vFactory = Thread.ofVirtual().name("V").factory();
