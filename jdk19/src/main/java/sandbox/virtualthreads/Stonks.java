@@ -134,6 +134,9 @@ public class Stonks {
 
       CompletableFuture.allOf(tickerTasks).get(10, TimeUnit.MINUTES);
     }
+
+    // continuous refresh ?
+    // clear console "\033[H\033[2J"
   }
 
   private void waitIfRateLimited(long reset) {
@@ -143,10 +146,13 @@ public class Stonks {
     var rateLimitResetSeconds = this.rateLimitResetSeconds;
     var announceInProgress = this.rateLimitAnnounceInProgress;
     if (rateLimitResetSeconds > 0) {
+      Thread waitingThread = null;
       var amount = rateLimitResetSeconds - ((int) (System.currentTimeMillis() / 1000));
       if (!announceInProgress) {
         this.rateLimitAnnounceInProgress = true;
         System.err.println("[Rate limit] Pausing for " + amount + "s");
+        waitingThread = LoadingIndicator.asVirtualThread(LoadingIndicator.BRAILLE);
+        waitingThread.start();
       }
       try {
         Thread.sleep(Duration.of(amount, ChronoUnit.SECONDS));
@@ -154,6 +160,7 @@ public class Stonks {
         Thread.currentThread().interrupt();
       } finally {
         if (!announceInProgress) {
+          waitingThread.interrupt();
           System.err.println("[Rate limit] Resuming");
         }
       }
