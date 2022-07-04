@@ -159,8 +159,11 @@ public class Stonks {
       var amount = rateLimitResetSeconds - ((int) (System.currentTimeMillis() / 1000));
       if (!announceInProgress) {
         this.rateLimitAnnounceInProgress = true;
-        System.err.println("[Rate limit] Pausing for " + amount + "s");
-        waitingThread = LoadingIndicator.asVirtualThread(LoadingIndicator.BRAILLE);
+        waitingThread = LoadingIndicator.infinite(System.err)
+                                        .loadingChars(LoadingIndicator.BRAILLE)
+                                        .withPrefix("[Rate limit] Pausing for " + amount + "s")
+                                        .withTerminateString("[Rate limit] Resuming")
+                                        .asVirtualThread();
         waitingThread.start();
       }
       try {
@@ -170,7 +173,6 @@ public class Stonks {
       } finally {
         if (!announceInProgress) {
           waitingThread.interrupt();
-          System.err.println("[Rate limit] Resuming");
         }
       }
     }
