@@ -32,6 +32,16 @@ import java.util.stream.Collectors;
  JFR: -XX:StartFlightRecording:filename=stonks.jfr,+jdk.VirtualThreadStart#enabled=true,+jdk.VirtualThreadEnd#enabled=true
 */
 public class Stonks {
+  private static final String default_fg = "\u001B[39m";
+  private static final String red = "\u001B[31m";
+  private static final String green = "\u001B[32m";
+  private static final String blue = "\u001B[34m";
+  private static final String gray = "\u001B[37m";
+  private static final String bold = "\u001B[01m";
+  private static final String italic = "\u001B[03m";
+  private static final String underline = "\u001B[04m";
+  private static final String reset = "\u001B[00m";
+
   private volatile boolean rateLimitAnnounceInProgress = false;
   private volatile long rateLimitResetSeconds = 0;
   private final Pattern fieldMatcher = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"?(-?\\d+(?:.\\d+)?|[^\"]+)\"?");
@@ -201,15 +211,6 @@ public class Stonks {
   }
 
   private void displayQuote(String ticker, HttpResponse<String> quoteResponse, HttpResponse<String> profile2Response) {
-    var red = "\u001B[00;31m";
-    var green = "\u001B[00;32m";
-    var blue = "\u001B[00;34m";
-    var gray = "\u001B[00;37m";
-    var bold = "\u001B[01m";
-    var italic = "\u001B[03m";
-    var underline = "\u001B[04m";
-    var reset = "\u001B[00m";
-
     // https://finnhub.io/docs/api/quote
     var matcher = fieldMatcher.matcher(quoteResponse.body());
     var quotePayload = matcher.results().collect(Collectors.toMap(
