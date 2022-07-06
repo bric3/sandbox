@@ -62,7 +62,7 @@ public class WebServer {
     // var h2 = HttpHandlers.handleOrElse(IS_POST, postHandler, h1);
     // var server = HttpServer.create(new InetSocketAddress(8001), 2,
     //                                "/", h2, SimpleFileServer.createOutputFilter(System.out, OutputLevel.INFO));
-    server.start();
+    // server.start();
   }
 
   private static class SomeHandler implements HttpHandler {
