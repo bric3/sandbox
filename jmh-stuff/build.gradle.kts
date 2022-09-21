@@ -9,7 +9,7 @@
  */
 
 plugins {
-  id("me.champeau.jmh") version "0.6.7"
+  id("me.champeau.jmh") version "0.6.8"
   id("java")
 }
 
