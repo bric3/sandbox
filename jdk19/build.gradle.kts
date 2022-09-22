@@ -24,10 +24,7 @@ repositories {
 }
 
 dependencies {
-  implementation("org.openjdk.jmc:flightrecorder:8.2.0")
-  implementation("org.openjdk.jmc:flightrecorder.writer:8.2.0")
-  implementation("org.openjdk.jmc:flightrecorder.rules:8.2.0")
-  implementation("org.openjdk.jmc:flightrecorder.rules.jdk:8.2.0")
+  implementation(libs.bundles.flightRecorder)
 }
 
 // Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope

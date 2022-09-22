@@ -14,6 +14,9 @@ junit-jupiter =  "5.9.1"
 graalvm = "22.2.0"
 
 
+flightRecorder = "8.2.1"
+
+
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
 guava = { module = "com.google.guava:guava", version = "31.1-jre" }
@@ -33,6 +36,12 @@ testcontainers = { module = "org.testcontainers:testcontainers", version = "1.17
 jna = { module = "net.java.dev.jna:jna", version = "5.12.1" }
 jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.12" }
 
+flightRecorder = { module = "org.openjdk.jmc:flightrecorder", version.ref = "flightRecorder" }
+flightRecorder-writer = { module = "org.openjdk.jmc:flightrecorder.writer", version.ref = "flightRecorder" }
+flightRecorder-rules = { module = "org.openjdk.jmc:flightrecorder.rules", version.ref = "flightRecorder" }
+flightRecorder-rules-jdk = { module = "org.openjdk.jmc:flightrecorder.rules.jdk", version.ref = "flightRecorder" }
+
+
 graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }
 graal-js = { module = "org.graalvm.js:js", version.ref = "graalvm" }
 graal-js-scriptengine = { module = "org.graalvm.js:js-scriptengine", version.ref = "graalvm" }
@@ -41,6 +50,8 @@ graal-js-scriptengine = { module = "org.graalvm.js:js-scriptengine", version.ref
 [bundles]
 okhttp = ['okhttp', 'okhttp-tls', 'okhttp-dnsoverhttps', 'okhttp-logging']
 bytebuddy = ['bytebuddy', 'bytebuddy-agent']
+flightRecorder = ['flightRecorder', 'flightRecorder-writer', 'flightRecorder-rules', 'flightRecorder-rules-jdk']
+
 graal-js = ["graal-js", "graal-js-scriptengine"]
 
 [plugins]
