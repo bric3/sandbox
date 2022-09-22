@@ -15,7 +15,7 @@ java {
     // bash configure --with-vendor-name=bric3
     // vendor.set(JvmVendorSpec.matching("bric3"))
     // loom
-    vendor.set(JvmVendorSpec.ORACLE)
+    // vendor.set(JvmVendorSpec.AMAZON)
   }
 }
 
