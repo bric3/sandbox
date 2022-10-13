@@ -25,6 +25,7 @@ repositories {
 
 dependencies {
   implementation(libs.bundles.flightRecorder)
+  implementation(libs.flexmark.all)
 }
 
 // Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope

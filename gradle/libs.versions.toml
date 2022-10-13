@@ -12,7 +12,7 @@ okhttp =  "4.10.0"
 bytebuddy = "1.12.17"
 junit-jupiter =  "5.9.1"
 graalvm = "22.2.0"
-
+flexmark = "0.64.0"
 
 flightRecorder = "8.2.1"
 
@@ -41,6 +41,7 @@ flightRecorder-writer = { module = "org.openjdk.jmc:flightrecorder.writer", vers
 flightRecorder-rules = { module = "org.openjdk.jmc:flightrecorder.rules", version.ref = "flightRecorder" }
 flightRecorder-rules-jdk = { module = "org.openjdk.jmc:flightrecorder.rules.jdk", version.ref = "flightRecorder" }
 
+flexmark-all = { module = "com.vladsch.flexmark:flexmark-all", version.ref = "flexmark" }
 
 graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }
 graal-js = { module = "org.graalvm.js:js", version.ref = "graalvm" }
