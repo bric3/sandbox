@@ -52,9 +52,9 @@ import static java.util.stream.Collectors.teeing;
 import static java.util.stream.Collectors.toMap;
 
 public class Disqus2Giscus {
-  private final GitHub gh;
-  private final String discussionCategoryId;
-  private final String repoId;
+  private GitHub gh;
+  private String discussionCategoryId;
+  private String repoId;
   private String me;
   private boolean convertToMarkdown = true;
   private boolean extractAuthors = false;
@@ -101,6 +101,18 @@ public class Disqus2Giscus {
       }
     }
 
+
+    if (exportFile == null || !Files.exists(exportFile)) {
+      System.err.println(exportFile == null ? "Export file option not set" : "File " + exportFile + " does not exist");
+      System.exit(1);
+    }
+
+
+    if (extractAuthors) {
+      // Don't need to invoke GH API, check flexmark, etc
+      return;
+    }
+
     var validMappingValues = Set.of("url", "pathname", "title", "og:title");
     if (!validMappingValues.contains(mapping)) {
       System.err.println("Invalid mapping: " + mapping + ". Supported values are: " + validMappingValues);
@@ -109,11 +121,6 @@ public class Disqus2Giscus {
 
     if (Objects.equals(mapping, "pathname") && Objects.equals(host, "")) {
       System.err.println("You must specify a host (e.g. '--host https://example.com') when using the 'pathname' mapping");
-      System.exit(1);
-    }
-
-    if (exportFile == null || !Files.exists(exportFile)) {
-      System.err.println(exportFile == null ? "Export file option not set" : "File " + exportFile + " does not exist");
       System.exit(1);
     }
 
@@ -134,13 +141,13 @@ public class Disqus2Giscus {
       }
     }
 
+
     // check repo
     if (!repo.matches("\\w+/\\w+")) {
       System.err.println("Invalid Github repo name " + repo);
       System.exit(1);
     }
 
-    // TODO don't check github or category when extract-authors is set
     gh = new GitHub(githubToken, dryRun);
     repoId = gh.getRepoId(repo);
     if (repoId == null || repoId.isEmpty()) {
@@ -255,21 +262,46 @@ public class Disqus2Giscus {
               disqusThreads.stream().map(DisqusThread::author),
               disqusPosts.values().stream().map(DisqusPost::author)
       ).map(Author::name).distinct().sorted().forEach(System.out::println);
-      System.exit(0);
+    } else {
+      migrate(disqusThreads, discussionsIndex);
     }
+  }
 
-    // TODO remove
-    // t: 8296439444
-    // p: 5928880724
-    var tid = "8296439444";
-    flattenChildNodes(discussionsIndex, tid, 0).forEach(pair -> {
-      var indent = "> ".repeat(pair.a);
-      System.out.println("> " + indent + pair.b);
-    });
+  private void migrate(
+          TreeSet<DisqusThread> disqusThreads,
+          LinkedHashMap<String, TreeSet<DisqusPost>> discussionsIndex
+  ) throws IOException {
+    // // t: 8296439444
+    // // p: 5928880724
+    // var tid = "8296439444";
+    // flattenChildNodes(discussionsIndex, tid, 0).forEach(pair -> {
+    //   var indent = "> ".repeat(pair.a);
+    //   System.out.println("> " + indent + pair.b);
+    // });
 
     var authorMapping = readCsv();
+    var authorByIds = Author.authorMap.values()
+                                      .stream()
+                                      .filter(Predicate.not(Author::anonymous))
+                                      .collect(toMap(
+                                              Author::username,
+                                              Function.identity()
+                                      ));
+    var embeddedDisqusAuthorRef = Pattern.compile("@(.+?):disqus");
+    Function<String, String> replaceEmbeddedAuthorRefs = msg -> {
+      var matcher = embeddedDisqusAuthorRef.matcher(msg);
+      var stringBuilder = new StringBuilder();
+      while (matcher.find()) {
+        var disqusAuthorId = matcher.group(1);
+        var name = authorByIds.get(disqusAuthorId).name;
+        matcher.appendReplacement(stringBuilder, authorMapping.getOrDefault(name, name));
+      }
+      matcher.appendTail(stringBuilder);
+      return stringBuilder.length() == 0 ? msg : stringBuilder.toString();
+    };
 
-    disqusThreads.stream().filter(t -> Objects.equals(t.id, tid)).forEach(t -> {
+    int migratedComments = 0;
+    for (DisqusThread t : disqusThreads) {
       var discussionId = gh.createDiscussion(
               repoId,
               discussionCategoryId,
@@ -285,27 +317,7 @@ public class Disqus2Giscus {
               """.formatted(t.title, t.link)
       );
 
-      var authorByIds = Author.authorMap.values()
-                                        .stream()
-                                        .filter(Predicate.not(Author::anonymous))
-                                        .collect(toMap(
-                                                Author::username,
-                                                Function.identity()
-                                        ));
-      var embeddedDisqusAuthorRef = Pattern.compile("@(.+?):disqus");
-      Function<String, String> replaceEmbeddedAuthorRefs = msg -> {
-        var matcher = embeddedDisqusAuthorRef.matcher(msg);
-        var stringBuilder = new StringBuilder();
-        while (matcher.find()) {
-          var disqusAuthorId = matcher.group(1);
-          var name = authorByIds.get(disqusAuthorId).name;
-          matcher.appendReplacement(stringBuilder, authorMapping.getOrDefault(name, name));
-        }
-        matcher.appendTail(stringBuilder);
-        return stringBuilder.length() == 0 ? msg : stringBuilder.toString();
-      };
-
-      visitChildNodes(
+      migratedComments += visitChildNodes(
               discussionsIndex,
               t.id,
               null,  // first level comment are not replying
@@ -343,10 +355,19 @@ public class Disqus2Giscus {
                         body
                 );
               }
-      ).forEach(p -> {});
-    });
+      ).count();
+    }
 
-    System.out.println("Target repo : " + repo);
+    System.out.printf(
+            """
+            Target repo       : %s
+            Migrated Threads  : %d
+            Migrated Comments : %d (non spam, non deleted)
+            """,
+            repo,
+            disqusThreads.size(),
+            migratedComments
+    );
     System.out.printf(
             """
             Confifgure Giscus with:
@@ -693,8 +714,37 @@ public class Disqus2Giscus {
   private static void usage() {
     System.out.println(
             """
+            Tool to migrate as best effort Disqus comment to GitHub Discussions.
+            Works best with 'jbang' (https://www.jbang.dev), but can be run with regular 'java' as well.
+            
             Usage:
-              env GITHUB_TOKEN=... java --source 19 Disqus2Giscus.java -f my-forum -e export.xml -r ghUser/repo -c Announcements
+              env GITHUB_TOKEN=... jbang Disqus2Giscus.java -f my-forum -e export.xml -r ghUser/repo -c "Discussion Category" -m pathname --host https://examle.com -u author-mapping.csv -o "@bric3"
+              env GITHUB_TOKEN=... java Disqus2Giscus.java -f my-forum -e export.xml -r ghUser/repo -c "Discussion Category" -m pathname --host https://examle.com -u author-mapping.csv -o "@bric3"
+
+            Author extraction
+              java Disqus2Giscus.java -f my-forum -e export.xml -a
+
+            Options:
+                -f, --forum-name <forum>             Disqus forum name
+                -e, --export-file <file>             Disqus export file (From https://disqus.com/admin/discussions/export/)
+                -r, --repo <repo>                    GitHub repository (owner/repo)
+                -c, --target-category <category>     GitHub discussion category
+                -m, --mapping <mapping>              Giscus discussion mapping mode
+                    --host <host>                    Site host, used for mapping mode 'pathname',
+                                                     removes the host from the link in exported
+                                                     comments.
+                -a, --extract-authors                Extract author names from Disqus export file                                  
+                -u, --user-mapping-file <file>       [Optional] Author mapping file, CSV format:
+                                                     Disqus author name,GitHub user
+                -o, --owner-account <owner>          [Optional] Discus or GitHub identifier
+                                                     for migrating owner's comments
+                    --[no-]convert-to-markdown       [Optional] Toggle markdown conversion of comments
+                                                     (Requires running with 'jbang' or having 'flexmark-all'
+                                                     dependency on the class path)
+                                                     (default: true)
+                -t, --token <token>                  Alternative way to pass the GitHub token
+                -n, --dry-run                        Dry run, do not create discussions on Github
+                -h, --help                           Show this help
             """
     );
     System.exit(0);
