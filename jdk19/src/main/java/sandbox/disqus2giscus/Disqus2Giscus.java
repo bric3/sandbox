@@ -1,7 +1,5 @@
 ///usr/bin/env jbang "$0" ; exit $?
 //JAVA 19
-//JAVAC_OPTIONS --enable-preview --source 19
-//JAVA_OPTIONS -ea --enable-preview
 //DEPS com.vladsch.flexmark:flexmark-all:0.64.0
 
 package sandbox.disqus2giscus;
@@ -41,6 +39,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -50,7 +49,7 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.teeing;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 public class Disqus2Giscus {
   private final GitHub gh;
@@ -155,11 +154,12 @@ public class Disqus2Giscus {
   }
 
   private Path expandPathSimple(String str) {
-    var userMappingFile1 = Path.of(str);
-    if (userMappingFile1.startsWith("~")) {
-      userMappingFile1 = Path.of(System.getProperty("user.home")).resolve(userMappingFile.subpath(1, userMappingFile.getNameCount()));
+    var path = Path.of(str);
+    if (path.startsWith("~")) {
+      path = Path.of(System.getProperty("user.home"))
+                 .resolve(path.subpath(1, path.getNameCount()));
     }
-    return userMappingFile1;
+    return path;
   }
 
   private void run() throws Exception {
@@ -199,7 +199,7 @@ public class Disqus2Giscus {
                           .map(node -> DisqusPost.disqusPost(xpath, node))
                           // .peek(System.out::println)
                           .collect(teeing(
-                                  toList(),
+                                  toMap(DisqusPost::id, Function.identity()),
                                   mapping(
                                           DisqusPost::threadId,
                                           Collectors.toUnmodifiableSet()
@@ -222,14 +222,26 @@ public class Disqus2Giscus {
       System.exit(1);
     }
 
-    // Rebuild hierarchic discussions in a "hash tree"
-    // [post-id | thread-id, list { post-id, post-id, ... }]
+    // Rebuild ~~hierarchic~~ discussions in a "hash tree", actually GH Discussions
+    // do not go beyond 2 levels (thread (L0), comment (L1), replies (L2))
+    // Structure : [post-id | thread-id, list { post-id, post-id, ... }]
     var discussionsIndex = new LinkedHashMap<String, TreeSet<DisqusPost>>(disqusPosts.size());
     Function<String, TreeSet<DisqusPost>> newChildPosts = k -> new TreeSet<>(comparing(DisqusPost::date));
-    disqusPosts.forEach(post -> {
+    disqusPosts.values().forEach(post -> {
+      // register the post
       discussionsIndex.computeIfAbsent(post.id(), newChildPosts);
       if (post.parentId != null && !post.parentId.isBlank()) {
-        discussionsIndex.computeIfAbsent(post.parentId, newChildPosts).add(post);
+        // GitHub Discussions don't have tree like comments structure,
+        // instead a discussion has top level comments, and all replies
+        // are at the same level under these top level comments
+        // this code finds the top level comment and register the current post
+
+        var targetParentId = post.parentId;
+        for (DisqusPost parentPost = null; (parentPost = disqusPosts.get(targetParentId)) != null && !parentPost.parentId.isBlank(); ) {
+          targetParentId = parentPost.parentId;
+        }
+
+        discussionsIndex.computeIfAbsent(targetParentId, newChildPosts).add(post);
       } else {
         discussionsIndex.computeIfAbsent(post.threadId, newChildPosts).add(post);
       }
@@ -238,17 +250,18 @@ public class Disqus2Giscus {
     if (extractAuthors) {
       Stream.concat(
               disqusThreads.stream().map(DisqusThread::author),
-              disqusPosts.stream().map(DisqusPost::author)
+              disqusPosts.values().stream().map(DisqusPost::author)
       ).map(Author::name).distinct().sorted().forEach(System.out::println);
       System.exit(0);
     }
 
+    // TODO remove
     // t: 8296439444
     // p: 5928880724
     var tid = "8296439444";
     flattenChildNodes(discussionsIndex, tid, 0).forEach(pair -> {
-      var indent = " ".repeat(pair.a * 2);
-      System.out.println(indent + pair.b);
+      var indent = "> ".repeat(pair.a);
+      System.out.println("> " + indent + pair.b);
     });
 
     var authorMapping = readCsv();
@@ -269,33 +282,57 @@ public class Disqus2Giscus {
               """.formatted(t.title, t.link)
       );
 
+      var authorByIds = Author.authorMap.values()
+                                        .stream()
+                                        .filter(Predicate.not(Author::anonymous))
+                                        .collect(toMap(
+                                                Author::username,
+                                                Function.identity()
+                                        ));
+      var embeddedDisqusAuthorRef = Pattern.compile("@(.+?):disqus");
+      Function<String, String> replaceEmbeddedAuthorRefs = msg -> {
+        var matcher = embeddedDisqusAuthorRef.matcher(msg);
+        var stringBuilder = new StringBuilder();
+        while (matcher.find()) {
+          var disqusAuthorId = matcher.group(1);
+          var name = authorByIds.get(disqusAuthorId).name;
+          matcher.appendReplacement(stringBuilder, authorMapping.getOrDefault(name, name));
+        }
+        matcher.appendTail(stringBuilder);
+        return stringBuilder.length() == 0 ? msg : stringBuilder.toString();
+      };
+
       visitChildNodes(
               discussionsIndex,
               t.id,
               null,  // first level comment are not replying
-              (replyToId, post) -> gh.addDiscussionComment(
-                      discussionId,
-                      replyToId,
-                      """
-                      Originally posted by %s on %s
-                                                       
-                      ----
-                                                       
-                      %s
-                      """.formatted(
-                              authorMapping.getOrDefault(post.author.name, post.author.name),
-                              post.date,
-                              new HtmlConverter(convertToMarkdown).convert(post.message) // TODO basic markdown conversion
-                      )
-              )
+              (replyToId, post) -> {
+
+                return gh.addDiscussionComment(
+                        discussionId,
+                        replyToId,
+                        """
+                        Originally posted by %s on %s
+                                                         
+                        ----
+                                                         
+                        %s
+                        """.formatted(
+                                authorMapping.getOrDefault(post.author.name, post.author.name),
+                                post.date,
+                                new HtmlConverter(convertToMarkdown).convert(
+                                        replaceEmbeddedAuthorRefs.apply(post.message)
+                                ).replace("\n\\>", "\n>")
+                        )
+                );
+              }
       ).forEach(p -> {});
     });
 
     System.out.println("Target repo : " + repo);
-
     System.out.printf(
             """
-            Giscus Configuration:
+            Confifgure Giscus with:
                         
             <script src="https://giscus.app/client.js"
                     data-repo="%s"
@@ -334,7 +371,12 @@ public class Disqus2Giscus {
   record Pair<A, B>(A a, B b) {}
 
 
-  private static Stream<Pair<String, DisqusPost>> visitChildNodes(Map<String, TreeSet<DisqusPost>> index, String id, String visitorArg0, BiFunction<String, DisqusPost, String> visitor) {
+  private static Stream<Pair<String, DisqusPost>> visitChildNodes(
+          Map<String, TreeSet<DisqusPost>> index,
+          String id,
+          String visitorArg0,
+          BiFunction<String, DisqusPost, String> visitor
+  ) {
     return index.get(id).stream().flatMap(childPost -> {
       var r = visitor.apply(visitorArg0, childPost);
       return Stream.concat(
@@ -350,7 +392,6 @@ public class Disqus2Giscus {
             flattenChildNodes(index, childPost.id, level + 1)
     ));
   }
-
 
   private static class GitHub {
     // https://docs.github.com/en/graphql/guides/using-the-graphql-api-for-discussions
@@ -483,8 +524,9 @@ public class Disqus2Giscus {
       Objects.requireNonNull(body);
 
       // https://docs.github.com/en/graphql/guides/using-the-graphql-api-for-discussions#adddiscussioncomment
-      String payload = switch (replyToId) {
-        case null -> graphQl(
+      String payload;
+      if (replyToId == null) {
+        payload = graphQl(
                 """
                 mutation($discussionId: ID!, $body: String!) {
                   addDiscussionComment(input: {discussionId: $discussionId, body: $body}) {
@@ -496,7 +538,8 @@ public class Disqus2Giscus {
                 """,
                 Map.of("discussionId", discussionId, "body", body)
         );
-        default -> graphQl(
+      } else {
+        payload = graphQl(
                 """
                 mutation($discussionId: ID!, $body: String!, $replyToId: ID) {
                   addDiscussionComment(input: {discussionId: $discussionId, body: $body, replyToId: $replyToId}) {
@@ -508,7 +551,7 @@ public class Disqus2Giscus {
                 """,
                 Map.of("discussionId", discussionId, "body", body, "replyToId", replyToId)
         );
-      };
+      }
       System.out.println(payload);
 
       // lame json parser, assumes the output is minified
