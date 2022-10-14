@@ -55,6 +55,7 @@ public class Disqus2Giscus {
   private final GitHub gh;
   private final String discussionCategoryId;
   private final String repoId;
+  private String me;
   private boolean convertToMarkdown = true;
   private boolean extractAuthors = false;
   private String mapping = "";
@@ -87,9 +88,11 @@ public class Disqus2Giscus {
         case "-c", "--target-category" -> targetCategoryName = readOptionValue(++argIdx, arg, args);
         case "-t", "--token" -> githubToken = readOptionValue(++argIdx, arg, args);
         case "-m", "--mapping" -> mapping = readOptionValue(++argIdx, arg, args);
+        case "-o", "--owner-account" -> me = readOptionValue(++argIdx, arg, args);
         case "--host" -> {
           host = readOptionValue(++argIdx, arg, args);
           if (!host.endsWith("/")) {
+            // noinspection StringConcatenationInLoop
             host += "/";
           }
         }
@@ -307,23 +310,37 @@ public class Disqus2Giscus {
               t.id,
               null,  // first level comment are not replying
               (replyToId, post) -> {
-
+                var mappedAuthor = authorMapping.getOrDefault(post.author.name, post.author.name);
+                String body;
+                if (Objects.equals(me, post.author.username)
+                    || Objects.equals(me, post.author.name)
+                    || Objects.equals(me, mappedAuthor)) {
+                  body = """
+                         %s
+                         """.formatted(
+                          new HtmlConverter(convertToMarkdown).convert(
+                                  replaceEmbeddedAuthorRefs.apply(post.message)
+                          ).replace("\n\\>", "\n>")
+                  );
+                } else {
+                  body = """
+                         Originally posted by %s on %s
+                                                          
+                         ----
+                                                          
+                         %s
+                         """.formatted(
+                          mappedAuthor,
+                          post.date,
+                          new HtmlConverter(convertToMarkdown).convert(
+                                  replaceEmbeddedAuthorRefs.apply(post.message)
+                          ).replace("\n\\>", "\n>")
+                  );
+                }
                 return gh.addDiscussionComment(
                         discussionId,
                         replyToId,
-                        """
-                        Originally posted by %s on %s
-                                                         
-                        ----
-                                                         
-                        %s
-                        """.formatted(
-                                authorMapping.getOrDefault(post.author.name, post.author.name),
-                                post.date,
-                                new HtmlConverter(convertToMarkdown).convert(
-                                        replaceEmbeddedAuthorRefs.apply(post.message)
-                                ).replace("\n\\>", "\n>")
-                        )
+                        body
                 );
               }
       ).forEach(p -> {});
