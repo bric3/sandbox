@@ -330,7 +330,7 @@ public class Disqus2Giscus {
         case "pathname" -> pathname;
         default -> throw new IllegalStateException("Unexpected value: " + mapping);
       };
-      System.out.println("Migrating discussions for \"" + t.title() + "\" (" + t.link + ")");
+      System.out.println("Migrating discussion for \"" + t.title() + "\" (" + t.link + ")");
       var discussionId = gh.createDiscussion(
               repoId,
               discussionCategoryId,
@@ -427,7 +427,7 @@ public class Disqus2Giscus {
             targetCategoryName,
             discussionCategoryId,
             mapping,
-            strictMatching
+            strictMatching ? "1" : "0"
     );
   }
 
