@@ -30,7 +30,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.HexFormat;
@@ -651,6 +650,7 @@ public class Disqus2Giscus {
                  }
                  """.formatted(
               graphQlQuery
+                      // TODO does not work within 'mutation' to be replaced by a regular poll .replaceAll("}(\n|\\s)*$", "  rateLimit { cost limit used remaining resetAt }}")
                       .replace("\"", "\\\"")
                       .replace("\n", "\\n"),
               variables.entrySet()
@@ -676,11 +676,39 @@ public class Disqus2Giscus {
       var responseBodyHandler = BodyHandlers.ofString();
 
       try {
+        // Handle global ratelimit
         var response = httpClient.send(request, responseBodyHandler);
         while (response.statusCode() == 429) {
           waitIfRateLimited(response.headers().firstValueAsLong("x-ratelimit-reset").orElseThrow());
           response = httpClient.send(request, responseBodyHandler);
         }
+        String body = response.body();
+
+        // TODO rateLimit response not returned due to not available within mutation
+        // // Handle qraphql rate limit
+        // // https://docs.github.com/en/graphql/overview/resource-limitations#rate-limit
+        // // lame json parser, assumes the output is minified
+        // while (body.contains("\"remaining\":0")) {
+        //   var matcher = Pattern.compile("\"resetAt\":\"(.*?)\"}").matcher(body);
+        //   if (!matcher.find()) {
+        //     System.err.println("Couldn't find 'resetAt' : " + body);
+        //     System.exit(1);
+        //   }
+        //   waitIfRateLimited(Instant.parse(matcher.group(1)).getEpochSecond());
+        //   response = httpClient.send(request, responseBodyHandler);
+        //   body = response.body();
+        // }
+
+        // Handle undocumented resource (like issues or discussions) rate limiting to combat abuse
+        // see https://github.com/cli/cli/issues/4801
+        // lame json parser, assumes the output is minified
+        while (response.statusCode() == 200 && body.contains("\"errors\":") && body.contains("\"type\":\"UNPROCESSABLE\"") && body.contains("\"was submitted too quickly\"")) {
+          System.out.println("Rate limit on resource creation, waiting 60 seconds, see https://github.com/cli/cli/issues/4801");
+          TimeUnit.SECONDS.sleep(60);
+          response = httpClient.send(request, responseBodyHandler);
+          body = response.body();
+        }
+
         if (response.statusCode() == 400) {
           System.err.printf(
                   """
@@ -689,7 +717,7 @@ public class Disqus2Giscus {
                   Request: %s
                   """,
                   response.statusCode(),
-                  response.body(),
+                  body,
                   json
           );
           System.exit(1);
@@ -702,12 +730,12 @@ public class Disqus2Giscus {
                   Bad request: %d %s%n
                   """,
                   response.statusCode(),
-                  response.body()
+                  body
           );
           System.exit(1);
         }
 
-        return response.body();
+        return body;
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       } catch (InterruptedException e) {
@@ -748,7 +776,8 @@ public class Disqus2Giscus {
             """
             Tool to migrate as best effort Disqus comment to GitHub Discussions.
             Works best with 'jbang' (https://www.jbang.dev), but can be run with regular 'java' as well.
-            
+            Note GitHub as undocumented resource rate limiting, on issues, discussions, which means the only option is to wait as long as necessary on large batch.
+                        
             Usage:
               env GITHUB_TOKEN=... jbang Disqus2Giscus.java -f my-forum -e export.xml -r ghUser/repo -c "Discussion Category" -m pathname --host https://examle.com -u author-mapping.csv -o "@bric3"
               env GITHUB_TOKEN=... java Disqus2Giscus.java -f my-forum -e export.xml -r ghUser/repo -c "Discussion Category" -m pathname --host https://examle.com -u author-mapping.csv -o "@bric3"
