@@ -149,7 +149,7 @@ public class Disqus2Giscus {
 
 
     // check repo
-    if (!repo.matches("\\w+/\\w+")) {
+    if (!repo.matches("(?:[a-z\\d]+-)*[a-z\\d]+/(?:[a-z\\d]+[.-])*[a-z\\d]+")) {
       System.err.println("Invalid Github repo name " + repo);
       System.exit(1);
     }
