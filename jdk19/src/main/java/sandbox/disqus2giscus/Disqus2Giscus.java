@@ -28,8 +28,12 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -37,6 +41,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -58,6 +63,7 @@ public class Disqus2Giscus {
   private String me;
   private boolean convertToMarkdown = true;
   private boolean extractAuthors = false;
+  private boolean strictMatching = false;
   private String mapping = "";
   private String targetCategoryName = "";
   private Path userMappingFile;
@@ -89,6 +95,7 @@ public class Disqus2Giscus {
         case "-t", "--token" -> githubToken = readOptionValue(++argIdx, arg, args);
         case "-m", "--mapping" -> mapping = readOptionValue(++argIdx, arg, args);
         case "-o", "--owner-account" -> me = readOptionValue(++argIdx, arg, args);
+        case "-s", "--strict", "--no-strict" -> strictMatching = !arg.startsWith("--no");
         case "--host" -> {
           host = readOptionValue(++argIdx, arg, args);
           if (!host.endsWith("/")) {
@@ -179,7 +186,7 @@ public class Disqus2Giscus {
     System.out.printf(
             """
             Export file : %s
-            Forum       : %s      
+            Forum       : %s
             """,
             exportFile,
             xpath.evaluate("/disqus/category[1]/forum", document)
@@ -300,24 +307,49 @@ public class Disqus2Giscus {
       return stringBuilder.length() == 0 ? msg : stringBuilder.toString();
     };
 
-    int migratedComments = 0;
+    // https://github.com/giscus/giscus/blob/main/ADVANCED-USAGE.md#data-strict
+    Function<String, String> hashWhenStrict = mappingValue -> {
+      if(!strictMatching) return "";
+      try {
+        var digest = MessageDigest.getInstance("SHA-1").digest(mappingValue.getBytes(StandardCharsets.UTF_8));
+        var hash = HexFormat.of().withLowerCase().formatHex(digest);
+
+        return "<!-- sha1: " + hash + " -->";
+      } catch (NoSuchAlgorithmException e) {
+        System.err.println("SHA-1 algorithm not available");
+        System.exit(1);
+        return ""; // satisfy missing return statement
+      }
+    };
+
+    int totalMigratedComments = 0;
     for (DisqusThread t : disqusThreads) {
+      var pathname = t.link.replaceFirst("^" + host, "");
+      var mappingValue = switch (mapping) {
+        case "title", "og:title" -> t.title();
+        case "url" -> t.link();
+        case "pathname" -> pathname;
+        default -> throw new IllegalStateException("Unexpected value: " + mapping);
+      };
+      System.out.println("Migrating discussions for \"" + t.title() + "\" (" + t.link + ")");
       var discussionId = gh.createDiscussion(
               repoId,
               discussionCategoryId,
-              switch (mapping) {
-                case "title", "og:title" -> t.title();
-                case "url" -> t.link();
-                case "pathname" -> t.link.replaceFirst("^" + host, "");
-                default -> throw new IllegalStateException("Unexpected value: " + mapping);
-              },
+              mappingValue,
               """
+              # %s
               %s
               %s
-              """.formatted(t.title, t.link)
+              %s
+              """.formatted(
+                      pathname,
+                      t.title,
+                      t.link,
+                      hashWhenStrict.apply(mappingValue)
+              )
       );
 
-      migratedComments += visitChildNodes(
+      var migratedComments = visitChildNodes(
               discussionsIndex,
               t.id,
               null,  // first level comment are not replying
@@ -356,6 +388,8 @@ public class Disqus2Giscus {
                 );
               }
       ).count();
+      System.out.printf("Migrated %d comments%n", migratedComments);
+      totalMigratedComments += migratedComments;
     }
 
     System.out.printf(
@@ -366,11 +400,11 @@ public class Disqus2Giscus {
             """,
             repo,
             disqusThreads.size(),
-            migratedComments
+            totalMigratedComments
     );
     System.out.printf(
             """
-            Confifgure Giscus with:
+            Check the configuration matches what was returned by https://giscus.app/
                         
             <script src="https://giscus.app/client.js"
                     data-repo="%s"
@@ -378,7 +412,7 @@ public class Disqus2Giscus {
                     data-category="%s"
                     data-category-id="%s"
                     data-mapping="%s"
-                    data-strict="0"
+                    data-strict="%s"
                     data-reactions-enabled="1"
                     data-emit-metadata="0"
                     data-input-position="top"
@@ -393,7 +427,8 @@ public class Disqus2Giscus {
             repoId,
             targetCategoryName,
             discussionCategoryId,
-            mapping
+            mapping,
+            strictMatching
     );
   }
 
@@ -483,7 +518,7 @@ public class Disqus2Giscus {
                     }
                   }
                 }
-              }           
+              }
               """,
               Map.of("owner", owner, "name", repoName)
       );
@@ -539,8 +574,6 @@ public class Disqus2Giscus {
               """,
               Map.of("repoId", repoId, "categoryId", discussionCategoryId, "title", title, "body", body)
       );
-      System.out.println(payload);
-
 
       // lame json parser, assumes the output is minified
       // https://docs.github.com/en/graphql/guides/using-the-graphql-api-for-discussions#discussion
@@ -590,7 +623,6 @@ public class Disqus2Giscus {
                 Map.of("discussionId", discussionId, "body", body, "replyToId", replyToId)
         );
       }
-      System.out.println(payload);
 
       // lame json parser, assumes the output is minified
       // https://docs.github.com/en/graphql/guides/using-the-graphql-api-for-discussions#discussioncomment
@@ -724,6 +756,8 @@ public class Disqus2Giscus {
             Author extraction
               java Disqus2Giscus.java -f my-forum -e export.xml -a
 
+            Make sure the blog is ready and that https://giscus.app/ is installed.
+
             Options:
                 -f, --forum-name <forum>             Disqus forum name
                 -e, --export-file <file>             Disqus export file (From https://disqus.com/admin/discussions/export/)
@@ -733,7 +767,7 @@ public class Disqus2Giscus {
                     --host <host>                    Site host, used for mapping mode 'pathname',
                                                      removes the host from the link in exported
                                                      comments.
-                -a, --extract-authors                Extract author names from Disqus export file                                  
+                -a, --extract-authors                Extract author names from Disqus export file
                 -u, --user-mapping-file <file>       [Optional] Author mapping file, CSV format:
                                                      Disqus author name,GitHub user
                 -o, --owner-account <owner>          [Optional] Discus or GitHub identifier
@@ -742,6 +776,9 @@ public class Disqus2Giscus {
                                                      (Requires running with 'jbang' or having 'flexmark-all'
                                                      dependency on the class path)
                                                      (default: true)
+                -s, --[no-]strict                    [Optional] Toggle giscus strict matching mode, this computes
+                                                     a hash of the blog title to match the discussion.
+                                                     (default: false)
                 -t, --token <token>                  Alternative way to pass the GitHub token
                 -n, --dry-run                        Dry run, do not create discussions on Github
                 -h, --help                           Show this help
