@@ -776,8 +776,8 @@ public class Disqus2Giscus {
             Note GitHub as undocumented resource rate limiting, on issues, discussions, which means the only option is to wait as long as necessary on large batch.
                         
             Usage:
-              env GITHUB_TOKEN=... jbang Disqus2Giscus.java -f my-forum -e export.xml -r ghUser/repo -c "Discussion Category" -m pathname --host https://examle.com -u author-mapping.csv -o "@bric3"
-              env GITHUB_TOKEN=... java Disqus2Giscus.java -f my-forum -e export.xml -r ghUser/repo -c "Discussion Category" -m pathname --host https://examle.com -u author-mapping.csv -o "@bric3"
+              env GITHUB_TOKEN=... jbang Disqus2Giscus.java -f my-forum -e export.xml -r ghUser/repo -c "Discussion Category" -m pathname --host https://example.com -u author-mapping.csv -o "@bric3"
+              env GITHUB_TOKEN=... java Disqus2Giscus.java -f my-forum -e export.xml -r ghUser/repo -c "Discussion Category" -m pathname --host https://example.com -u author-mapping.csv -o "@bric3"
 
             Author extraction
               java Disqus2Giscus.java -f my-forum -e export.xml -a
