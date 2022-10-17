@@ -13,6 +13,7 @@
 
 package sandbox.disqus2giscus;
 
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -243,6 +244,19 @@ public class Disqus2Giscus {
       System.exit(1);
     }
 
+    // Perform the actual task, either author extraction, or the migration
+    if (extractAuthors) {
+      Stream.concat(
+              disqusThreads.stream().map(DisqusThread::author),
+              disqusPosts.values().stream().map(DisqusPost::author)
+      ).map(Author::name).distinct().sorted().forEach(System.out::println);
+    } else {
+      migrate(disqusThreads, buildDiscussionHashTree(disqusPosts));
+    }
+  }
+
+  @NotNull
+  private static LinkedHashMap<String, TreeSet<DisqusPost>> buildDiscussionHashTree(Map<String, DisqusPost> disqusPosts) {
     // Rebuild ~~hierarchic~~ discussions in a "hash tree", actually GH Discussions
     // do not go beyond 2 levels (thread (L0), comment (L1), replies (L2))
     // Structure : [post-id | thread-id, list { post-id, post-id, ... }]
@@ -267,30 +281,14 @@ public class Disqus2Giscus {
         discussionsIndex.computeIfAbsent(post.threadId, newChildPosts).add(post);
       }
     });
-
-    if (extractAuthors) {
-      Stream.concat(
-              disqusThreads.stream().map(DisqusThread::author),
-              disqusPosts.values().stream().map(DisqusPost::author)
-      ).map(Author::name).distinct().sorted().forEach(System.out::println);
-    } else {
-      migrate(disqusThreads, discussionsIndex);
-    }
+    return discussionsIndex;
   }
 
   private void migrate(
           TreeSet<DisqusThread> disqusThreads,
           LinkedHashMap<String, TreeSet<DisqusPost>> discussionsIndex
   ) throws IOException {
-    // // t: 8296439444
-    // // p: 5928880724
-    // var tid = "8296439444";
-    // flattenChildNodes(discussionsIndex, tid, 0).forEach(pair -> {
-    //   var indent = "> ".repeat(pair.a);
-    //   System.out.println("> " + indent + pair.b);
-    // });
-
-    var authorMapping = readCsv();
+    var authorMapping = readCsv(userMappingFile);
     var authorByIds = Author.authorMap.values()
                                       .stream()
                                       .filter(Predicate.not(Author::anonymous))
@@ -408,7 +406,8 @@ public class Disqus2Giscus {
     );
     System.out.printf(
             """
-            Check the configuration matches what was returned by https://giscus.app/
+            Check the following configuration attributes matches what was returned by https://giscus.app/ for discussions to be found: 'data-repo', 'data-repo-id', 'data-category', 'data-category-id', 'data-mapping', and 'data-strict'.
+            The other attributes can differ as the affect appearance or features only.
                         
             <script src="https://giscus.app/client.js"
                     data-repo="%s"
@@ -436,12 +435,12 @@ public class Disqus2Giscus {
     );
   }
 
-  private Map<String, String> readCsv() throws IOException {
-    if (userMappingFile == null) {
+  private static Map<String, String> readCsv(Path file) throws IOException {
+    if (file == null) {
       return Map.of();
     }
-    try (var lines = Files.lines(userMappingFile, StandardCharsets.UTF_8)) {
-      return lines.filter(l -> !l.isBlank()).map(l -> l.split(",")).collect(Collectors.toMap(a -> a[0].trim(), a -> a[1].trim()));
+    try (var lines = Files.lines(file, StandardCharsets.UTF_8)) {
+      return lines.filter(l -> !l.isBlank()).map(l -> l.split(",")).collect(toMap(a -> a[0].trim(), a -> a[1].trim()));
     }
   }
 
@@ -461,13 +460,6 @@ public class Disqus2Giscus {
               visitChildNodes(index, childPost.id, r, visitor)
       );
     });
-  }
-
-  private static Stream<Pair<Integer, DisqusPost>> flattenChildNodes(Map<String, TreeSet<DisqusPost>> index, String id, int level) {
-    return index.get(id).stream().flatMap(childPost -> Stream.concat(
-            Stream.of(new Pair<>(level, childPost)),
-            flattenChildNodes(index, childPost.id, level + 1)
-    ));
   }
 
   private static class GitHub {
