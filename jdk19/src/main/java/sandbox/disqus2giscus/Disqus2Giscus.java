@@ -1,3 +1,12 @@
+/*
+ * DiscusToGiscus.java
+ *
+ * Copyright (c) 2021,today - Brice Dutheil <brice.dutheil@gmail.com>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 ///usr/bin/env jbang "$0" ; exit $?
 //JAVA 19
 //DEPS com.vladsch.flexmark:flexmark-all:0.64.0
@@ -138,13 +147,9 @@ public class Disqus2Giscus {
       System.exit(1);
     }
 
-    if (convertToMarkdown) {
-      try {
-        Class.forName("com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter");
-      } catch (ClassNotFoundException e) {
-        System.err.println("To use convert HTML comment to markdown, you must add the flexmark-all dependency to your classpath or run it with jbang, or disable the conversion with '--no-convert-to-markdown' option");
-        System.exit(1);
-      }
+    if (convertToMarkdown && !HtmlConverter.isAvailable()) {
+      System.err.println("To use convert HTML comment to markdown, you must add the flexmark-all dependency to your classpath or run it with jbang, or disable the conversion with '--no-convert-to-markdown' option");
+      System.exit(1);
     }
 
 
@@ -772,7 +777,7 @@ public class Disqus2Giscus {
   }
 
   private static void usage() {
-    System.out.println(
+    System.out.printf(
             """
             Tool to migrate as best effort Disqus comment to GitHub Discussions.
             Works best with 'jbang' (https://www.jbang.dev), but can be run with regular 'java' as well.
@@ -786,6 +791,8 @@ public class Disqus2Giscus {
               java Disqus2Giscus.java -f my-forum -e export.xml -a
 
             Make sure the blog is ready and that https://giscus.app/ is installed.
+            
+            %s
 
             Options:
                 -f, --forum-name <forum>             Disqus forum name
@@ -811,7 +818,8 @@ public class Disqus2Giscus {
                 -t, --token <token>                  Alternative way to pass the GitHub token
                 -n, --dry-run                        Dry run, do not create discussions on Github
                 -h, --help                           Show this help
-            """
+            """,
+            HtmlConverter.isAvailable() ? "HTML to Markdown available." : "HTML to Markdown not available, please run with 'jbang' or add 'flexmark-all' dependency to the class path."
     );
     System.exit(0);
   }
@@ -912,6 +920,15 @@ public class Disqus2Giscus {
           throw new RuntimeException(e);
         }
 
+      }
+    }
+
+    public static boolean isAvailable() {
+      try {
+        Class.forName("com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter");
+        return true;
+      } catch (ClassNotFoundException e) {
+        return false;
       }
     }
 
