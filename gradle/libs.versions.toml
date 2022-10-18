@@ -11,7 +11,7 @@
 okhttp =  "4.10.0"
 bytebuddy = "1.12.18"
 junit-jupiter =  "5.9.1"
-graalvm = "22.2.0"
+graalvm = "22.3.0"
 
 
 flightRecorder = "8.2.1"
