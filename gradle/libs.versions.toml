@@ -34,7 +34,7 @@ assertj = { module = "org.assertj:assertj-core", version = "3.23.1" }
 testcontainers = { module = "org.testcontainers:testcontainers", version = "1.17.5" }
 
 jna = { module = "net.java.dev.jna:jna", version = "5.12.1" }
-jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.12" }
+jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.13" }
 
 flightRecorder = { module = "org.openjdk.jmc:flightrecorder", version.ref = "flightRecorder" }
 flightRecorder-writer = { module = "org.openjdk.jmc:flightrecorder.writer", version.ref = "flightRecorder" }
