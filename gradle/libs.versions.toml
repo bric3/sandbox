@@ -14,7 +14,7 @@ junit-jupiter =  "5.9.1"
 graalvm = "22.3.0"
 
 
-flightRecorder = "8.2.1"
+flightRecorder = "8.3.0"
 
 
 [libraries]
