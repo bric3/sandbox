@@ -30,7 +30,7 @@ dependencies {
   implementation("com.muquit.libsodiumjna:libsodium-jna:1.0.4")
 
   // libsodium with JNR
-  implementation("org.apache.tuweni:tuweni-crypto:2.3.0")
+  implementation("org.apache.tuweni:tuweni-crypto:2.3.1")
 
   implementation("org.apache.commons:commons-lang3:3.12.0")
 }
