@@ -15,9 +15,19 @@ plugins {
   // `xctest` to support building and running test executables (linux) or bundles (macos)
 }
 
+// > No tool chain has support to build Swift for host operating system 'Mac OS X' architecture 'x86-64':
+//     - Tool chain 'swiftc' (Swift Compiler):
+//         - Don't know how to build for host operating system 'Mac OS X' architecture 'x86-64'.
+
 library {
-  linkage.set(listOf(Linkage.SHARED, Linkage.STATIC))
-  targetMachines.set(listOf(machines.linux.x86_64, machines.macOS.x86_64))
+  linkage.set(listOf(
+    Linkage.SHARED,
+    Linkage.STATIC
+  ))
+  targetMachines.set(listOf(
+    machines.linux,
+    machines.macOS,
+  ))
   module.set("TouchIdDemoLib")
 
   // Set compiler flags here due to bug

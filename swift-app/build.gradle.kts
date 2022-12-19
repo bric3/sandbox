@@ -41,7 +41,7 @@ tasks.withType(SwiftCompile::class.java).configureEach {
 
 application {
   targetMachines.set(listOf(
-          machines.macOS.x86_64,
-          machines.linux.x86_64
+          machines.macOS,
+          machines.linux,
   ))
 }
