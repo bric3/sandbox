@@ -15,6 +15,7 @@ dependencies {
 
   implementation(libs.bundles.bytebuddy)
   implementation(libs.bundles.okhttp)
+  implementation(libs.bundles.graal.js)
   implementation(libs.conscrypt)
   implementation(libs.jna)
   implementation(libs.jnr.ffi)
