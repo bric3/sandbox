@@ -43,6 +43,9 @@ pluginManagement {
   }
 }
 
+plugins {
+  id("org.gradle.toolchains.foojay-resolver-convention") version("0.4.0")
+}
 
 // Doc https://docs.gradle.org/7.2/userguide/platforms.html
 // API https://docs.gradle.org/7.2/javadoc/org/gradle/api/initialization/dsl/VersionCatalogBuilder.html
@@ -54,7 +57,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 rootProject.name = "sandbox"
 
 include("jmh-stuff", "jmh-panama")
-include("jdk11", "jdk16", "jdk17", "jdk18", "jdk19")
+include("jdk11", "jdk17", "jdk18", "jdk19")
 include("cmem", "swift-app", "swift-library")
 include("jmh-panama")
 include("graal:run-with-graal", "graal:run-with-libgraal")

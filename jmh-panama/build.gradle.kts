@@ -10,7 +10,7 @@
 
 plugins {
   id("java")
-  id("me.champeau.jmh") version "0.6.8"
+  alias(libs.plugins.jmh)
 }
 
 repositories {
@@ -58,7 +58,7 @@ jmh {
   ))
 
   jvm.set(launcher.executablePath.asFile.absolutePath)
-  jmhVersion.set("1.33")
+  jmhVersion.set(libs.versions.jmh)
 }
 
 tasks {

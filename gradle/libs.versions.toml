@@ -16,6 +16,7 @@ flexmark = "0.64.0"
 
 flightRecorder = "8.3.0"
 
+jmh = "1.36"
 
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
@@ -48,6 +49,9 @@ graal-js = { module = "org.graalvm.js:js", version.ref = "graalvm" }
 graal-js-scriptengine = { module = "org.graalvm.js:js-scriptengine", version.ref = "graalvm" }
 graal-js-chromeinspector = { module = "org.graalvm.tools:chromeinspector", version.ref="graalvm" }
 
+# Used to help mend compute the JMH version
+jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
+
 [bundles]
 okhttp = ['okhttp', 'okhttp-tls', 'okhttp-dnsoverhttps', 'okhttp-logging']
 bytebuddy = ['bytebuddy', 'bytebuddy-agent']
@@ -56,4 +60,5 @@ flightRecorder = ['flightRecorder', 'flightRecorder-writer', 'flightRecorder-rul
 graal-js = ["graal-js", "graal-js-scriptengine", "graal-js-chromeinspector"]
 
 [plugins]
-download = { id = "de.undercouch.download", version = "5.3.0" }
+download = { id = "de.undercouch.download", version = "5.3.1" }
+jmh = { id = "me.champeau.jmh", version = "0.6.8" }

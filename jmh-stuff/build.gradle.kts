@@ -9,8 +9,8 @@
  */
 
 plugins {
-  id("me.champeau.jmh") version "0.6.8"
   id("java")
+  alias(libs.plugins.jmh)
 }
 
 repositories {
@@ -26,6 +26,7 @@ jmh {
   fork.set(1) // -f 1
   benchmarkMode.set(listOf("avgt")) // -bm avgt
   timeUnit.set("ns") // -tu ns
+  jmhVersion.set(libs.versions.jmh)
 }
 
 
