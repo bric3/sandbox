@@ -1,27 +1,10 @@
-/*
- * sandbox
- *
- * Copyright (c) 2021,today - Brice Dutheil <brice.dutheil@gmail.com>
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/.
- */
-
-
 package sandbox;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-/**
- * Inner classes can now have static fields
- *
- * See
- * - https://twitter.com/sundararajan_a/status/1439227184229482498?s=21
- * - https://twitter.com/sundararajan_a/status/1439433889538187270?s=21
- */
+@Since("16") // copied from jdk16
 public class StaticFieldInnerClass {
 
   public static void main(String[] args) {
@@ -63,7 +46,7 @@ public class StaticFieldInnerClass {
 
   private void isValidEmail(String str) {
     class EmailPattern {
-      static final Pattern pattern = Pattern.compile("^[^\s@]+@[^\s@]+\\.[^\s@]+$");
+      static final Pattern pattern = Pattern.compile("^[^ @]+@[^ @]+\\.[^ @]+$");
     }
     System.out.printf("%s -> %s%n", str, str != null && EmailPattern.pattern.matcher(str).matches());
   }
