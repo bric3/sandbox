@@ -61,8 +61,6 @@ public class PegJs implements AutoCloseable {
   private final Value peggyObject;
 
   public static void main(String[] args) throws ScriptException {
-
-
     try (var pegJs = PegJs.init()) {
       String grammar = "start = ('a' / 'b')+";
       var parser = pegJs.generate(grammar, "basic-example", true);
@@ -126,7 +124,7 @@ public class PegJs implements AutoCloseable {
             IOSupplier.uncheckIO(
                     () -> Source.newBuilder(JavaScriptLanguage.ID,
                                             Objects.requireNonNullElse(
-                                                    PegJs.class.getResource("/peg.min.js"),
+                                                    PegJs.class.getResource("/peggy.min.js"),
                                                     // ⚠️ No SRI verification
                                                     new URL("https://cdn.jsdelivr.net/npm/peggy@2.0.1/browser/peggy.min.js")
                                             ))
@@ -443,7 +441,7 @@ public class PegJs implements AutoCloseable {
         // https://stackoverflow.com/questions/68762814/how-to-add-sourcemaps-to-graalvm-js-inspection
         // need org.graalvm.tools:chromeinspector dep
         var port = "4242";
-        var path = java.util.UUID.randomUUID().toString();
+        var path = "peggyjs";
 
         engineBuilder.option("inspect", port)
                      .option("inspect.Path", path)
