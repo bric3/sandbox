@@ -5,7 +5,7 @@ indent_size = 2
 indent_style = space
 insert_final_newline = false
 max_line_length = 120
-tab_width = 4
+tab_width = 2
 ij_continuation_indent_size = 8
 ij_formatter_off_tag = @formatter:off
 ij_formatter_on_tag = @formatter:on
@@ -70,8 +70,6 @@ ij_less_use_double_quotes = true
 ij_less_value_alignment = 0
 
 [*.proto]
-indent_size = 2
-tab_width = 2
 ij_continuation_indent_size = 4
 ij_visual_guides = none
 ij_protobuf_keep_blank_lines_in_code = 2
@@ -108,7 +106,6 @@ ij_rust_preserve_punctuation = false
 ij_rust_spaces_around_assoc_type_binding = false
 
 [*.sass]
-indent_size = 2
 ij_visual_guides = none
 ij_sass_align_closing_brace_with_properties = false
 ij_sass_blank_lines_around_nested_selector = 1
@@ -155,8 +152,6 @@ ij_scss_use_double_quotes = true
 ij_scss_value_alignment = 0
 
 [*.vue]
-indent_size = 2
-tab_width = 2
 ij_continuation_indent_size = 4
 ij_visual_guides = none
 ij_vue_indent_children_of_top_level = template
@@ -807,7 +802,6 @@ ij_visual_guides = none
 ij_http request_call_parameters_wrap = normal
 
 [{*.java,*.jbang}]
-indent_size = 2
 ij_visual_guides = none
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
@@ -1191,7 +1185,6 @@ ij_markdown_wrap_text_inside_blockquotes = true
 ij_visual_guides = none
 
 [{*.pb,*.textproto}]
-indent_size = 2
 tab_width = 2
 ij_continuation_indent_size = 4
 ij_visual_guides = none
@@ -1221,7 +1214,6 @@ ij_visual_guides = none
 ij_toml_keep_indents_on_empty_lines = false
 
 [{*.yaml,*.yml}]
-indent_size = 2
 ij_visual_guides = none
 ij_yaml_align_values_properties = do_not_align
 ij_yaml_autoinsert_sequence_marker = true
