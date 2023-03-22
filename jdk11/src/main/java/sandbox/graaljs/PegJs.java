@@ -15,6 +15,8 @@
 
 package sandbox.graaljs;
 
+import com.oracle.truffle.api.debug.Breakpoint;
+import com.oracle.truffle.api.debug.Debugger;
 import com.oracle.truffle.js.lang.JavaScriptLanguage;
 import com.oracle.truffle.js.runtime.JSContextOptions;
 import org.graalvm.polyglot.Context;
@@ -46,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 // NOTE
 // pegjs is dead : https://github.com/pegjs/pegjs/issues/667 (See s*storm https://github.com/pegjs/pegjs/issues/639)
@@ -118,7 +121,7 @@ public class PegJs implements AutoCloseable {
     jsRunner = new JsRunner();
 
     // https://peggyjs.org/documentation
-    // Load library is it was in a <script> element
+    // Load library is if it was in a <script> element
 
     jsRunner.run(
             IOSupplier.uncheckIO(
@@ -407,8 +410,29 @@ public class PegJs implements AutoCloseable {
       }
     }
 
+    public void debugAt() {
+      String name = "parser-generated-source";
+      var engine = ctx.getEngine();
+      var debugger = Debugger.find(engine);
 
-    private Context makeGraalvmPolyglotContext(OutputStream out, OutputStream err) {
+      Map<String, Source> sources = engine.getCachedSources().stream().collect(Collectors.toMap(
+              Source::getName,
+              Function.identity()
+      ));
+      var source = sources.get(name);
+      if (source == null) {
+        throw new IllegalStateException("no sources found with name: '" + name + "'");
+      }
+
+      var installed = debugger.install(Breakpoint.newBuilder(source.getURI()).lineIs(1).build());
+
+
+    }
+
+    private static Context makeGraalvmPolyglotContext(
+            OutputStream out,
+            OutputStream err
+    ) {
       return Context.newBuilder(JavaScriptLanguage.ID)
                     .engine(makePolyglotEngine().build())
                     .out(out)
@@ -428,7 +452,7 @@ public class PegJs implements AutoCloseable {
     }
 
     @NotNull
-    private Engine.Builder makePolyglotEngine() {
+    private static Engine.Builder makePolyglotEngine() {
       // When graalvm is used as dependency only the interpreter mode is available
       // Indeed without using UseJVMCICompiler and patching the module path (--module-path --upgrade-module-path)
       // graalvm cannot produce compiled code, and runs in "interpreter only"
@@ -451,11 +475,11 @@ public class PegJs implements AutoCloseable {
       return engineBuilder;
     }
 
-    private HostAccess getHostAccess() {
+    private static HostAccess getHostAccess() {
       return HostAccess.EXPLICIT;
     }
 
-    private boolean isDebugging() {
+    private static boolean isDebugging() {
       return ProcessHandle.current()
                           .info()
                           .arguments()
@@ -463,12 +487,13 @@ public class PegJs implements AutoCloseable {
                           .orElse(false);
     }
 
-    private boolean isEnablingChromeDebugger() {
-      return false;
+    private static boolean isEnablingChromeDebugger() {
+      return true;
     }
 
     @Override
     public void close() {
+      ctx.getEngine().close();
       ctx.close();
     }
   }
