@@ -18,6 +18,9 @@ flightRecorder = "8.3.0"
 
 jmh = "1.36"
 
+kotlin = "1.8.10"
+kotlinCoroutines = "1.5.0"
+
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
 guava = { module = "com.google.guava:guava", version = "31.1-jre" }

@@ -56,6 +56,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "sandbox"
 
+include("kotlin")
 include("jmh-stuff", "jmh-panama")
 include("jdk11", "jdk17", "jdk18", "jdk19")
 include("cmem", "swift-app", "swift-library")
