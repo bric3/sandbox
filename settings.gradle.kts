@@ -63,6 +63,7 @@ include("native:cmem", "native:dlopen")
 include("swift-app", "swift-library")
 include("jmh-panama")
 include("graal:run-with-graal", "graal:run-with-libgraal")
+include("swing")
 
 val os = DefaultNativePlatform.getCurrentOperatingSystem()
 if (os.isMacOsX) {
