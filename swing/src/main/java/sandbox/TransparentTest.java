@@ -224,7 +224,7 @@ public class TransparentTest {
                     rootPane.printAll(g2d);
                     g2d.dispose();
 
-                    background = GlowEffectFactory.generateBlur(img, 40);
+                    background = ImageEffects.generateBlur(img, 40);
                 }
             }
             super.setVisible(visible);

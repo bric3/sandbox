@@ -1,3 +1,12 @@
+/*
+ * sandbox
+ *
+ * Copyright (c) 2021,today - Brice Dutheil <brice.dutheil@gmail.com>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 @file:Suppress("unused")
 
 package sandbox
@@ -7,8 +16,6 @@ import java.text.DecimalFormatSymbols
 import java.util.concurrent.TimeUnit
 import kotlin.math.log2
 import kotlin.math.pow
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 
 fun Long.formatMs(): String {
     fun normalize(number: Long): String = String.format("%02d", number)

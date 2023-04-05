@@ -1,5 +1,3 @@
-import java.util.*
-
 /*
  * sandbox
  *
@@ -9,6 +7,8 @@ import java.util.*
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
+import java.util.*
+
 plugins {
   alias(libs.plugins.download)
 }

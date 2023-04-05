@@ -1,5 +1,13 @@
 package sandbox;
-
+/*
+ * sandbox
+ *
+ * Copyright (c) 2021,today - Brice Dutheil <brice.dutheil@gmail.com>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -11,7 +19,6 @@ import java.util.Queue;
 import java.util.Random;
 
 public class Baubles extends JPanel implements ActionListener {
-
     private static final int MAX = 64;
     private static final String TITLE = "Baubles";
     private static final Random rnd = new Random();

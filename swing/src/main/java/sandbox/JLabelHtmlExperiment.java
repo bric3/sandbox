@@ -50,5 +50,4 @@ public class JLabelHtmlExperiment {
       jFrame.setVisible(true);
     });
   }
-
 }
