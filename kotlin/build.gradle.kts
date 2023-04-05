@@ -28,7 +28,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.kotlinCoroutines.get()}")
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("app.cash.turbine:turbine:0.12.1")
+    testImplementation("app.cash.turbine:turbine:0.12.3")
 }
 
 tasks.test {
