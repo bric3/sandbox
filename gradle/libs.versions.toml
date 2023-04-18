@@ -64,4 +64,4 @@ graal-js = ["graal-js", "graal-js-scriptengine", "graal-js-chromeinspector"]
 
 [plugins]
 download = { id = "de.undercouch.download", version = "5.4.0" }
-jmh = { id = "me.champeau.jmh", version = "0.7.0" }
+jmh = { id = "me.champeau.jmh", version = "0.7.1" }
