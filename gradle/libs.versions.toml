@@ -14,7 +14,7 @@ junit-jupiter =  "5.9.2"
 graalvm = "22.3.2"
 flexmark = "0.64.0"
 
-flightRecorder = "8.3.0"
+flightRecorder = "8.3.1"
 
 jmh = "1.36"
 
