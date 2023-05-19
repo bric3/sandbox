@@ -12,7 +12,7 @@ okhttp =  "4.11.0"
 bytebuddy = "1.14.4"
 junit-jupiter =  "5.9.3"
 graalvm = "22.3.2"
-flexmark = "0.64.2"
+flexmark = "0.64.6"
 
 flightRecorder = "8.3.1"
 
