@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class NumberCruncher(
+    private val calculationTime: Long,
     private val coroutineScope: CoroutineScope,
     private val dispatcherProvider: () -> CoroutineDispatcher
 ) {
@@ -20,7 +21,7 @@ class NumberCruncher(
         // 👇 using dispatcher provider avoids hardcoding dispatcher, allowing for us to use a `TestDispatcher` while testing
         coroutineScope.launch(dispatcherProvider.invoke()) {
             val result = longRunningOperation()
-            delay(5_000)
+            delay(calculationTime)
             _results.emit(result)
         }
     }

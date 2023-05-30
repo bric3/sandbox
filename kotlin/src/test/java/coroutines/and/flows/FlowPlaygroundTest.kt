@@ -8,22 +8,25 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.milliseconds
 
-class NameCruncherTest {
+class UnconfinedTestDispatcherTest {
     @Test
-    fun name() = runTest {
+    fun `should not wait for te whole delay when using UnconfinedTestDispatcher dispatcher`() = runTest {
+        val start = System.currentTimeMillis()
         // UnconfinedTestDispatcher allow to skip the delay operator
-        val numberCruncher = NumberCruncher(this, { UnconfinedTestDispatcher(testScheduler) })
+        val numberCruncher = NumberCruncher(10_000, this, { UnconfinedTestDispatcher(testScheduler) })
         numberCruncher.calculate()
-        assertEquals(0, numberCruncher.results().first())
+        val ignored = numberCruncher.results().first()
+        assertTrue(System.currentTimeMillis() - start < 1_000) { "getting first result should not wait for te whole delay when using UnconfinedTestDispatcher dispatcher" }
     }
 }
 
 class MyEmitterTest {
     @Test
-    fun usingDispatcher() = runTest(dispatchTimeoutMs = 500) {
+    fun usingDispatcher() = runTest(timeout = 500.milliseconds) {
         val numberCruncher = MyEmitter()
 
         var c = 0
