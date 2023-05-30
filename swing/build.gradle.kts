@@ -12,6 +12,10 @@ plugins {
     kotlin("jvm") version "1.8.21"
 }
 
+kotlin {
+    jvmToolchain(19) // kotlin 1.8.21 does not support JDK 20
+}
+
 dependencies {
     implementation("com.jhlabs:filters:2.0.235-1")
 }

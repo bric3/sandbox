@@ -13,6 +13,10 @@ plugins {
     kotlin("jvm") version "1.8.21"
 }
 
+kotlin {
+    jvmToolchain(19) // kotlin 1.8.21 does not support JDK 20
+}
+
 repositories {
     mavenCentral()
 }
