@@ -18,7 +18,7 @@ flightRecorder = "8.3.1"
 
 jmh = "1.36"
 
-kotlin = "1.8.10"
+kotlin = "1.8.21"
 kotlinCoroutines = "1.5.0"
 
 [libraries]
@@ -54,6 +54,10 @@ graal-js-chromeinspector = { module = "org.graalvm.tools:chromeinspector", versi
 
 # Used to help mend compute the JMH version
 jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
+
+
+# Gradle plugins declared in build conventions
+gradleplugin-kotlin-jvm = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
 [bundles]
 okhttp = ['okhttp', 'okhttp-tls', 'okhttp-dnsoverhttps', 'okhttp-logging']

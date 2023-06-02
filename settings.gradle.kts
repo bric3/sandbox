@@ -52,10 +52,9 @@ plugins {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-
-
 rootProject.name = "sandbox"
 
+includeBuild("conventions")
 include("kotlin")
 include("jmh-stuff", "jmh-panama")
 include("jdk11", "jdk17", "jdk18", "jdk19", "jdk20")
@@ -64,6 +63,7 @@ include("swift-app", "swift-library")
 include("jmh-panama")
 include("graal:run-with-graal", "graal:run-with-libgraal")
 include("swing")
+include("sa-agent")
 
 val os = DefaultNativePlatform.getCurrentOperatingSystem()
 if (os.isMacOsX) {
