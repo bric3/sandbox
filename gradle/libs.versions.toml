@@ -9,7 +9,7 @@
 #
 [versions]
 okhttp =  "4.11.0"
-bytebuddy = "1.14.4"
+bytebuddy = "1.14.5"
 junit-jupiter =  "5.9.3"
 graalvm = "22.3.2"
 flexmark = "0.64.8"
