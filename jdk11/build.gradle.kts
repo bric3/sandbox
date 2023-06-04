@@ -11,6 +11,7 @@ import java.util.*
 
 plugins {
   alias(libs.plugins.download)
+  id("sandbox.java-conventions")
 }
 
 dependencies {
@@ -33,17 +34,11 @@ dependencies {
 }
 
 
-java {
-  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(11))
-  }
+javaConvention {
+  languageVersion = 20
 }
 
 tasks {
-  withType<JavaCompile> {
-    options.release.set(11)
-  }
-
   // pass args this way ./gradlew runSparkline --args="-f numbers"
   register<JavaExec>("runSparkline") {
     dependsOn(compileJava)

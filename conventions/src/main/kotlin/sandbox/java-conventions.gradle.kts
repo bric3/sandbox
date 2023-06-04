@@ -20,18 +20,27 @@ repositories {
 // Note: simple property assignment enabled in kotlin-dsl since Gradle 8.2 RC1
 // https://docs.gradle.org/8.2-rc-1/release-notes.html#kotlin-dsl-improvements
 
+val javaConventions: JavaConventionExtension =
+    project.extensions.create(
+        "javaConvention",
+        JavaConventionExtension::class.java
+    )
+javaConventions.languageVersion.convention(11)
+javaConventions.useRelease.convention(true)
+
 //val javaToolchains: JavaToolchainService = extensions.getByType()
 
 java {
     toolchain {
-        languageVersion.set(javaVersion.map(JavaLanguageVersion::of))
-        jvmVendor.orNull?.let { vendor.set(it) }
+        languageVersion.set(javaConventions.languageVersion.map(JavaLanguageVersion::of))
+        javaConventions.jvmVendor.orNull?.let { vendor.set(it) }
     }
 }
 
 tasks {
-    withType<JavaExec> {
-        group = "class-with-main"
+    // Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope
+    withType<JavaExec>().configureEach {
+        //group = "class-with-main"
         classpath(sourceSets.main.get().runtimeClasspath)
 
         // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
@@ -42,7 +51,7 @@ tasks {
         )
 
         jvmArgumentProviders.add(
-            addedModules
+            javaConventions.addedModules
                 .map {
                     CommandLineArgumentProvider {
                         it.map { "--add-modules=$it" }
@@ -52,13 +61,13 @@ tasks {
         )
     }
 
-    withType<JavaCompile> {
+    withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
-        if (javaUseRelease.get()) {
-            options.release.set(javaVersion)
+        if (javaConventions.useRelease.get()) {
+            options.release.set(javaConventions.languageVersion)
         } else {
-            sourceCompatibility = javaVersion.get().toString()
-            targetCompatibility = javaVersion.get().toString()
+            sourceCompatibility = javaConventions.languageVersion.get().toString()
+            targetCompatibility = javaConventions.languageVersion.get().toString()
         }
         options.compilerArgs.addAll(
             listOf(
@@ -67,7 +76,7 @@ tasks {
             )
         )
         options.compilerArgumentProviders.add(
-            addedModules
+            javaConventions.addedModules
                 .map {
                     CommandLineArgumentProvider {
                         it.map { "--add-modules=$it" }
@@ -75,6 +84,22 @@ tasks {
                 }
                 .get()
         )
+    }
+
+    register("javaConvention", PrintJavaConventionTask::class.java) {
+        languageVersion.set(javaConventions.languageVersion)
+        useRelease.set(javaConventions.useRelease)
+        jvmVendor.set(javaConventions.jvmVendor)
+        addedModules.set(javaConventions.addedModules)
+    }
+
+    register("showToolchain") {
+        doLast {
+            val launcher = javaToolchains.launcherFor(java.toolchain).get()
+
+            println(launcher.executablePath)
+            println(launcher.metadata.installationPath)
+        }
     }
 }
 
@@ -92,5 +117,32 @@ tasks.test {
         showStandardStreams = true
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         events("skipped", "failed")
+    }
+}
+
+abstract class PrintJavaConventionTask : DefaultTask() {
+    @get:Input
+    abstract val languageVersion: Property<Int>
+
+    @get:Input
+    abstract val useRelease: Property<Boolean>
+
+    @get:Input
+    @get:Optional
+    abstract val jvmVendor: Property<JvmVendorSpec>
+
+    @get:Input
+    abstract val addedModules: ListProperty<String>
+
+    @TaskAction
+    fun run() {
+        logger.lifecycle(
+            """
+            languageVersion: ${languageVersion.get()}
+            compile with release flag: ${useRelease.get()}
+            jvmVendor: ${jvmVendor.orNull ?: "unset"}
+            addedModules: ${addedModules.get()}
+        """.trimIndent()
+        )
     }
 }

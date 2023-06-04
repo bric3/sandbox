@@ -12,16 +12,17 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import java.nio.file.Files
 import java.nio.file.Path
 
+plugins {
+    id("sandbox.java-conventions")
+}
+
+javaConvention {
+    languageVersion = 17
+    addedModules = setOf("jdk.incubator.foreign")
+}
 
 dependencies {
   implementation("org.jsoup:jsoup:1.16.1")
-}
-
-
-java {
-  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(17))
-  }
 }
 
 // See https://docs.gradle.org/current/userguide/cross_project_publications.html
@@ -41,33 +42,18 @@ tasks.register("swiftLib") {
   }
 }
 
-// Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope
 tasks.withType<JavaExec>().configureEach {
   dependsOn(tasks.compileJava, "swiftLib") // for IntelliJ run main class
   group = "class-with-main"
-  classpath(sourceSets.main.get().runtimeClasspath)
 
-  // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
-  javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+
   jvmArgs(
-          "-ea",
           "--enable-native-access=ALL-UNNAMED",
-          "--add-modules=jdk.incubator.foreign",
-          "--enable-preview"
   )
 
   environment = mapOf(
           "JAVA_LIBRARY_PATH" to sourceSets.main.get().output.resourcesDir!! // for IntelliJ run main class
 //          "JAVA_LIBRARY_PATH" to ".:/usr/local/lib"
-  )
-}
-
-tasks.withType<JavaCompile>().configureEach {
-  options.release.set(17)
-  options.compilerArgs = listOf(
-          "--add-modules=jdk.incubator.foreign",
-          "--enable-preview",
-          "-Xlint:preview"
   )
 }
 
@@ -91,15 +77,6 @@ tasks.register<JavaExec>("touchId") {
   )
 }
 
-tasks.create("showToolchain") {
-  doLast {
-    val launcher = javaToolchains.launcherFor(java.toolchain).get()
-
-    println(launcher.executablePath)
-    println(launcher.metadata.installationPath)
-  }
-}
-
 sourceSets {
   val jextract by creating  {
     java.srcDirs("$buildDir/generated/sources/jextract/java")
@@ -114,7 +91,7 @@ sourceSets {
   }
 }
 
-tasks.create<Exec>("jextractSDLHeaders") {
+tasks.register<Exec>("jextractSDLHeaders") {
   val jextract = (project.findProperty("jextract") as String).replace("\$HOME", System.getProperty("user.home"))
   val sdl2Headers = "/usr/local/include/SDL2"
   val platformIncludes = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/"
@@ -172,7 +149,7 @@ tasks.create<Exec>("jextractSDLHeaders") {
 }
 
 
-tasks.create<JavaExec>("runSDLFoo") {
+tasks.register<JavaExec>("runSDLFoo") {
   dependsOn("jextractSDLHeaders")
   // JAVA_LIBRARY_PATH=:/usr/local/lib java \
   //    -cp build/classes/java/main \
@@ -183,7 +160,7 @@ tasks.create<JavaExec>("runSDLFoo") {
   mainClass.set("sandbox.SDLFoo")
   jvmArgs(
           "--enable-native-access=ALL-UNNAMED",
-          "--add-modules=jdk.incubator.foreign",
+      //"--add-modules=jdk.incubator.foreign",
           "-XstartOnFirstThread"
   )
   environment("JAVA_LIBRARY_PATH", ":/usr/local/lib")

@@ -7,21 +7,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-val javaVersion = 20
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(javaVersion.toString()))
-        // my build
-        // bash configure --with-vendor-name=bric3
-        // vendor.set(JvmVendorSpec.matching("bric3"))
-        // loom
-        // vendor.set(JvmVendorSpec.AMAZON)
-    }
+plugins {
+    id("sandbox.java-conventions")
+    // Playing with graal compiler
+    // commented because it messes with the plugin convention
+    //id("org.graalvm.plugin.compiler") version "0.1.0-alpha2"
 }
 
-repositories {
-    mavenCentral()
+javaConvention {
+    languageVersion = 20
+    addedModules = setOf("jdk.incubator.concurrent")
+    // my JDK build `bash configure --with-vendor-name=bric3`
+    // vendor.set(JvmVendorSpec.matching("bric3"))
 }
 
 dependencies {
@@ -32,17 +29,6 @@ dependencies {
 // Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope
 tasks.withType<JavaExec>().configureEach {
     group = "class-with-main"
-    classpath(sourceSets.main.get().runtimeClasspath)
-
-    // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
-    javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-    jvmArgs(
-        "-ea",
-        // "--enable-native-access=ALL-UNNAMED",
-        // "--add-modules=jdk.incubator.foreign",
-        "--add-modules=jdk.incubator.concurrent",
-        "--enable-preview",
-    )
 
     environment = mapOf(
         "JAVA_LIBRARY_PATH" to sourceSets.main.get().output.resourcesDir!!, // for IntelliJ run main class
@@ -51,25 +37,3 @@ tasks.withType<JavaExec>().configureEach {
         "HTTP_CLIENT_CARRIER_THREADS" to System.getenv("HTTP_CLIENT_CARRIER_THREADS"),
     )
 }
-
-tasks.withType<JavaCompile>().configureEach {
-    options.release.set(javaVersion)
-    options.compilerArgs = listOf(
-        // "--add-modules=jdk.incubator.foreign",
-        "--add-modules=jdk.incubator.concurrent",
-        "--enable-preview",
-        "-Xlint:preview",
-    )
-}
-
-
-tasks.create("showToolchain") {
-    doLast {
-        val launcher = javaToolchains.launcherFor(java.toolchain).get()
-
-        println(launcher.executablePath)
-        println(launcher.metadata.installationPath)
-    }
-}
-
-
