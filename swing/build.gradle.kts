@@ -1,5 +1,3 @@
-import sandbox.javaVersion
-
 /*
  * sandbox
  *
@@ -15,7 +13,9 @@ plugins {
     id("sandbox.test-conventions")
 }
 
-javaVersion = 20
+javaConvention {
+    languageVersion = 20
+}
 
 dependencies {
     implementation("com.jhlabs:filters:2.0.235-1")

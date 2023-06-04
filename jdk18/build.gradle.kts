@@ -12,16 +12,18 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import java.nio.file.Files
 import java.nio.file.Path
 
-java {
-  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(18))
-  }
+plugins {
+    id("sandbox.java-conventions")
+}
+
+javaConvention {
+    languageVersion = 18
+    addedModules = setOf("jdk.incubator.foreign")
 }
 
 dependencies {
   //    implementation(libs.graal.sdk)
   implementation(libs.bundles.graal.js)
-
 }
 
 // See https://docs.gradle.org/current/userguide/cross_project_publications.html
@@ -43,19 +45,13 @@ tasks.register("swiftLib") {
   }
 }
 
-// Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope
 tasks.withType<JavaExec>().configureEach {
   dependsOn(tasks.compileJava, "swiftLib") // for IntelliJ run main class
   group = "class-with-main"
-  classpath(sourceSets.main.get().runtimeClasspath)
 
   // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
-  javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
   jvmArgs(
-          "-ea",
           "--enable-native-access=ALL-UNNAMED",
-          "--add-modules=jdk.incubator.foreign",
-          "--enable-preview",
           "-Xlog:os+container"
   )
 
@@ -65,16 +61,6 @@ tasks.withType<JavaExec>().configureEach {
   )
 }
 
-tasks.withType<JavaCompile>().configureEach {
-  options.release.set(18)
-  options.compilerArgs = listOf(
-          "--add-modules=jdk.incubator.foreign",
-          "--enable-preview",
-          "-Xlint:preview"
-  )
-}
-
-
 // JAVA_LIBRARY_PATH=jdk17/build/resources/main/ java --enable-native-access=ALL-UNNAMED --add-modules=jdk.incubator.foreign -cp jdk17/build/classes/java/main sandbox.TouchId
 tasks.register<JavaExec>("touchId") {
   dependsOn(tasks.compileJava, "swiftLib")
@@ -83,15 +69,6 @@ tasks.register<JavaExec>("touchId") {
           "JAVA_LIBRARY_PATH" to sourceSets.main.get().output.resourcesDir!!
 //          "JAVA_LIBRARY_PATH" to ".:/usr/local/lib"
   )
-}
-
-tasks.create("showToolchain") {
-  doLast {
-    val launcher = javaToolchains.launcherFor(java.toolchain).get()
-
-    println(launcher.executablePath)
-    println(launcher.metadata.installationPath)
-  }
 }
 
 sourceSets {
@@ -108,7 +85,7 @@ sourceSets {
   }
 }
 
-tasks.create<Exec>("jextractSDLHeaders") {
+tasks.register<Exec>("jextractSDLHeaders") {
   val jextract = (project.findProperty("jextract") as String).replace("\$HOME", System.getProperty("user.home"))
   val sdl2Headers = "/usr/local/include/SDL2"
   val platformIncludes = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/"
