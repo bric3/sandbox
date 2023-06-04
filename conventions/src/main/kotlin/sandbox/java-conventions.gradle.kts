@@ -13,38 +13,24 @@ plugins {
     id("java-library")
 }
 
-// simple property assignment enabled in kotlin-dsl since Gradle 8.2 RC1
+repositories {
+    mavenCentral()
+}
+
+// Note: simple property assignment enabled in kotlin-dsl since Gradle 8.2 RC1
 // https://docs.gradle.org/8.2-rc-1/release-notes.html#kotlin-dsl-improvements
 
 //val javaToolchains: JavaToolchainService = extensions.getByType()
 
-
-fun JavaPluginExtension.configureJavaToolChain(
-    javaVersion: Int,
-    useRelease: Boolean = true,
-    vendorSpec: JvmVendorSpec?
-) {
+java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(javaVersion)
-        vendorSpec?.let { vendor = it }
+        languageVersion.set(javaVersion.map(JavaLanguageVersion::of))
+        jvmVendor.orNull?.let { vendor.set(it) }
     }
+}
 
-    tasks.withType<JavaCompile> {
-        if (useRelease) {
-            options.release = javaVersion
-        } else {
-            targetCompatibility = javaVersion.toString()
-            sourceCompatibility = javaVersion.toString()
-        }
-        options.compilerArgs.addAll(
-            listOf(
-                "--enable-preview",
-                "-Xlint:preview",
-            )
-        )
-    }
-
-    tasks.withType<JavaExec>().configureEach {
+tasks {
+    withType<JavaExec> {
         group = "class-with-main"
         classpath(sourceSets.main.get().runtimeClasspath)
 
@@ -54,33 +40,57 @@ fun JavaPluginExtension.configureJavaToolChain(
             "-ea",
             "--enable-preview",
         )
+
+        jvmArgumentProviders.add(
+            addedModules
+                .map {
+                    CommandLineArgumentProvider {
+                        it.map { "--add-modules=$it" }
+                    }
+                }
+                .get()
+        )
     }
 
-    // workaround for https://youtrack.jetbrains.com/issue/IDEA-316081/Gradle-8-toolchain-error-Toolchain-from-executable-property-does-not-match-toolchain-from-javaLauncher-property-when-different
-    gradle.taskGraph.whenReady {
-        val ideRunTask = allTasks.find { it.name.endsWith(".main()") } as? JavaExec
-        // note that javaLauncher property is actually correct
-        ideRunTask?.setExecutable(javaToolchains.launcherFor(java.toolchain).get().executablePath.asFile.absolutePath)
+    withType<JavaCompile> {
+        options.encoding = "UTF-8"
+        if (javaUseRelease.get()) {
+            options.release.set(javaVersion)
+        } else {
+            sourceCompatibility = javaVersion.get().toString()
+            targetCompatibility = javaVersion.get().toString()
+        }
+        options.compilerArgs.addAll(
+            listOf(
+                "--enable-preview",
+                "-Xlint:preview",
+            )
+        )
+        options.compilerArgumentProviders.add(
+            addedModules
+                .map {
+                    CommandLineArgumentProvider {
+                        it.map { "--add-modules=$it" }
+                    }
+                }
+                .get()
+        )
     }
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
+// workaround for https://youtrack.jetbrains.com/issue/IDEA-316081/Gradle-8-toolchain-error-Toolchain-from-executable-property-does-not-match-toolchain-from-javaLauncher-property-when-different
+gradle.taskGraph.whenReady {
+    val ideRunTask = allTasks.find { it.name.endsWith(".main()") } as? JavaExec
+    // note that javaLauncher property is actually correct
+    ideRunTask?.setExecutable(javaToolchains.launcherFor(java.toolchain).get().executablePath.asFile.absolutePath)
 }
 
-//tasks {
-//    withType<JavaExec> {
-//
-//    }
-//
-//    withType<JavaCompile> {
-//        options.encoding = "UTF-8"
-//        options.release.set(20)
-//    }
-//}
 
 tasks.test {
     useJUnitPlatform()
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        events("skipped", "failed")
+    }
 }

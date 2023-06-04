@@ -47,14 +47,14 @@ tasks.withType<JavaExec>().configureEach {
     "--enable-preview",
   )
 
-    environment.putAll(
-        mapOf(
-    "JAVA_LIBRARY_PATH" to sourceSets.main.get().output.resourcesDir!!, // for IntelliJ run main class
-    // "JAVA_LIBRARY_PATH" to ".:/usr/local/lib",
-    "FINNHUB_TOKEN" to System.getenv("FINNHUB_TOKEN"),
-    "HTTP_CLIENT_CARRIER_THREADS" to System.getenv("HTTP_CLIENT_CARRIER_THREADS"),
-        )
+  environment.putAll(
+    mapOf(
+      "JAVA_LIBRARY_PATH" to sourceSets.main.get().output.resourcesDir!!, // for IntelliJ run main class
+      // "JAVA_LIBRARY_PATH" to ".:/usr/local/lib",
+      "FINNHUB_TOKEN" to System.getenv("FINNHUB_TOKEN"),
+      "HTTP_CLIENT_CARRIER_THREADS" to System.getenv("HTTP_CLIENT_CARRIER_THREADS"),
     )
+  )
 }
 
 tasks.withType<JavaCompile>().configureEach {
