@@ -7,20 +7,48 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-@file:Suppress("UnusedImport")
-
 package sandbox
 
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.api.Project
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.jvm.toolchain.JvmVendorSpec
-import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.property
 
-fun JavaPluginExtension.dumbConfigureJavaToolChain() {
-    toolchain {
-        // simple property assignment enabled in kotlin-dsl since Gradle 8.2 RC1
-        // https://docs.gradle.org/8.2-rc-1/release-notes.html#kotlin-dsl-improvements
-        languageVersion = JavaLanguageVersion.of(11)
-        vendor = JvmVendorSpec.ADOPTIUM
-    }
-}
+/**
+ * Configure the java version for this project, sets the toolchain, compiler, and java launcher
+ *
+ * Defaults to `11`.
+ */
+val Project.javaVersion: Property<Int>
+    get() = objects.property(Int::class).convention(11)
+//val Project.javaVersion: Property<JavaVersion>
+//    get() = objects.property(JavaVersion::class).convention(JavaVersion.VERSION_11)
+
+/**
+ * Whether to use the `--release` option for compilation, or use `sourceCompatibility` and `targetCompatibility`.
+ *
+ * Defaults to `true`.
+ */
+val Project.javaUseRelease: Property<Boolean>
+    get() = objects.property(Boolean::class).convention(true)
+
+/**
+ * Tweak the JVM vendor for this project.
+ *
+ * Unset by default.
+ */
+val Project.jvmVendor: Property<JvmVendorSpec>
+    get() = objects.property(JvmVendorSpec::class) // .convention(JvmVendorSpec.ADOPTIUM)
+
+/**
+ * List of modules to add to the module path.
+ *
+ * Each module will be added as this option `--add-modules=<module>`
+ * to the compiler and java exec.
+ *
+ * Defaults to an empty list.
+ */
+val Project.addedModules: ListProperty<String>
+    get() = objects.listProperty(String::class.java).convention(emptyList())
+
