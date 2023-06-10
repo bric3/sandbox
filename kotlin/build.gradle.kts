@@ -10,7 +10,7 @@
 
 plugins {
     java
-    kotlin("jvm") version "1.8.21"
+    kotlin("jvm") version "1.8.22"
 }
 
 kotlin {
