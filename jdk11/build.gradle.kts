@@ -35,7 +35,7 @@ dependencies {
 
 
 javaConvention {
-  languageVersion = 20
+    languageVersion = 11
 }
 
 tasks {

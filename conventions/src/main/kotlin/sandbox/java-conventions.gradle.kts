@@ -9,6 +9,15 @@
  */
 package sandbox
 
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
+/**
+ * Note that `org.graalvm.plugin.compiler` messes with this plugin convention,
+ * to avoid that, the extension may instead be configured with methods rather
+ * than properties.
+ *
+ * See: https://discuss.gradle.org/t/exposing-an-api-via-kotlin-dsl-script-plugin/45755/7?u=bric3
+ */
 plugins {
     id("java-library")
 }
@@ -27,12 +36,13 @@ val javaConventions: JavaConventionExtension =
     )
 javaConventions.languageVersion.convention(11)
 javaConventions.useRelease.convention(true)
+javaConventions.enablePreview.convention(true)
 
 //val javaToolchains: JavaToolchainService = extensions.getByType()
 
 java {
     toolchain {
-        languageVersion.set(javaConventions.languageVersion.map(JavaLanguageVersion::of))
+        //languageVersion.set(javaConventions.languageVersion.map(JavaLanguageVersion::of))
         javaConventions.jvmVendor.orNull?.let { vendor.set(it) }
     }
 }
@@ -45,10 +55,11 @@ tasks {
 
         // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
         javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
-        jvmArgs(
-            "-ea",
-            "--enable-preview",
-        )
+        jvmArgs("-ea")
+
+        if (javaConventions.enablePreview.get()) {
+            jvmArgs("--enable-preview")
+        }
 
         jvmArgumentProviders.add(
             javaConventions.addedModules
@@ -69,12 +80,15 @@ tasks {
             sourceCompatibility = javaConventions.languageVersion.get().toString()
             targetCompatibility = javaConventions.languageVersion.get().toString()
         }
-        options.compilerArgs.addAll(
-            listOf(
-                "--enable-preview",
-                "-Xlint:preview",
+        if (javaConventions.enablePreview.get()) {
+            options.compilerArgs.addAll(
+                listOf(
+                    "--enable-preview",
+                    "-Xlint:preview",
+                )
             )
-        )
+        }
+
         options.compilerArgumentProviders.add(
             javaConventions.addedModules
                 .map {
@@ -87,7 +101,7 @@ tasks {
     }
 
     register("javaConvention", PrintJavaConventionTask::class.java) {
-        languageVersion.set(javaConventions.languageVersion)
+        //languageVersion.set(javaConventions.languageVersion)
         useRelease.set(javaConventions.useRelease)
         jvmVendor.set(javaConventions.jvmVendor)
         addedModules.set(javaConventions.addedModules)
@@ -115,7 +129,7 @@ tasks.test {
     useJUnitPlatform()
     testLogging {
         showStandardStreams = true
-        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        exceptionFormat = TestExceptionFormat.FULL
         events("skipped", "failed")
     }
 }

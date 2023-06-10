@@ -12,15 +12,10 @@ plugins {
 }
 
 javaConvention {
-    languageVersion = 20
-    addedModules = setOf("jdk.incubator.concurrent")
-    // my JDK build `bash configure --with-vendor-name=bric3`
-    // vendor.set(JvmVendorSpec.matching("bric3"))
+    languageVersion = 21
 }
 
 dependencies {
-    implementation(libs.bundles.flightRecorder)
-    implementation(libs.flexmark.all)
 }
 
 // Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope

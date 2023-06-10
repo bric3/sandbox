@@ -34,6 +34,13 @@ interface JavaConventionExtension {
     val useRelease: Property<Boolean>
 
     /**
+     * Whether to use the `--enable-preview` option for compilation and execution.
+     *
+     * Defaults to `true`.
+     */
+    val enablePreview: Property<Boolean>
+
+    /**
      * Tweak the JVM vendor for this project.
      *
      * Unset by default.

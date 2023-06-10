@@ -57,7 +57,7 @@ rootProject.name = "sandbox"
 includeBuild("conventions")
 include("kotlin")
 include("jmh-stuff", "jmh-panama")
-include("jdk11", "jdk17", "jdk18", "jdk19", "jdk20")
+include("jdk11", "jdk17", "jdk18", "jdk19", "jdk20", "jdk21")
 include("native:cmem", "native:dlopen")
 include("swift-app", "swift-library")
 include("jmh-panama")
