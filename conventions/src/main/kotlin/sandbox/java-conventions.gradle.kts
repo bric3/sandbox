@@ -9,6 +9,7 @@
  */
 package sandbox
 
+import gradle.kotlin.dsl.accessors._dbb15c6bfb5bdc33b23d8c76d8272896.java
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 /**
@@ -30,9 +31,8 @@ repositories {
 // https://docs.gradle.org/8.2-rc-1/release-notes.html#kotlin-dsl-improvements
 
 val javaConventions: JavaConventionExtension =
-    project.extensions.create(
+    project.extensions.create<JavaConventionExtension>(
         "javaConvention",
-        JavaConventionExtension::class.java
     )
 javaConventions.languageVersion.convention(11)
 javaConventions.useRelease.convention(true)
@@ -42,7 +42,7 @@ javaConventions.enablePreview.convention(true)
 
 java {
     toolchain {
-        //languageVersion.set(javaConventions.languageVersion.map(JavaLanguageVersion::of))
+        languageVersion.set(javaConventions.languageVersion.map(JavaLanguageVersion::of))
         javaConventions.jvmVendor.orNull?.let { vendor.set(it) }
     }
 }
@@ -73,7 +73,9 @@ tasks {
     }
 
     withType<JavaCompile>().configureEach {
+        javaCompiler.set(javaToolchains.compilerFor(java.toolchain))
         options.encoding = "UTF-8"
+
         if (javaConventions.useRelease.get()) {
             options.release.set(javaConventions.languageVersion)
         } else {
@@ -101,7 +103,7 @@ tasks {
     }
 
     register("javaConvention", PrintJavaConventionTask::class.java) {
-        //languageVersion.set(javaConventions.languageVersion)
+        languageVersion.set(javaConventions.languageVersion)
         useRelease.set(javaConventions.useRelease)
         jvmVendor.set(javaConventions.jvmVendor)
         addedModules.set(javaConventions.addedModules)
@@ -111,8 +113,9 @@ tasks {
         doLast {
             val launcher = javaToolchains.launcherFor(java.toolchain).get()
 
-            println(launcher.executablePath)
             println(launcher.metadata.installationPath)
+            println(launcher.executablePath)
+            println(javaToolchains.compilerFor(java.toolchain).get())
         }
     }
 }
