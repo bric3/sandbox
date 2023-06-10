@@ -17,7 +17,9 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
  * to avoid that, the extension may instead be configured with methods rather
  * than properties.
  *
- * See: https://discuss.gradle.org/t/exposing-an-api-via-kotlin-dsl-script-plugin/45755/7?u=bric3
+ * See:
+ * - https://discuss.gradle.org/t/exposing-an-api-via-kotlin-dsl-script-plugin/45755/7?u=bric3
+ * - https://docs.gradle.org/current/userguide/implementing_gradle_plugins.html#reacting_to_plugins
  */
 plugins {
     id("java-library")
@@ -135,6 +137,7 @@ tasks.test {
         exceptionFormat = TestExceptionFormat.FULL
         events("skipped", "failed")
     }
+    println(javaLauncher.get().executablePath)
 }
 
 abstract class PrintJavaConventionTask : DefaultTask() {

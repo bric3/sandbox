@@ -28,7 +28,7 @@ dependencies {
 
   implementation(files("lib/spring-jdbc-4.1.6.RELEASE.jar"))
 
-  testImplementation(libs.junit.jupiter)
+  testImplementation(libs.bundles.junit.jupiter)
   testImplementation(libs.assertj)
   testImplementation(libs.testcontainers)
 }
