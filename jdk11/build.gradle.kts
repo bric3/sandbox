@@ -11,6 +11,7 @@ import java.util.*
 
 plugins {
   alias(libs.plugins.download)
+  id("sandbox.java-conventions")
 }
 
 dependencies {
@@ -27,23 +28,17 @@ dependencies {
 
   implementation(files("lib/spring-jdbc-4.1.6.RELEASE.jar"))
 
-  testImplementation(libs.junit.jupiter)
+  testImplementation(libs.bundles.junit.jupiter)
   testImplementation(libs.assertj)
   testImplementation(libs.testcontainers)
 }
 
 
-java {
-  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(11))
-  }
+javaConvention {
+    languageVersion = 11
 }
 
 tasks {
-  withType<JavaCompile> {
-    options.release.set(11)
-  }
-
   // pass args this way ./gradlew runSparkline --args="-f numbers"
   register<JavaExec>("runSparkline") {
     dependsOn(compileJava)

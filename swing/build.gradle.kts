@@ -8,12 +8,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 plugins {
-    java
-    kotlin("jvm") version "1.8.22"
+    id("sandbox.java-conventions")
+    id("sandbox.kotlin-conventions")
+    id("sandbox.test-conventions")
 }
 
-kotlin {
-    jvmToolchain(19) // kotlin 1.8.21 does not support JDK 20
+javaConvention {
+    languageVersion = 20
 }
 
 dependencies {

@@ -40,7 +40,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -127,7 +126,7 @@ public class Stonks {
     // https://finnhub.io/pricing
     // 60 API calls/minute
     var finnhubToken = System.getenv("FINNHUB_TOKEN");
-    if (finnhubToken == null || finnhubToken.isBlank()) {
+    if (finnhubToken == null || finnhubToken.isBlank() || finnhubToken.equals("null")) {
       System.out.println("Needs non empty token set in the environment variable FINNHUB_TOKEN");
       System.exit(1);
     }
@@ -136,12 +135,16 @@ public class Stonks {
   }
 
   public Stonks() {
-    int httpClientCarrierThreads = Integer.parseInt(Objects.requireNonNullElse(System.getenv("HTTP_CLIENT_CARRIER_THREADS"), "1"));
+    var httpClientCarrierThreadsEnv = System.getenv("HTTP_CLIENT_CARRIER_THREADS");
+    int httpClientCarrierThreads = switch (httpClientCarrierThreadsEnv) {
+      case null, "null" -> 1;
+      default -> Integer.parseInt(httpClientCarrierThreadsEnv);
+    };
+
     httpClient = HttpClient.newBuilder()
                            .executor(Executors.newFixedThreadPool(httpClientCarrierThreads, Thread.ofVirtual().name("HttpClient-virtual").factory()))
                            .connectTimeout(Duration.ofSeconds(10))
                            .build();
-
   }
 
   private void run(String finnhubToken, String... tickersArgs) throws InterruptedException, ExecutionException, TimeoutException {

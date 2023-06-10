@@ -9,12 +9,7 @@
  */
 
 plugins {
-    java
-    kotlin("jvm") version "1.8.22"
-}
-
-kotlin {
-    jvmToolchain(19) // kotlin 1.8.21 does not support JDK 20
+    id("sandbox.kotlin-conventions")
 }
 
 repositories {
@@ -33,8 +28,4 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("app.cash.turbine:turbine:0.13.0")
-}
-
-tasks.test {
-    useJUnitPlatform()
 }

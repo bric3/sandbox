@@ -26,13 +26,4 @@ configure(javaProjects) {
   repositories {
     mavenCentral()
   }
-
-  tasks.withType<Test>() {
-    useJUnitPlatform()
-    testLogging {
-      showStandardStreams = true
-      exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-      events("skipped", "failed")
-    }
-  }
 }
