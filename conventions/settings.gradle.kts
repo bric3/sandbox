@@ -8,7 +8,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version ("0.4.0")
+    id("org.gradle.toolchains.foojay-resolver-convention") version ("0.5.0")
 }
 
 dependencyResolutionManagement {
