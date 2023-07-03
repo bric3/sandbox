@@ -10,6 +10,8 @@
 package sandbox
 
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+import sandbox.FailedTestLogger.Companion.logStdOutOnFailure
 
 /**
  * Note that `org.graalvm.plugin.compiler` messes with this plugin convention,
@@ -131,14 +133,19 @@ gradle.taskGraph.whenReady {
 }
 
 
-tasks.test {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     testLogging {
-        showStandardStreams = true
+        showStackTraces = true
         exceptionFormat = TestExceptionFormat.FULL
-        events("skipped", "failed")
+        events = setOf(
+            TestLogEvent.FAILED,
+            TestLogEvent.SKIPPED,
+        )
     }
+    logStdOutOnFailure()
 }
+
 
 abstract class PrintJavaConventionTask : DefaultTask() {
     @get:Input
