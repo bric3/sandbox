@@ -9,15 +9,31 @@
  */
 package sandbox
 
+import gradle.kotlin.dsl.accessors._bad02cca212ff678e8ee79d4fa920d50.java
+import org.gradle.kotlin.dsl.invoke
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    java
     id("org.jetbrains.kotlin.jvm")
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(19))
+    }
 }
 
 kotlinExtension.apply {
     jvmToolchain(19) // kotlin 1.8.21 does not support JDK 20
+}
+
+// workaround for https://youtrack.jetbrains.com/issue/IDEA-316081/Gradle-8-toolchain-error-Toolchain-from-executable-property-does-not-match-toolchain-from-javaLauncher-property-when-different
+gradle.taskGraph.whenReady {
+    val ideRunTask = allTasks.find { it.name.endsWith(".main()") } as? JavaExec
+    // note that javaLauncher property is actually correct
+    ideRunTask?.executable = javaToolchains.launcherFor(java.toolchain).get().executablePath.asFile.absolutePath
 }
 
 tasks {
@@ -37,6 +53,13 @@ tasks {
                 )
             )
         }
+    }
+    withType<JavaExec>().configureEach {
+        // group = "class-with-main"
+        classpath(sourceSets.main.get().runtimeClasspath)
+
+        // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
+        javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
     }
 }
 

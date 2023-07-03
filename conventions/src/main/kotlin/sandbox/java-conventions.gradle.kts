@@ -9,7 +9,6 @@
  */
 package sandbox
 
-import gradle.kotlin.dsl.accessors._dbb15c6bfb5bdc33b23d8c76d8272896.java
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 /**
@@ -49,6 +48,9 @@ java {
     }
 }
 
+val javaToolchainLauncher = javaToolchains.launcherFor(java.toolchain)
+val javaToolchainCompiler = javaToolchains.compilerFor(java.toolchain)
+
 tasks {
     // Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope
     withType<JavaExec>().configureEach {
@@ -56,7 +58,7 @@ tasks {
         classpath(sourceSets.main.get().runtimeClasspath)
 
         // Need to set the toolchain https://github.com/gradle/gradle/issues/16791
-        javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+        javaLauncher.set(javaToolchainLauncher)
         jvmArgs("-ea")
 
         if (javaConventions.enablePreview.get()) {
@@ -75,7 +77,7 @@ tasks {
     }
 
     withType<JavaCompile>().configureEach {
-        javaCompiler.set(javaToolchains.compilerFor(java.toolchain))
+        javaCompiler.set(javaToolchainCompiler)
         options.encoding = "UTF-8"
 
         if (javaConventions.useRelease.get()) {
@@ -113,11 +115,9 @@ tasks {
 
     register("showToolchain") {
         doLast {
-            val launcher = javaToolchains.launcherFor(java.toolchain).get()
-
-            println(launcher.metadata.installationPath)
-            println(launcher.executablePath)
-            println(javaToolchains.compilerFor(java.toolchain).get())
+            println(javaToolchainLauncher.get().metadata.installationPath)
+            println(javaToolchainLauncher.get().executablePath)
+            println(javaToolchainCompiler.get())
         }
     }
 }
@@ -126,7 +126,7 @@ tasks {
 gradle.taskGraph.whenReady {
     val ideRunTask = allTasks.find { it.name.endsWith(".main()") } as? JavaExec
     // note that javaLauncher property is actually correct
-    ideRunTask?.setExecutable(javaToolchains.launcherFor(java.toolchain).get().executablePath.asFile.absolutePath)
+    ideRunTask?.setExecutable(javaToolchainLauncher.get().executablePath.asFile.absolutePath)
 }
 
 
@@ -137,7 +137,6 @@ tasks.test {
         exceptionFormat = TestExceptionFormat.FULL
         events("skipped", "failed")
     }
-    println(javaLauncher.get().executablePath)
 }
 
 abstract class PrintJavaConventionTask : DefaultTask() {
