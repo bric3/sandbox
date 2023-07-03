@@ -9,8 +9,6 @@
  */
 package sandbox
 
-import gradle.kotlin.dsl.accessors._bad02cca212ff678e8ee79d4fa920d50.java
-import org.gradle.kotlin.dsl.invoke
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -33,7 +31,8 @@ kotlinExtension.apply {
 gradle.taskGraph.whenReady {
     val ideRunTask = allTasks.find { it.name.endsWith(".main()") } as? JavaExec
     // note that javaLauncher property is actually correct
-    ideRunTask?.executable = javaToolchains.launcherFor(java.toolchain).get().executablePath.asFile.absolutePath
+    @Suppress("UsePropertyAccessSyntax") // otherwise fails with: 'Val cannot be reassigned'
+    ideRunTask?.setExecutable(javaToolchains.launcherFor(java.toolchain).get().executablePath.asFile.absolutePath)
 }
 
 tasks {

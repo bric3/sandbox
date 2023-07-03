@@ -126,6 +126,7 @@ tasks {
 gradle.taskGraph.whenReady {
     val ideRunTask = allTasks.find { it.name.endsWith(".main()") } as? JavaExec
     // note that javaLauncher property is actually correct
+    @Suppress("UsePropertyAccessSyntax") // otherwise fails with: 'Val cannot be reassigned'
     ideRunTask?.setExecutable(javaToolchainLauncher.get().executablePath.asFile.absolutePath)
 }
 
