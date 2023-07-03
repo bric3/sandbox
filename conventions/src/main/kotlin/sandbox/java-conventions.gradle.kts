@@ -9,6 +9,7 @@
  */
 package sandbox
 
+
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import sandbox.FailedTestLogger.Companion.logStdOutOnFailure
@@ -54,6 +55,19 @@ val javaToolchainLauncher = javaToolchains.launcherFor(java.toolchain)
 val javaToolchainCompiler = javaToolchains.compilerFor(java.toolchain)
 
 tasks {
+    withType<Test>().configureEach {
+        useJUnitPlatform()
+        testLogging {
+            showStackTraces = true
+            exceptionFormat = TestExceptionFormat.FULL
+            events = setOf(
+                TestLogEvent.FAILED,
+                TestLogEvent.SKIPPED,
+            )
+        }
+        logStdOutOnFailure()
+    }
+
     // Due to https://github.com/gradle/gradle/issues/18426, tasks are not declared in the TaskContainerScope
     withType<JavaExec>().configureEach {
         //group = "class-with-main"
@@ -131,21 +145,6 @@ gradle.taskGraph.whenReady {
     @Suppress("UsePropertyAccessSyntax") // otherwise fails with: 'Val cannot be reassigned'
     ideRunTask?.setExecutable(javaToolchainLauncher.get().executablePath.asFile.absolutePath)
 }
-
-
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
-    testLogging {
-        showStackTraces = true
-        exceptionFormat = TestExceptionFormat.FULL
-        events = setOf(
-            TestLogEvent.FAILED,
-            TestLogEvent.SKIPPED,
-        )
-    }
-    logStdOutOnFailure()
-}
-
 
 abstract class PrintJavaConventionTask : DefaultTask() {
     @get:Input
