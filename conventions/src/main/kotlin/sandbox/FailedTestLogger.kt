@@ -60,6 +60,7 @@ class FailedTestLogger : TestListener, TestOutputListener {
                 append(test.displayName)
             })
             for (output in testOutputs.getOrDefault(test, listOf())) {
+                @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA") // never null
                 when (output.destination) {
                     TestOutputEvent.Destination.StdOut -> print(output.message)
                     TestOutputEvent.Destination.StdErr -> System.err.print(output.message)
