@@ -13,27 +13,35 @@ import java.lang.module.Configuration;
 import java.lang.module.ModuleFinder;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 public class ModuleApi {
     public static void main(String[] args) throws ClassNotFoundException {
-        findSystemModule();
+        findSystemModule("java.desktop");
 
 
         // TODO create module dynamically
 
-        loadClassInAnotherModulePath(
+        // Stupid code
+        var c = loadClassInAnotherModulePath(
                 null,
                 "java.desktop",
                 "my.ModuleMain"
         );
+        System.out.println(
+                "loaded in '" +
+                "java.desktop" +
+                "'? " + c
+        );
     }
 
-    private static void loadClassInAnotherModulePath(
+    @SuppressWarnings("unchecked")
+    private static <T> Optional<Class<T>> loadClassInAnotherModulePath(
             Path theJarPath,
             String moduleName,
             String className
     ) throws ClassNotFoundException {
-        ModuleFinder systemFinder = ModuleFinder.of(theJarPath);
+        ModuleFinder systemFinder = theJarPath == null ? ModuleFinder.of() : ModuleFinder.of(theJarPath);
         ModuleLayer bootLayout = ModuleLayer.boot();
 
         // resolves the configuration that has bootLayout as parent
@@ -47,10 +55,15 @@ public class ModuleApi {
                 newConfiguration,
                 ClassLoader.getSystemClassLoader()
         );
-        moduleLayer.findLoader(moduleName).loadClass(className);
+        ClassLoader loader = moduleLayer.findLoader(moduleName);
+        if (loader == null) {
+            // system class loader
+            return Optional.empty();
+        }
+        return Optional.of((Class<T>) loader.loadClass(className));
     }
 
-    private static void findSystemModule() {
-        ModuleLayer.boot().findModule("java.desktop").ifPresent(System.out::println);
+    private static void findSystemModule(String moduleName) {
+        ModuleLayer.boot().findModule(moduleName).ifPresent(System.out::println);
     }
 }
