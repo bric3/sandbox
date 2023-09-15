@@ -46,7 +46,7 @@ mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 
 jna = { module = "net.java.dev.jna:jna", version = "5.13.0" }
-jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.14" }
+jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.15" }
 
 flightRecorder = { module = "org.openjdk.jmc:flightrecorder", version.ref = "flightRecorder" }
 flightRecorder-writer = { module = "org.openjdk.jmc:flightrecorder.writer", version.ref = "flightRecorder" }
