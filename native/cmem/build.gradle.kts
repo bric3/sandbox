@@ -1,6 +1,3 @@
-import dev.nokee.platform.nativebase.ExecutableBinary
-import dev.nokee.platform.nativebase.internal.linking.NativeLinkTaskUtils
-
 /*
  * sandbox
  *
@@ -10,6 +7,9 @@ import dev.nokee.platform.nativebase.internal.linking.NativeLinkTaskUtils
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
+import dev.nokee.platform.nativebase.ExecutableBinary
+import dev.nokee.platform.nativebase.internal.linking.NativeLinkTaskUtils
+
 plugins {
     id("dev.nokee.c-application")
 }
