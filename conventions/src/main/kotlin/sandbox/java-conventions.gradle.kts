@@ -90,6 +90,15 @@ tasks {
                 }
                 .get()
         )
+        jvmArgumentProviders.add(
+            javaConventions.openedModules
+                .map {
+                    CommandLineArgumentProvider {
+                        it.map { "--add-opens=${it.key}=${it.value}" }
+                    }
+                }
+                .get()
+        )
     }
 
     withType<JavaCompile>().configureEach {

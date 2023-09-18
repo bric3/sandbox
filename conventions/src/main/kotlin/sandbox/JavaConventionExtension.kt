@@ -10,6 +10,7 @@
 package sandbox
 
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.jvm.toolchain.JvmVendorSpec
 
@@ -50,10 +51,20 @@ interface JavaConventionExtension {
     /**
      * List of modules to add to the module path.
      *
-     * Each module will be added as this option `--add-modules=<module>`
-     * to the compiler and java exec.
+     * Each module will be added using `--add-modules={module}` option
+     * to the **compiler** and **java** exec.
      *
      * Defaults to an empty list.
      */
     val addedModules: ListProperty<String>
+
+    /**
+     * List of module package to open and their target modules.
+     *
+     * Each module will be opened using `--open-modules={module package}={target module}` option
+     * to the **compiler** and **java** exec.
+     *
+     * Defaults to an empty list.
+     */
+    val openedModules: MapProperty<String, String>
 }
