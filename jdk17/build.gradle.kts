@@ -169,3 +169,11 @@ tasks.register<JavaExec>("runSDLFoo") {
   // need to set the project's toolchain explicitly see: https://github.com/gradle/gradle/issues/16791
   javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
+
+tasks.compileJava {
+    // -g:none
+    options.debugOptions.debugLevel = "none"
+    options.debugOptions.debugLevel
+
+    options.isDebug
+}

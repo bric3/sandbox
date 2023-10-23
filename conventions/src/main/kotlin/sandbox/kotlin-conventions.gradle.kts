@@ -19,12 +19,14 @@ plugins {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(19))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
 kotlinExtension.apply {
-    jvmToolchain(19) // kotlin 1.8.21 does not support JDK 20
+    // kotlin pre 1.9 does not support JDK 20
+    // kotlin pre 1.9.10 does not support JDK 21
+    jvmToolchain(21)
 }
 
 // workaround for https://youtrack.jetbrains.com/issue/IDEA-316081/Gradle-8-toolchain-error-Toolchain-from-executable-property-does-not-match-toolchain-from-javaLauncher-property-when-different
