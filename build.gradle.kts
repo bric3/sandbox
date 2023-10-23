@@ -11,6 +11,7 @@ import org.jetbrains.gradle.ext.copyright
 import org.jetbrains.gradle.ext.settings
 
 plugins {
+  id("sandbox.build-stats-conventions")
   alias(libs.plugins.ideaExt)
 }
 
