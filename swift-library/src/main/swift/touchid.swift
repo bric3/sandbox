@@ -52,6 +52,7 @@ func authenticateUser(_ callback: @escaping (_ result: AuthResult) -> Void) {
     switch (context.biometryType) {
         case .touchID: print("Biometry: Touch ID")
         case .faceID: print("Biometry: Face ID")
+        case .opticID: print("Biometry: Optic ID")
         case .none: print("Biometry: none")
     }
 
