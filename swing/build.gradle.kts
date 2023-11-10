@@ -14,7 +14,7 @@ plugins {
 }
 
 javaConvention {
-    languageVersion = 20
+    languageVersion = 21
 }
 
 dependencies {
