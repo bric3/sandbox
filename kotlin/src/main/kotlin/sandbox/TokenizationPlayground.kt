@@ -9,7 +9,12 @@
  */
 package sandbox
 
+import sandbox.TokenizationPlayground.Companion.PlaceholderMatcher
 import java.io.StreamTokenizer
+
+typealias Token = String
+typealias MutableTokenList = MutableList<Token>
+typealias TokenList = List<Token>
 
 class TokenizationPlayground {
     companion object {
@@ -42,42 +47,41 @@ class TokenizationPlayground {
             }
         }
 
-        private fun String.tokenize(): List<String> {
+        fun interface PlaceholderMatcher {
+            fun match(subSequence: CharSequence, tokenList: MutableTokenList): Boolean
+        }
+
+        fun tokenizeMessageFormat(
+            logMessageFormat : CharSequence,
+            placeholderMatcher: PlaceholderMatcher = PlaceholderMatcher { _,_ -> false }
+        ): TokenList {
             val delimiters = " " // other delimiters?
-            val parameterTokens = listOf("{}") // TODO may need higher lever matcher (e.g. for {0}, {1}, or else)
 
-            // need to split on string like "{}" as a single word
-            // e.g. "{}{}" becomes two tokens "{}", "{}"
-
-            val delimiterCodePoints = delimiters.codePoints().toArray()
+            // Currently the tokenization works on char, do we need to work with
+            // Unicode code points instead?
+            // e.g. val delimiterCodePoints = delimiters.codePoints().toArray()
 
             val tokens = mutableListOf<String>()
             var wordStart = -1
-            forEachIndexed { idx, c ->
+            logMessageFormat.forEachIndexed { idx, c ->
                 if (!delimiters.contains(c)) {
                     // not a delimiter, keep the char
                     if (wordStart < 0) {
                         wordStart = idx
                     }
-                    val element = substring(wordStart, idx + 1)
-                    val matchedParamToken = parameterTokens.firstOrNull { element.endsWith(it) }
-                    if (matchedParamToken != null) {
-                        if (matchedParamToken.length < element.length) {
-                            tokens.add(element.substring(0, element.length - matchedParamToken.length))
-                            tokens.add(matchedParamToken)
-                        } else {
-                            tokens.add(element)
-                        }
+                    val element = logMessageFormat.subSequence(wordStart, idx + 1)
 
+                    if (placeholderMatcher.match(element, tokens)) {
+                        // placeholder matched, reset the word start
                         wordStart = -1
                     }
-                    if (wordStart >-0 && idx == length - 1) {
-                        tokens.add(element)
+                    if (wordStart > 0 && idx == logMessageFormat.length - 1) {
+                        tokens.add(element.toString())
                     }
                 } else {
                     // whitespace or any delimiter, drop the char
                     if (wordStart > -1) {
-                        tokens.add(substring(wordStart, idx))
+                        tokens.add(logMessageFormat.substring(wordStart, idx))
                         wordStart = -1
                     }
                 }
@@ -91,7 +95,27 @@ class TokenizationPlayground {
             "{}{} Fragment text {}={} yet 😶‍🌫️ another piece of text".run {
                 streamTokenization().forEach { println(it) }
                 println("----")
-                tokenize().forEach { println(it) }
+                tokenizeMessageFormat(
+                    logMessageFormat = this,
+                    placeholderMatcher = ::slf4jPlaceholdersMatcher
+                ).forEach { println(it) }
+            }
+        }
+
+        private fun slf4jPlaceholdersMatcher(subSequence: CharSequence, tokenList: MutableTokenList): Boolean {
+            val formatPlaceholders = listOf("{}")
+            val matchedParamToken = formatPlaceholders.firstOrNull { subSequence.endsWith(it) }
+            return if (matchedParamToken != null) {
+                if (matchedParamToken.length < subSequence.length) {
+                    tokenList.add(subSequence.substring(0, subSequence.length - matchedParamToken.length))
+                    tokenList.add(matchedParamToken)
+                } else {
+                    tokenList.add(subSequence.toString())
+                }
+
+                true
+            } else {
+                false
             }
         }
     }
