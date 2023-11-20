@@ -92,12 +92,27 @@ class TokenizationPlayground {
 
         @JvmStatic
         fun main(args: Array<String>) {
+            println("log message format")
+            println("==================")
+
             "{}{} Fragment text {}={} yet 😶‍🌫️ another piece of text".run {
                 streamTokenization().forEach { println(it) }
                 println("----")
                 tokenizeMessageFormat(
                     logMessageFormat = this,
                     placeholderMatcher = ::slf4jPlaceholdersMatcher
+                ).forEach { println(it) }
+            }
+
+            println("wildcard")
+            println("========")
+
+            "Computing stuff key=[wildcard]*[/wildcard]".run {
+                streamTokenization().forEach { println(it) }
+                println("----")
+                tokenizeMessageFormat(
+                    logMessageFormat = this,
+                    placeholderMatcher = ddClusterWildcardsMatcher()
                 ).forEach { println(it) }
             }
         }
@@ -118,5 +133,51 @@ class TokenizationPlayground {
                 false
             }
         }
+
+        fun ddClusterWildcardsMatcher() : PlaceholderMatcher {
+            return object : PlaceholderMatcher {
+                private var wildCardDepth = 0
+                private var outerMostStartTagIndex = -1
+                private val beforeWildcard = "[wildcard]"
+                private val afterWildcard = "[/wildcard]"
+
+                override fun match(subSequence: CharSequence, tokenList: MutableTokenList): Boolean {
+                    // Apparently wildcard can be nested?!
+                    // Detect wildcard start tag (the subsequence might have started by something else than a wildcard)
+                    val indexOfStart = subSequence.indexOf(beforeWildcard, outerMostStartTagIndex + beforeWildcard.length)
+                    if (indexOfStart != -1) {
+                        wildCardDepth++
+
+                        if (indexOfStart > 0 && wildCardDepth == 1) {
+                            // there is something before the wildcard
+                            outerMostStartTagIndex = indexOfStart
+                            tokenList.add(subSequence.substring(0, indexOfStart))
+                        }
+                        // continue eating the whole pattern
+                        return false
+                    }
+
+                    // Detect wildcard end tag
+                    if (subSequence.endsWith(afterWildcard)) {
+                        wildCardDepth--
+
+                        if (wildCardDepth == 0) {
+                            // end of wildcard
+                            tokenList.add(subSequence.substring(outerMostStartTagIndex, subSequence.length))
+                            outerMostStartTagIndex = -1
+                            return true
+                        } else {
+                            check(wildCardDepth < 0) { "negative wildcard depth" }
+                        }
+
+                        // continue eating the whole pattern until last wildcard end tag
+                        return false
+                    }
+
+                    return false
+                }
+            }
+        }
+
     }
 }
