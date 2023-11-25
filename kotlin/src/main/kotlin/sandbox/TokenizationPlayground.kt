@@ -359,16 +359,35 @@ object LogStatementScorer {
                 }
             }
 
-            // check if the msgFormat token is a formatting anchor and the template token is a wildcard
-            // then lets assume it matches
-            if (msgFormatToken is LogFormattingAnchor
-                && templateToken is WildcardToken) {
-                score++
-                msgFormatTokensIdx++
-                templateTokensIdx++
-                continue
-            }
+            // check if the msgFormat token is a formatting anchor e.g. {}
+            if (msgFormatToken is LogFormattingAnchor) {
+                // and the template token is a wildcard then let's assume it matches
+                if (templateToken is WildcardToken) {
+                    // hint to skip template tokens to grab hold on the next common whitespace or regular text,
+                    // e.g., eat everything until whitespace
+                    // "[wildcard]*[/wildcard].[wildcard]*[/wildcard][wildcard]*[/wildcard] "
+                    //  | Wildcard            || Wildcard            | Wildcard            | Whitespace
+                    //                        | RegularTextToken(word=.)
+                    //
+                    // or
+                    // "[wildcard]*[/wildcard].[wildcard]*[/wildcard][wildcard]*[/wildcard]regular_text"
+                    //  | Wildcard            || Wildcard            | Wildcard            | RegularTextToken(word=regular_text)
+                    //                        | RegularTextToken(word=.)
+                    val nextMsgFormatToken = msgFormatTokens.getOrNull(msgFormatTokensIdx + 1)
+                    if (nextMsgFormatToken is Whitespace || nextMsgFormatToken is RegularTextToken) {
+                        var nextTemplateToken = templateTokens.getOrNull(templateTokensIdx + 1)
+                        while (nextTemplateToken != nextMsgFormatToken) {
+                            templateTokensIdx++
+                            nextTemplateToken = templateTokens.getOrNull(templateTokensIdx + 1)
+                        }
+                    }
 
+                    score++
+                    msgFormatTokensIdx++
+                    templateTokensIdx++
+                    continue
+                }
+            }
             // Don't know how to match those tokens so abort the scoring
             break
         }
