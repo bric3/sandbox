@@ -4,6 +4,7 @@ import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Point
+import java.awt.event.ComponentEvent
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JComponent
@@ -49,14 +50,28 @@ object PopupStuff {
                     }
 
                     popupContent.addPropertyChangeListener("preferredSize") { _ ->
-                        val w = SwingUtilities.getWindowAncestor(popupContent)
-                        w.location = this@button.locationOnScreen.apply {
-                            x = x + this@button.width - popupContent.preferredSize.width
-                            y += this@button.height
-                        }
-                        w.size = popupContent.preferredSize
+                        // val w = SwingUtilities.getWindowAncestor(popupContent)
+                        // w.location = this@button.locationOnScreen.apply {
+                        //     x = x + this@button.width - popupContent.preferredSize.width
+                        //     y += this@button.height
+                        // }
+                        // w.size = popupContent.preferredSize
                         println("preferredSize: ${popupContent.preferredSize}")
                     }
+
+                    popupContent.addComponentListener(object : java.awt.event.ComponentAdapter() {
+                        override fun componentResized(e: ComponentEvent?) {
+                            val w = SwingUtilities.getWindowAncestor(popupContent)
+                            w.location = this@button.locationOnScreen.apply {
+                                x = x + this@button.width - popupContent.preferredSize.width
+                                y += this@button.height
+                            }
+                            w.size = popupContent.preferredSize
+                            w.doLayout()
+                            w.repaint(1)
+                            println("componentResized: ${popupContent.preferredSize}")
+                        }
+                    })
 
                     popup = PopupFactory.getSharedInstance().getPopup(
                         this@main,
