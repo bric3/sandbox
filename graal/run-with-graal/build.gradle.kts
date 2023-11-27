@@ -9,13 +9,7 @@
  */
 
 plugins {
-  // Playing with graal compiler
-  id("org.graalvm.plugin.compiler") version "0.1.0-alpha2"
-}
-
-
-graal {
-  version = libs.versions.graalvm.get()
+  id("sandbox.graal-jvmci-conventions")
 }
 
 tasks.withType<JavaExec>().configureEach {

@@ -55,9 +55,13 @@ flightRecorder-rules-jdk = { module = "org.openjdk.jmc:flightrecorder.rules.jdk"
 flexmark-all = { module = "com.vladsch.flexmark:flexmark-all", version.ref = "flexmark" }
 
 graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }
-graal-js = { module = "org.graalvm.js:js", version.ref = "graalvm" }
+graal-truffle-api = { module = "org.graalvm.truffle:truffle-api", version.ref = "graalvm" }
+graal-js = { module = "org.graalvm.polyglot:js", version.ref = "graalvm" }
 graal-js-scriptengine = { module = "org.graalvm.js:js-scriptengine", version.ref = "graalvm" }
-graal-js-chromeinspector = { module = "org.graalvm.tools:chromeinspector", version.ref="graalvm" }
+graal-js-chromeinspector = { module = "org.graalvm.tools:chromeinspector-tool", version.ref="graalvm" }
+
+graal-compiler = { module = "org.graalvm.compiler:compiler", version.ref = "graalvm" }
+graal-compiler-management = { module = "org.graalvm.compiler:compiler-management", version.ref = "graalvm" }
 
 # Used to help mend compute the JMH version
 jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
@@ -75,6 +79,8 @@ junit-jupiter = ["junit-jupiter-api", "junit-jupiter-engine", "junit-jupiter-vin
 mockito = ["mockito-core", "mockito-kotlin"]
 
 graal-js = ["graal-js", "graal-js-scriptengine", "graal-js-chromeinspector"]
+graal-compiler = ["graal-compiler", "graal-compiler-management"]
+graal-deps = ["graal-sdk", "graal-truffle-api"]
 
 [plugins]
 download = { id = "de.undercouch.download", version = "5.5.0" }

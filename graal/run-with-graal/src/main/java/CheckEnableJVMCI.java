@@ -12,7 +12,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class CheckEnableJVMCI {
@@ -27,16 +28,16 @@ public class CheckEnableJVMCI {
             System.getProperty("java.vm.name"),
             System.getProperty("java.vm.version")
     );
-
-    var commandArgs = ProcessHandle.current().info().arguments().map(Set::of).orElseThrow();
+    var commandArgs = ProcessHandle.current().info().arguments().map(List::of).map(LinkedHashSet::new).orElseThrow();
 
     assert commandArgs.contains("-XX:+UnlockExperimentalVMOptions") : "Missing -XX:+UnlockExperimentalVMOptions";
     assert commandArgs.contains("-XX:+EnableJVMCI") : "Missing -XX:+EnableJVMCI";
-    assert commandArgs.stream().anyMatch(arg -> arg.startsWith("--module-path")) : "Missing graal --module-path";
-    assert commandArgs.stream().anyMatch(arg -> arg.startsWith("--upgrade-module-path")) : "Missing graal --upgrade-module-path";
+    assert commandArgs.stream().anyMatch(arg -> arg.startsWith("--module-path")) : "No graal module (SDK, Truffle API) --module-path";
+    assert commandArgs.stream().anyMatch(arg -> arg.startsWith("--upgrade-module-path")) : "Missing graal compiler --upgrade-module-path";
 
+    // TODO rewrite to support args without "="
     commandArgs.stream()
-               .filter(arg -> arg.startsWith("--module-path"))
+               .filter(arg -> arg.startsWith("--upgrade-module-path") || arg.startsWith("--module-path"))
                .map(arg -> arg.substring(arg.indexOf("=") + 1))
                .flatMap(path -> {
                  try {
