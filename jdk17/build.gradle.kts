@@ -22,7 +22,7 @@ javaConvention {
 }
 
 dependencies {
-  implementation("org.jsoup:jsoup:1.16.2")
+  implementation("org.jsoup:jsoup:1.17.1")
 }
 
 // See https://docs.gradle.org/current/userguide/cross_project_publications.html
