@@ -15,7 +15,7 @@ import javax.swing.PopupFactory
 import javax.swing.SwingUtilities
 
 
-object PopupStuff {
+object PopupStuffK {
     @JvmStatic
     fun main(args: Array<String>) {
         SwingUtilities.invokeLater {
