@@ -54,6 +54,8 @@ func authenticateUser(_ callback: @escaping (_ result: AuthResult) -> Void) {
         case .faceID: print("Biometry: Face ID")
         case .opticID: print("Biometry: Optic ID")
         case .none: print("Biometry: none")
+        @unknown default:
+            print("Biometry: unknown")
     }
 
     if !permitted { // this only makes sense with LAPolicy.deviceOwnerAuthenticationWithBiometrics
