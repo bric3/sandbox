@@ -4,52 +4,14 @@ import java.io.PrintStream;
 
 @SuppressWarnings("unused")
 public class LoadingIndicator {
-
   public static final String BASIC = "|/-\\";
   public static final String BRAILLE = "⡿⣟⣯⣷⣾⣽⣻⢿";
   public static final String CLOCK = "◷◶◵◴";
   public static final String UNICODE_HALF_WIDTH = "▏ ▎ ▍ ▌ ▋ ▊ ▉ █ ";
+  public static final String UNICODE_FULL_WIDTH = "▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ";
 
-  public static void main(String[] args) {
-    var t1 = LoadingIndicator.infinite(System.out)
-                             .loadingChars(BRAILLE)
-                             .asVirtualThread();
-    t1.start();
-    try {
-      Thread.sleep(5000);
-      t1.interrupt();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-
-    var t2 = LoadingIndicator.infinite(System.out)
-                             .loadingChars(UNICODE_HALF_WIDTH)
-                             .withPrefix("Loading (5s)...")
-                             .asVirtualThread();
-    t2.start();
-    try {
-      Thread.sleep(5000);
-      t2.interrupt();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-
-    var t3 = LoadingIndicator.infinite(System.out)
-                             .loadingChars(CLOCK)
-                             .withPrefix("Getting ready (5s)...")
-                             .withTerminateString("Done")
-                             .asVirtualThread();
-    t3.start();
-    try {
-      Thread.sleep(5000);
-      t3.interrupt();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    }
-  }
-
-  public static InfiniteLoaderIndicator infinite(PrintStream printStream) {
-    return new InfiniteLoaderIndicator(printStream);
+  public static LoadingIndicator.InfiniteLoaderIndicator infinite(PrintStream printStream) {
+    return new LoadingIndicator.InfiniteLoaderIndicator(printStream);
   }
 
   public static class InfiniteLoaderIndicator extends LoadingIndicator {
@@ -92,7 +54,7 @@ public class LoadingIndicator {
             Thread.sleep(500);
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            printStream.print("\r" + prefix + "✅");
+            printStream.print(STR."\r\{prefix}✅");
             // for some reason using print("\n") introduce a flush and outputs one too many
             // 'new line' along the way, using the char overload to output a new line works
             printStream.print('\n');
@@ -104,7 +66,7 @@ public class LoadingIndicator {
             return;
           }
 
-          printStream.print(prefix + c + "\r");
+          printStream.print(STR."\{prefix}\{c}\r");
         }
       }
     }

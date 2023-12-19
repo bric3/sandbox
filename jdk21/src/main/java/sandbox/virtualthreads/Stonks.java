@@ -1,3 +1,12 @@
+/*
+ * Stonks.java
+ *
+ * Copyright (c) 2021,today - Brice Dutheil <brice.dutheil@gmail.com>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 package sandbox.virtualthreads;
 
 import java.io.IOException;
@@ -15,12 +24,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -29,9 +33,60 @@ import java.util.stream.Collectors;
  Run with
 
  environment variable: FINNHUB_TOKEN={the token}
- JFR: -XX:StartFlightRecording:filename=stonks.jfr,+jdk.VirtualThreadStart#enabled=true,+jdk.VirtualThreadEnd#enabled=true
+ JFR: -XX:StartFlightRecording:filename=stonks.jfr,+jdk.VirtualThreadStart#enabled=true,+jdk.VirtualThreadEnd#enabled=true,+jdk.VirtualThreadPinned=true
 */
 public class Stonks {
+  public static final List<String> DEFAULT_TICKERS = List.of(
+          "DDOG",
+          "NFLX",
+          "AAPL",
+          "TSLA",
+          "GOOG",
+          "AMZN",
+          "MSFT",
+          "NET",
+          "TWTR",
+          "BABA",
+          "NDAQ",
+          "IBM",
+          "UBER",
+          "ROKU",
+          "NVDA",
+          "AMD",
+          "INTC",
+          "AKAM",
+          "XIACF",
+          "PHG",
+          "ADBE",
+          "ORCL",
+          "TTE",
+          "SNY",
+          "PFE",
+          "ORAN",
+          "CRTO",
+
+          "GC=F", // no company profile for gold
+          "SI=F", // no company profile for silver
+          "CL=F", // no company profile for crude oil
+          "EURUSD=X", // no company profile for euro/usd
+          "BTC-USD",
+          "BTC-EUR",
+          "ETH-USD",
+          "ETH-EUR",
+
+          // "A2R82Y.DU", // no company profile for Dow Futures
+          // "^IXIC", // no company profile for nasdaq
+
+          // not available in the free tier
+          // "NASDAQ",
+          // "^HSI",
+          // "^FCHI",
+          // "DOW J",
+          // "^N225",
+          // "^GDAXI",
+          // "^FTSE",
+          ""
+  );
   private static final String default_fg = "\u001B[39m";
   private static final String red = "\u001B[31m";
   private static final String green = "\u001B[32m";
@@ -44,88 +99,43 @@ public class Stonks {
 
   private volatile boolean rateLimitAnnounceInProgress = false;
   private volatile long rateLimitResetSeconds = 0;
-  private final Pattern fieldMatcher = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"?(-?\\d+(?:.\\d+)?|[^\"]+)\"?");
+  private final Pattern fieldMatcher = Pattern.compile("\"([^\"]+)\"\\s*:\\s*(null|\"?(?:-?\\d+(?:.\\d+)?|[^\"]+)\"?)");
   private final HttpClient httpClient;
 
   public static void main(String[] args) throws Exception {
     // https://finnhub.io/pricing
     // 60 API calls/minute
     var finnhubToken = System.getenv("FINNHUB_TOKEN");
-    if (finnhubToken == null || finnhubToken.isBlank()) {
+    if (finnhubToken == null || finnhubToken.isBlank() || finnhubToken.equals("null")) {
       System.out.println("Needs non empty token set in the environment variable FINNHUB_TOKEN");
       System.exit(1);
     }
 
-    new Stonks().run(finnhubToken);
+    new Stonks().run(finnhubToken, args);
   }
 
   public Stonks() {
-    int httpClientCarrierThreads = Integer.parseInt(Objects.requireNonNullElse(System.getenv("HTTP_CLIENT_CARRIER_THREADS"), "1"));
+    var httpClientCarrierThreadsEnv = System.getenv("HTTP_CLIENT_CARRIER_THREADS");
+    int httpClientCarrierThreads = switch (httpClientCarrierThreadsEnv) {
+      case "null" -> 1;
+      case null -> 1;
+      default -> Integer.parseInt(httpClientCarrierThreadsEnv);
+    };
+
     httpClient = HttpClient.newBuilder()
                            .executor(Executors.newFixedThreadPool(httpClientCarrierThreads, Thread.ofVirtual().name("HttpClient-virtual").factory()))
                            .connectTimeout(Duration.ofSeconds(10))
                            .build();
-
   }
 
-  private void run(String finnhubToken) throws InterruptedException, ExecutionException, TimeoutException {
-    var tickers = List.of(
-            "DDOG",
-            "NFLX",
-            "AAPL",
-            "TSLA",
-            "GOOG",
-            "AMZN",
-            "MSFT",
-            "NET",
-            "TWTR",
-            "BABA",
-            "NDAQ",
-            "IBM",
-            "UBER",
-            "ROKU",
-            "NVDA",
-            "AMD",
-            "INTC",
-            "AKAM",
-            "XIACF",
-            "PHG",
-            "ADBE",
-            "ORCL",
-            "TTE",
-            "SNY",
-            "PFE",
-            "ORAN",
-            "CRTO",
-
-            "GC=F", // no company profile for gold
-            "SI=F", // no company profile for silver
-            "CL=F", // no company profile for crude oil
-            "EURUSD=X", // no company profile for euro/usd
-            "BTC-USD",
-            "BTC-EUR",
-            "ETH-USD",
-            "ETH-EUR",
-
-            "YM=F", // no company profile for Dow Futures
-            "NQ=F", // no company profile for nasdaq
-
-            // not available in the free tier
-            // "NASDAQ",
-            // "^HSI",
-            // "^FCHI",
-            // "DOW J",
-            // "^N225",
-            // "^GDAXI",
-            // "^FTSE",
-            ""
-    );
+  private void run(String finnhubToken, String... tickersArgs) throws InterruptedException, ExecutionException, TimeoutException {
+    var tickers = tickersArgs.length > 0 ? List.of(tickersArgs) : DEFAULT_TICKERS;
 
     try (var es = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("finnhub-fetcher").factory())) {
       var tickerTasks = tickers.stream().filter(Predicate.not(String::isBlank)).map(ticker -> CompletableFuture.runAsync(() -> {
         try {
           var quoteResponse = CompletableFuture.supplyAsync(() -> sendWithRetry(
-                  HttpRequest.newBuilder(URI.create("https://finnhub.io/api/v1/quote?symbol=" + URLEncoder.encode(ticker, StandardCharsets.UTF_8)))
+                  HttpRequest.newBuilder(URI.create(STR."https://finnhub.io/api/v1/quote?symbol=\{URLEncoder.encode(ticker, StandardCharsets.UTF_8)}"))
                              .GET()
                              .header("X-Finnhub-Token", finnhubToken)
                              .build(),
@@ -133,7 +143,7 @@ public class Stonks {
           ), es);
 
           var profile2Response = CompletableFuture.supplyAsync(() -> sendWithRetry(
-                  HttpRequest.newBuilder(URI.create("https://finnhub.io/api/v1/stock/profile2?symbol=" + URLEncoder.encode(ticker, StandardCharsets.UTF_8)))
+                  HttpRequest.newBuilder(URI.create(STR."https://finnhub.io/api/v1/stock/profile2?symbol=\{URLEncoder.encode(ticker, StandardCharsets.UTF_8)}"))
                              .GET()
                              .header("X-Finnhub-Token", finnhubToken)
                              .build(),
@@ -146,7 +156,7 @@ public class Stonks {
                   profile2Response.get()
           );
         } catch (Exception e) {
-          System.err.println("Failure on " + ticker);
+          System.err.println(STR."Failure on \{ticker}");
           e.printStackTrace(System.err);
         }
       }, es)).toArray(CompletableFuture[]::new);
@@ -171,7 +181,7 @@ public class Stonks {
         this.rateLimitAnnounceInProgress = true;
         waitingThread = LoadingIndicator.infinite(System.err)
                                         .loadingChars(LoadingIndicator.BRAILLE)
-                                        .withPrefix("[Rate limit] Pausing for " + amount + "s")
+                                        .withPrefix(STR."[Rate limit] Pausing for \{amount}s")
                                         .withTerminateString("[Rate limit] Resuming")
                                         .asVirtualThread();
         waitingThread.start();
@@ -218,6 +228,15 @@ public class Stonks {
             m -> m.group(2)
     ));
 
+    String error = quotePayload.get("error");
+    if ("null".equals(quotePayload.get("d")) || error != null) {
+      System.out.println(STR."► \{bold}\{ticker}\{reset} \{gray}SKIPPED\{reset}%n");
+      if (error != null) {
+        System.out.println(STR."  \{red}\{error}\{reset}%n");
+      }
+      return;
+    }
+
     var currentPrice = Double.parseDouble(quotePayload.get("c"));
     var change = Double.parseDouble(quotePayload.get("d"));
     var percentChange = Double.parseDouble(quotePayload.get("dp"));
@@ -231,31 +250,13 @@ public class Stonks {
             m -> m.group(2)
     ));
 
-    System.out.printf(
+    System.out.println(
+            STR."""
+            ► \{bold}\{ticker}\{reset} \{(change < 0 ? STR."\{red}↘︎" : STR."\{green}↗︎")}\{reset} \{gray}\{LocalDateTime.ofInstant(Instant.ofEpochSecond(Long.parseLong(quotePayload.get("t"))), ZoneId.systemDefault())}\{reset}
+            \{italic}\{profile2Payload.get("name")}\{reset} (\{profile2Payload.get("exchange")}) currency: \{profile2Payload.get("currency")}
+            \{bold + underline + blue}\{currentPrice}\{reset}
+            \{change < 0 ? change : STR."+\{change}"} (\{change < 0 ? red : green}\{percentChange}%\{reset}) \{green}↑\{reset}\{highPriceOfTheDay} \{red}↓\{reset}\{lowPriceOfTheDay} \{reset}
             """
-            ► %s %s %s\u001B[00m
-            %s (%s) currency: %s\u001B[00m
-            %s
-            %s (%s) \u001B[00;32m↑\u001B[00m %s \u001B[00;31m↓\u001B[00m %s
-            """,
-            // line 1
-            bold + ticker + reset,
-            (change < 0 ? red + "↘︎" : green + "↗︎") + reset,
-            gray + LocalDateTime.ofInstant(Instant.ofEpochSecond(Long.parseLong(quotePayload.get("t"))), ZoneId.systemDefault()) + reset,
-
-            // line 2
-            italic + profile2Payload.get("name") + reset,
-            profile2Payload.get("exchange"),
-            profile2Payload.get("currency"),
-
-            // Line 3
-            bold + underline + blue + currentPrice + reset,
-
-            // line 4
-            change < 0 ? change : "+" + change,
-            (change < 0 ? red + percentChange + "%" : green + "+" + percentChange + "%") + reset,
-            highPriceOfTheDay,
-            lowPriceOfTheDay
     );
   }
 }
