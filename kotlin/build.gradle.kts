@@ -14,6 +14,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven("https://packages.jetbrains.team/maven/p/kds/kotlin-ds-maven")
 }
 
 dependencies {
@@ -24,8 +25,15 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${libs.versions.kotlinCoroutines.get()}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${libs.versions.kotlinCoroutines.get()}")
 
+    implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.5.0")
+    implementation("org.jetbrains.lets-plot:lets-plot-batik:4.1.0")
+    implementation("org.jetbrains.kotlinx:kandy-lets-plot:0.5.0")
+    implementation("org.jetbrains.kotlinx:kandy-util:0.5.0")
+    // currently on a private repository, see https://github.com/Kotlin/kandy/issues/284
+    implementation("org.jetbrains.kotlinx:kotlin-statistics-jvm:0.1.0")
+
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.kotlinCoroutines.get()}")
-    testImplementation(platform("org.junit:junit-bom:5.10.1"))
+    testImplementation(platform("org.junit:junit-bom:${libs.versions.junit.jupiter.get()}"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("app.cash.turbine:turbine:1.0.0")
 }

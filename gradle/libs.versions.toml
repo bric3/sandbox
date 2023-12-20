@@ -24,7 +24,7 @@ flightRecorder = "8.3.1"
 jmh = "1.37"
 
 kotlin = "1.9.22"
-kotlinCoroutines = "1.5.0"
+kotlinCoroutines = "1.7.3"
 
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
