@@ -1,13 +1,3 @@
-/*
- * sandbox
- *
- * Copyright (c) 2022, today - Brice DUTHEIL
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/.
- */
-
 // Options doc https://docs.renovatebot.com/configuration-options/
 // validate with
 // docker run --mount type=bind,source=$(pwd)/.github/renovate.json5,target=/usr/src/app/renovate.json5,readonly -it renovate/renovate renovate-config-validator
