@@ -26,7 +26,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${libs.versions.kotlinCoroutines.get()}")
 
     implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.5.0")
-    implementation("org.jetbrains.lets-plot:lets-plot-batik:4.1.0")
+    implementation("org.jetbrains.lets-plot:lets-plot-batik:4.2.0")
     implementation("org.jetbrains.kotlinx:kandy-lets-plot:0.5.0")
     implementation("org.jetbrains.kotlinx:kandy-util:0.5.0")
     // currently on a private repository, see https://github.com/Kotlin/kandy/issues/284
