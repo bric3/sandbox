@@ -17,7 +17,7 @@ flexmark = "0.64.8"
 mockito = "5.11.0"
 mockito-kotlin = "5.2.1"
 
-testcontainers = "1.19.6"
+testcontainers = "1.19.7"
 
 flightRecorder = "8.3.1"
 
