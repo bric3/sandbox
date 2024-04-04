@@ -1,8 +1,9 @@
-JF Labs Filters
+JF Labs Layouts
 
 
 Source : 
-http://www.jhlabs.com/ip/filters/download.html
+http://www.jhlabs.com/java/layout/index.html
+http://www.jhlabs.com/java/layout/layouts.zip
 
 
 Copyright 2006 Jerry Huxtable
