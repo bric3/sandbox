@@ -17,12 +17,13 @@ javaConvention {
     languageVersion = 21
 }
 
-dependencies {
-    implementation("com.jhlabs:filters:2.0.235-1")
-}
-
 // Downloaded on 2024-04-05 from https://www.jhlabs.com/ip/filters/download.html
 sourceSets {
-    create("jhLabs")
+  create("jhLabs")
+}
+
+dependencies {
+  // implementation("com.jhlabs:filters:2.0.235-1")
+  implementation(sourceSets["jhLabs"].output)
 }
 
