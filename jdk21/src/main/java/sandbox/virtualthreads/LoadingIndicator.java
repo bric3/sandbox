@@ -54,7 +54,7 @@ public class LoadingIndicator {
             Thread.sleep(500);
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            printStream.print(STR."\r\{prefix}✅");
+            printStream.print("\r" + prefix + "✅");
             // for some reason using print("\n") introduce a flush and outputs one too many
             // 'new line' along the way, using the char overload to output a new line works
             printStream.print('\n');
@@ -66,7 +66,7 @@ public class LoadingIndicator {
             return;
           }
 
-          printStream.print(STR."\{prefix}\{c}\r");
+          printStream.print(prefix + c + "\r");
         }
       }
     }

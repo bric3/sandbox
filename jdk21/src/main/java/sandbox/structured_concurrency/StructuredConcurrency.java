@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@SuppressWarnings("preview")
 public class StructuredConcurrency {
   public static void main(String[] args) {
     try (var executorService = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().factory())) {

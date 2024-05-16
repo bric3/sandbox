@@ -12,7 +12,7 @@
  * env FINNHUB_TOKEN=<token> jbang jdk21/src/main/java/Stonks.java DDOG
  *
  * Or even with Java 21 directly
- * env FINNHUB_TOKEN=<token> java --enable-preview --source 21 path/to/Stonks.java NET
+ * env FINNHUB_TOKEN=<token> java --source 21 path/to/Stonks.java NET
  */
 
 import java.io.IOException;
@@ -31,7 +31,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -115,7 +119,7 @@ public class Stonks {
     // 60 API calls/minute
     var finnhubToken = System.getenv("FINNHUB_TOKEN");
     if (finnhubToken == null || finnhubToken.isBlank() || finnhubToken.equals("null")) {
-      System.out.println("Needs non empty token set in the environment variable FINNHUB_TOKEN");
+      System.err.println("Needs non empty token set in the environment variable FINNHUB_TOKEN");
       System.exit(1);
     }
 
@@ -143,7 +147,7 @@ public class Stonks {
       var tickerTasks = tickers.stream().filter(Predicate.not(String::isBlank)).map(ticker -> CompletableFuture.runAsync(() -> {
         try {
           var quoteResponse = CompletableFuture.supplyAsync(() -> sendWithRetry(
-                  HttpRequest.newBuilder(URI.create(STR."https://finnhub.io/api/v1/quote?symbol=\{URLEncoder.encode(ticker, StandardCharsets.UTF_8)}"))
+                  HttpRequest.newBuilder(URI.create("https://finnhub.io/api/v1/quote?symbol=" + URLEncoder.encode(ticker, StandardCharsets.UTF_8)))
                              .GET()
                              .header("X-Finnhub-Token", finnhubToken)
                              .build(),
@@ -151,7 +155,7 @@ public class Stonks {
           ), es);
 
           var profile2Response = CompletableFuture.supplyAsync(() -> sendWithRetry(
-                  HttpRequest.newBuilder(URI.create(STR."https://finnhub.io/api/v1/stock/profile2?symbol=\{URLEncoder.encode(ticker, StandardCharsets.UTF_8)}"))
+                  HttpRequest.newBuilder(URI.create("https://finnhub.io/api/v1/stock/profile2?symbol=" + URLEncoder.encode(ticker, StandardCharsets.UTF_8)))
                              .GET()
                              .header("X-Finnhub-Token", finnhubToken)
                              .build(),
@@ -164,7 +168,7 @@ public class Stonks {
                   profile2Response.get()
           );
         } catch (Exception e) {
-          System.err.println(STR."Failure on \{ticker}");
+          System.err.println("Failure on " + ticker);
           e.printStackTrace(System.err);
         }
       }, es)).toArray(CompletableFuture[]::new);
@@ -189,7 +193,7 @@ public class Stonks {
         this.rateLimitAnnounceInProgress = true;
         waitingThread = LoadingIndicator.infinite(System.err)
                                         .loadingChars(LoadingIndicator.BRAILLE)
-                                        .withPrefix(STR."[Rate limit] Pausing for \{amount}s")
+                                        .withPrefix("[Rate limit] Pausing for " + amount + "s")
                                         .withTerminateString("[Rate limit] Resuming")
                                         .asVirtualThread();
         waitingThread.start();
@@ -238,9 +242,9 @@ public class Stonks {
 
     String error = quotePayload.get("error");
     if ("null".equals(quotePayload.get("d")) || error != null) {
-      System.out.println(STR."► \{bold}\{ticker}\{reset} \{gray}SKIPPED\{reset}%n");
+      System.out.println("► " + bold + ticker + reset + " " + gray + "SKIPPED" + reset + "%n");
       if (error != null) {
-        System.out.println(STR."  \{red}\{error}\{reset}%n");
+        System.out.println("  " + red + error + reset + "%n");
       }
       return;
     }
@@ -259,16 +263,15 @@ public class Stonks {
     ));
 
     System.out.println(
-            STR."""
-            ► \{bold}\{ticker}\{reset} \{(change < 0 ? STR."\{red}↘︎" : STR."\{green}↗︎")}\{reset} \{gray}\{LocalDateTime.ofInstant(Instant.ofEpochSecond(Long.parseLong(quotePayload.get("t"))), ZoneId.systemDefault())}\{reset}
-            \{italic}\{profile2Payload.get("name")}\{reset} (\{profile2Payload.get("exchange")}) currency: \{profile2Payload.get("currency")}
-            \{bold + underline + blue}\{currentPrice}\{reset}
-            \{change < 0 ? change : STR."+\{change}"} (\{change < 0 ? red : green}\{percentChange}%\{reset}) \{green}↑\{reset}\{highPriceOfTheDay} \{red}↓\{reset}\{lowPriceOfTheDay} \{reset}
-            """
+            "► " + bold + ticker + reset + " " + (change < 0 ? red + "↘︎" : green + "↗︎") + reset + " " + gray + LocalDateTime.ofInstant(Instant.ofEpochSecond(Long.parseLong(quotePayload.get("t"))), ZoneId.systemDefault()) + reset + "\n" +
+            italic + profile2Payload.get("name") + reset + " (" + profile2Payload.get("exchange") + ") currency: " + profile2Payload.get("currency") + "\n" +
+            bold + underline + blue + currentPrice + reset + "\n" +
+            (change < 0 ? change : "+" + change) + " (" + (change < 0 ? red : green) + percentChange + "%" + reset + ") " + green + "↑" + reset + highPriceOfTheDay + " " + red + "↓" + reset + lowPriceOfTheDay + " " + reset
     );
   }
 }
 
+@SuppressWarnings("unused")
 class LoadingIndicator {
   public static final String BASIC = "|/-\\";
   public static final String BRAILLE = "⡿⣟⣯⣷⣾⣽⣻⢿";
@@ -320,7 +323,7 @@ class LoadingIndicator {
             Thread.sleep(500);
           } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            printStream.print(STR."\r\{prefix}✅");
+            printStream.print("\r" + prefix + "✅");
             // for some reason using print("\n") introduce a flush and outputs one too many
             // 'new line' along the way, using the char overload to output a new line works
             printStream.print('\n');
@@ -332,7 +335,7 @@ class LoadingIndicator {
             return;
           }
 
-          printStream.print(STR."\{prefix}\{c}\r");
+          printStream.print(prefix + c + "\r");
         }
       }
     }

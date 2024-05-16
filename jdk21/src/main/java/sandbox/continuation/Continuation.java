@@ -26,6 +26,7 @@ import java.util.function.Consumer;
  *
  * @param <T>
  */
+@SuppressWarnings("preview")
 public final class Continuation<T> implements Iterable<T> {
 
     private final Object delegate;
