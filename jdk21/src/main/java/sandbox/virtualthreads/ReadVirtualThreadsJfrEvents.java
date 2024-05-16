@@ -1,19 +1,10 @@
 package sandbox.virtualthreads;
 
-import org.openjdk.jmc.common.collection.IteratorToolkit;
-import org.openjdk.jmc.common.item.Attribute;
-import org.openjdk.jmc.common.item.IAccessorFactory;
-import org.openjdk.jmc.common.item.ICanonicalAccessorFactory;
 import org.openjdk.jmc.common.item.IItem;
 import org.openjdk.jmc.common.item.IItemCollection;
 import org.openjdk.jmc.common.item.IItemIterable;
-import org.openjdk.jmc.common.item.IMemberAccessor;
 import org.openjdk.jmc.common.item.IType;
-import org.openjdk.jmc.common.item.ItemIterableToolkit;
-import org.openjdk.jmc.common.unit.ContentType;
-import org.openjdk.jmc.common.unit.UnitLookup;
 import org.openjdk.jmc.flightrecorder.CouldNotLoadRecordingException;
-import org.openjdk.jmc.flightrecorder.JfrAttributes;
 import org.openjdk.jmc.flightrecorder.JfrLoaderToolkit;
 
 import java.io.File;
@@ -21,11 +12,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ReadVirtualThreadsJfrEvents {
   private static final String default_fg = "\u001B[39m";

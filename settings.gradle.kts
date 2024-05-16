@@ -1,6 +1,26 @@
 /*
  * sandbox
  *
+ * Copyright (c) 2021, today - Brice Dutheil
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+/*
+ * sandbox
+ *
+ * Copyright (c) 2021, today - Brice Dutheil
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+/*
+ * sandbox
+ *
  * Copyright (c) 2021,today - Brice Dutheil <brice.dutheil@gmail.com>
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -57,7 +77,7 @@ rootProject.name = "sandbox"
 includeBuild("conventions")
 include("kotlin")
 include("jmh-stuff", "jmh-panama")
-include("jdk11", "jdk17", "jdk18", "jdk19", "jdk20", "jdk21")
+include("jdk11", "jdk17", "jdk18", "jdk21")
 include("native:cmem", "native:dlopen")
 include("swift-app", "swift-library")
 include("jmh-panama")

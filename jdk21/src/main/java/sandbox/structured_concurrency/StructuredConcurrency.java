@@ -7,14 +7,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-package sandbox;
+package sandbox.structured_concurrency;
 
-import jdk.incubator.concurrent.StructuredTaskScope;
-
-import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.StructuredTaskScope;
+import java.util.concurrent.StructuredTaskScope.Subtask;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -35,17 +33,18 @@ public class StructuredConcurrency {
       scope.joinUntil(deadline);
       scope.throwIfFailed(e -> new RuntimeException("oups", e));
       // both tasks completed successfully
-      String result = Stream.of(future1, future2)
-                            .map(Future::resultNow)
-                            .map(Object::toString)
-                            .collect(Collectors.joining(", ", "{ ", " }"));
+      var result = Stream.of(future1, future2)
+                         .map(Subtask::get)
+                         .map(Object::toString)
+                         .collect(Collectors.joining(", ", "{ ", " }"));
 
+      System.out.println(result);
     } catch (InterruptedException | TimeoutException e) {
       throw new RuntimeException(e);
     }
   }
 
   private static String query(String queryString) {
-    return "";
+    return queryString + ":" + Instant.now().toString();
   }
 }

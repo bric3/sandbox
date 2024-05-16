@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Path;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
@@ -65,7 +66,7 @@ public class JfrSingle {
           IntStream.range(0, 10_000).forEach(i -> es.submit(() -> System.out.print(".")));
         }
 
-        r.dump(Path.of("recording2.jfr"));
+        r.dump(Path.of(Instant.now().getEpochSecond() + "-recording.jfr"));
       }
     }
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 /*
@@ -299,23 +300,27 @@ class CountDownProblem {
    public static void main(String[] args) {
       if (args.length != 2) {
          System.err.println("usage: java CountDownProblem.java <comma-separated-values> <target>");
-         System.exit(1);
+         // System.exit(1);
       }
+
+      args = new String[] { "1,3,7,10,25,50", "765" };
 
       int target = Integer.parseInt(args[1]);
       List<Integer> numbers = Stream.of(args[0].split(",")).map(Integer::parseInt).toList();
       // uniqueness check
       try {
-         Set.of(numbers.toArray());
+        //noinspection ResultOfMethodCallIgnored
+        Set.of(numbers.toArray());
       } catch (IllegalArgumentException iae) {
          System.err.println(iae);
          System.exit(2);
       }
 
       var start = System.currentTimeMillis();
-      solutions(numbers, target).forEach(e -> {
-         System.out.println(e);
-      });
+      final var firstSeenRef = new AtomicBoolean(false);
+      solutions(numbers, target)
+              .peek(e -> { if (!firstSeenRef.get()) { System.out.println("Solutions:\n----------"); firstSeenRef.set(true); } })
+              .forEach(System.out::println);
       System.out.println("Time taken (ms): " + (System.currentTimeMillis() - start));
    }
 }
