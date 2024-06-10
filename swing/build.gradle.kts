@@ -39,6 +39,8 @@ dependencies {
 
   implementation("org.violetlib:vaqua:12")
   // implementation("com.github.weisj:java-native-foundation:1.1.0:zip")
+  implementation(libs.miglayout)
+  implementation(libs.bundles.flatlaf)
 }
 
 val jnfLocation = layout.buildDirectory.map { "$it/jnf" }

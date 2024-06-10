@@ -13,6 +13,7 @@ bytebuddy = "1.14.18"
 junit-jupiter =  "5.10.3"
 graalvm = "24.0.2"
 flexmark = "0.64.8"
+flatlaf = "3.4.1"
 
 mockito = "5.12.0"
 mockito-kotlin = "5.4.0"
@@ -56,6 +57,14 @@ flightRecorder-rules-jdk = { module = "org.openjdk.jmc:flightrecorder.rules.jdk"
 
 flexmark-all = { module = "com.vladsch.flexmark:flexmark-all", version.ref = "flexmark" }
 
+flatlaf = { module = "com.formdev:flatlaf", version.ref = "flatlaf" }
+flatlaf-extras = { module = "com.formdev:flatlaf", version.ref = "flatlaf" }
+flatlaf-fonts-inter = { module = "com.formdev:flatlaf-fonts-inter", version = "4.0" }
+flatlaf-fonts-roboto-mono = { module = "com.formdev:flatlaf-fonts-roboto-mono", version = "3.000" }
+flatlaf-fonts-jetbrains-mono = { module = "com.formdev:flatlaf-fonts-jetbrains-mono", version = "2.304" }
+
+miglayout = { module = "com.miglayout:miglayout-swing", version = "5.3" }
+
 graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }
 graal-truffle-api = { module = "org.graalvm.truffle:truffle-api", version.ref = "graalvm" }
 graal-js = { module = "org.graalvm.polyglot:js", version.ref = "graalvm" }
@@ -76,6 +85,8 @@ gradleplugin-kotlin-jvm = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin"
 okhttp = ['okhttp', 'okhttp-tls', 'okhttp-dnsoverhttps', 'okhttp-logging']
 bytebuddy = ['bytebuddy', 'bytebuddy-agent']
 flightRecorder = ['flightRecorder', 'flightRecorder-writer', 'flightRecorder-rules', 'flightRecorder-rules-jdk']
+
+flatlaf = ['flatlaf', 'flatlaf-extras', 'flatlaf-fonts-inter', 'flatlaf-fonts-roboto-mono']
 
 junit-jupiter = ["junit-jupiter-api", "junit-jupiter-engine", "junit-jupiter-vintage-engine"]
 mockito = ["mockito-core", "mockito-kotlin"]
