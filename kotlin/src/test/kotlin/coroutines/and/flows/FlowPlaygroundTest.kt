@@ -15,12 +15,12 @@ import kotlin.time.Duration.Companion.milliseconds
 class UnconfinedTestDispatcherTest {
     @Test
     fun `should not wait for te whole delay when using UnconfinedTestDispatcher dispatcher`() = runTest {
-        val start = System.currentTimeMillis()
+        val start = System.nanoTime()
         // UnconfinedTestDispatcher allow to skip the delay operator
         val numberCruncher = NumberCruncher(10_000, this, { UnconfinedTestDispatcher(testScheduler) })
         numberCruncher.calculate()
         val ignored = numberCruncher.results().first()
-        assertTrue(System.currentTimeMillis() - start < 1_000) { "getting first result should not wait for te whole delay when using UnconfinedTestDispatcher dispatcher" }
+        assertTrue(((System.nanoTime() - start) / 1_000_000) < 1_000) { "getting first result should not wait for te whole delay when using UnconfinedTestDispatcher dispatcher" }
     }
 }
 

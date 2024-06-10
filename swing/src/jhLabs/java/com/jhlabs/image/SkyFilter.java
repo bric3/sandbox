@@ -271,7 +271,7 @@ public class SkyFilter extends PointFilter {
   float mn, mx;
 
   public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-    long start = System.currentTimeMillis();
+    long start = System.nanoTime();
     sunR = (float) ((sunColor >> 16) & 0xff) * r255;
     sunG = (float) ((sunColor >> 8) & 0xff) * r255;
     sunB = (float) (sunColor & 0xff) * r255;
@@ -309,8 +309,8 @@ public class SkyFilter extends PointFilter {
     BufferedImage clouds = super.filter(dst, dst);
 //		g.drawRenderedImage( clouds, null );
 //		g.dispose();
-    long finish = System.currentTimeMillis();
-    System.out.println(mn + " " + mx + " " + (finish - start) * 0.001f);
+    long finish = System.nanoTime();
+    System.out.println(mn + " " + mx + " " + ((finish - start) / 1_000_000) * 0.001f);
     exponents = null;
     tan = null;
     return dst;
