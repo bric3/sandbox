@@ -28,7 +28,7 @@ dependencies {
     implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.7.3")
     implementation("org.jetbrains.lets-plot:lets-plot-batik:4.4.0")
     implementation("org.jetbrains.kotlinx:kandy-lets-plot:0.7.0")
-    implementation("org.jetbrains.kotlinx:kandy-util:0.6.0")
+    implementation("org.jetbrains.kotlinx:kandy-util:0.7.0")
     // currently on a private repository, see https://github.com/Kotlin/kandy/issues/284
     implementation("org.jetbrains.kotlinx:kotlin-statistics-jvm:0.3.0")
 
