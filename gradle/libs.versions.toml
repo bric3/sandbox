@@ -29,7 +29,7 @@ kotlinCoroutines = "1.7.3"
 
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
-guava = { module = "com.google.guava:guava", version = "33.2.1-jre" }
+guava = { module = "com.google.guava:guava", version = "33.3.0-jre" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-tls = { group = "com.squareup.okhttp3", name = "okhttp-tls", version.ref = "okhttp" }
 okhttp-dnsoverhttps = { group = "com.squareup.okhttp3", name = "okhttp-dnsoverhttps", version.ref = "okhttp" }
