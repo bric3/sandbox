@@ -63,7 +63,7 @@ flatlaf-fonts-inter = { module = "com.formdev:flatlaf-fonts-inter", version = "4
 flatlaf-fonts-roboto-mono = { module = "com.formdev:flatlaf-fonts-roboto-mono", version = "3.000" }
 flatlaf-fonts-jetbrains-mono = { module = "com.formdev:flatlaf-fonts-jetbrains-mono", version = "2.304" }
 
-miglayout = { module = "com.miglayout:miglayout-swing", version = "5.3" }
+miglayout = { module = "com.miglayout:miglayout-swing", version = "11.4" }
 
 graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }
 graal-truffle-api = { module = "org.graalvm.truffle:truffle-api", version.ref = "graalvm" }
