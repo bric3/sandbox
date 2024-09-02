@@ -27,7 +27,7 @@ dependencies {
   implementation("com.github.joshjdevl.libsodiumjni:libsodium-jni:2.0.2")
 
   // https://github.com/muquit/libsodium-jna
-  implementation("com.muquit.libsodiumjna:libsodium-jna:1.0.4")
+  implementation("com.muquit.libsodiumjna:libsodium-jna:1.0.5")
 
   // libsodium with JNR
   implementation("org.apache.tuweni:tuweni-crypto:2.3.1")
