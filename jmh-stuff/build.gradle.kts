@@ -32,7 +32,7 @@ jmh {
 
 tasks.create("increments") {
   jmh.includes.add("Increments")
-  jmh.resultsFile.set(project.file("${project.buildDir}/reports/jmh/increments-results.txt"))
+  jmh.resultsFile.set(layout.buildDirectory.file("/reports/jmh/increments-results.txt"))
   finalizedBy("jmh")
 }
 
