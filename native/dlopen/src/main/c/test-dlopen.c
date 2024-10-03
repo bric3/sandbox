@@ -32,7 +32,7 @@ static int load_libjvm_handle(void) {
   return 0;
 }
 
-static char* exec(const char* command) {
+static void exec(const char* command) {
   FILE* fp;
   char* result = NULL;
   size_t len = 0;
@@ -41,7 +41,8 @@ static char* exec(const char* command) {
   fp = popen(command, "r");
   if (fp == NULL) {
     printf("failed to execute command: %s\n", command);
-    return fp;
+    perror("popen");
+    return;
   }
 
   while(getline(&result, &len, fp) != -1) {
@@ -61,7 +62,7 @@ static char* exec(const char* command) {
   } else {
     printf("unexpected: %d", status);
   }
-  return result;
+  return;
 }
 
 int main (int argc, char *argv[])
