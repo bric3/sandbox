@@ -30,6 +30,7 @@ import kotlin.system.exitProcess
 
 @Throws(IOException::class)
 fun main(args: Array<String>) {
+  // https://github.com/user-attachments/assets/da93170a-3126-44a0-833c-1e02783b1632
   val firstArg = args.firstOrNull() ?: "https://jb.gg/badges/official.svg"
   val image = when {
     firstArg.startsWith("http") -> ImageIO.read(URI.create(firstArg).toURL())
