@@ -36,12 +36,6 @@ application {
       append(targetMachine.operatingSystemFamily.name)
       append(if (!targetMachine.operatingSystemFamily.isMacOs) "-${targetMachine.architecture.name}" else "")
     }
-    // from(executableFile) {
-    //   rename(".*", publicationName)
-    // }
-
-
-    println(toolChain)
 
     when (toolChain) {
       is Clang -> {

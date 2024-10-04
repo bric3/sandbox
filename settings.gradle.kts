@@ -60,13 +60,17 @@ include("kotlin")
 include("jmh-stuff", "jmh-panama")
 include("jdk11", "jdk17", "jdk18", "jdk21", "jdk23")
 include("native:cmem", "native:dlopen")
-include("swift-app", "swift-library")
 include("jmh-panama")
 include("graal:run-with-graal", "graal:run-with-libgraal")
 include("swing")
 include("sa-agent")
 
-val os = DefaultNativePlatform.getCurrentOperatingSystem()
-if (os.isMacOsX) {
-  include("swift-app", "swift-library")
-}
+// Swift language broken on sequoia (swift 6)
+// See https://github.com/gradle/gradle-native/issues/1116
+// val os = DefaultNativePlatform.getCurrentOperatingSystem()
+// if (os.isMacOsX) {
+//   include(
+//     "swift-app",
+//     "swift-library",
+//   )
+// }
