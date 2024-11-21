@@ -37,7 +37,7 @@ dependencies {
   // implementation("com.jhlabs:filters:2.0.235-1")
   implementation(sourceSets["jhLabs"].output)
 
-  implementation("org.violetlib:vaqua:12")
+  implementation("org.violetlib:vaqua:13")
   // implementation("com.github.weisj:java-native-foundation:1.1.0:zip")
   implementation(libs.miglayout)
   implementation(libs.bundles.flatlaf)
