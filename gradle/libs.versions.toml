@@ -47,7 +47,7 @@ testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 
-jna = { module = "net.java.dev.jna:jna", version = "5.15.0" }
+jna = { module = "net.java.dev.jna:jna", version = "5.16.0" }
 jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.17" }
 
 flightRecorder = { module = "org.openjdk.jmc:flightrecorder", version.ref = "flightRecorder" }
