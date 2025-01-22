@@ -11,7 +11,7 @@
 okhttp =  "4.12.0"
 bytebuddy = "1.16.1"
 junit-jupiter =  "5.11.4"
-graalvm = "24.1.1"
+graalvm = "24.1.2"
 flexmark = "0.64.8"
 flatlaf = "3.5.4"
 
