@@ -9,6 +9,7 @@
  */
 
 plugins {
+  java
   id("sandbox.graal-jvmci-conventions")
 }
 

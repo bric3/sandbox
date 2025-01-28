@@ -8,6 +8,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+plugins {
+  java
+}
 
 
 tasks.withType<JavaExec>().configureEach {

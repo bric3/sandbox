@@ -1,10 +1,5 @@
 // Copy of https://github.com/carldea/panama4newbies/blob/d9791acfa6399d9664909d16f3cd2beb7d6c24ed/macos-touchID/touchid.swift
-
-// Modified
-// See https://www.advancedswift.com/face-id-touch-id-swift/
-
 import LocalAuthentication
-// import _Concurrency
 
 @_cdecl("authenticate_user_touchid")
 public func authenticateUserApi() {
@@ -23,17 +18,20 @@ enum AuthResult {
     case UNAVAILABLE
 }
 
-func authenticateUser(_ callback: @escaping (_ result: AuthResult) -> Void) {
+// Fixing
+// |- error: sending 'runme' risks causing data races
+// `- note: task-isolated 'runme' is captured by a main actor-isolated closure. main actor-isolated uses in closure may race against later nonisolated uses
+//
+// 1. Making `callback` a `@Sendable`
+// 2.   
+// https://www.donnywals.com/solving-main-actor-isolated-property-can-not-be-referenced-from-a-sendable-closure-in-swift/
+// https://www.donnywals.com/dispatching-to-the-main-thread-with-mainactor-in-swift/
 
-//         let handle = Task {
-//             Thread.sleep(forTimeInterval: 5)
-//             return await "bim"
-//         }
-//         let result = await handle.value
-//         print(result)
+// TODO replace by swift actors ?
+// https://www.andyibanez.com/posts/understanding-actors-in-the-new-concurrency-model-in-swift/
 
 
-
+func authenticateUser(_ callback: @escaping @Sendable (_ result: AuthResult) -> Void) {
     // Create the Local Authentication Context
     let context = LAContext()
 
@@ -46,8 +44,6 @@ func authenticateUser(_ callback: @escaping (_ result: AuthResult) -> Void) {
             LAPolicy.deviceOwnerAuthentication, // TouchId or passcode
             error: &authorizationError
     )
-
-//     let result = AuthenticationResult()
 
     switch (context.biometryType) {
         case .touchID: print("Biometry: Touch ID")
@@ -67,7 +63,7 @@ func authenticateUser(_ callback: @escaping (_ result: AuthResult) -> Void) {
 
     let reason = "Identify yourself!"
     print(reason)
-    var runme = true
+    let semaphore = DispatchSemaphore(value: 0)
 
     context.evaluatePolicy(
             //  LAPolicy.deviceOwnerAuthenticationWithBiometrics,
@@ -77,28 +73,16 @@ func authenticateUser(_ callback: @escaping (_ result: AuthResult) -> Void) {
         DispatchQueue.main.async {
             if success {
                 print(" You may enter")
-                runme = false
+                semaphore.signal()
                 callback(.OK)
             } else {
                 print(" Authentication failed")
                 print(error?.localizedDescription ?? "Failed to authenticate")
-                runme = false
+                semaphore.signal()
                 callback(.ERROR)
             }
         }
     }
 
-    // can be replaced by actors in later swift versions
-    // https://www.andyibanez.com/posts/understanding-actors-in-the-new-concurrency-model-in-swift/
-    while runme {
-    }
+    semaphore.wait()
 }
-
-// actor AuthenticationResult {
-//     private(set) var success: Bool?
-//
-//     func setSuccess(success: Bool) {
-//       self.success = success
-//     }
-//
-// }

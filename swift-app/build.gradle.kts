@@ -12,10 +12,7 @@ plugins {
   `swift-application`
 }
 
-
-
-
-tasks.withType(SwiftCompile::class.java).configureEach {
+tasks.withType<SwiftCompile> {
   // Define a preprocessor macro for every binary
   macros.add("NDEBUG")
 
@@ -25,7 +22,7 @@ tasks.withType(SwiftCompile::class.java).configureEach {
 
 application {
   targetMachines.set(listOf(
-          machines.macOS,
-          machines.linux,
+    machines.macOS,
+    machines.linux,
   ))
 }

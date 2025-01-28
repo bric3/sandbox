@@ -14,6 +14,7 @@ junit-jupiter =  "5.12.1"
 graalvm = "24.2.0"
 flexmark = "0.64.8"
 flatlaf = "3.5.4"
+jsvg = "1.6.1"
 
 mockito = "5.17.0"
 mockito-kotlin = "5.4.0"
@@ -25,7 +26,7 @@ flightRecorder = "9.1.0"
 jmh = "1.37"
 
 kotlin = "2.1.20"
-kotlinCoroutines = "1.7.3"
+kotlinCoroutines = "1.8.1"
 
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
@@ -62,6 +63,8 @@ flatlaf-extras = { module = "com.formdev:flatlaf", version.ref = "flatlaf" }
 flatlaf-fonts-inter = { module = "com.formdev:flatlaf-fonts-inter", version = "4.1" }
 flatlaf-fonts-roboto-mono = { module = "com.formdev:flatlaf-fonts-roboto-mono", version = "3.000" }
 flatlaf-fonts-jetbrains-mono = { module = "com.formdev:flatlaf-fonts-jetbrains-mono", version = "2.304" }
+
+jsvg = { module = "com.github.weisj:jsvg", version.ref = "jsvg" }
 
 miglayout = { module = "com.miglayout:miglayout-swing", version = "11.4.2" }
 

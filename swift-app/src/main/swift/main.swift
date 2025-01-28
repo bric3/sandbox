@@ -37,7 +37,8 @@ public func authenticateUser() {
     let reason = "Identify yourself!"
     print(reason)
 
-    var waitForResult = true
+    let semaphore = DispatchSemaphore(value: 0)
+
     context.evaluatePolicy(
             LAPolicy.deviceOwnerAuthentication,
             localizedReason: reason
@@ -48,12 +49,11 @@ public func authenticateUser() {
               print("⛔️ Authentication failed")
               print(error?.localizedDescription ?? "Failed to authenticate")
           }
-          waitForResult = false
+          semaphore.signal()
           return
     }
 
-    while waitForResult {} // block here without a loop
-//   RunLoop.main.run()
+    semaphore.wait()
 }
 
 authenticateUser()

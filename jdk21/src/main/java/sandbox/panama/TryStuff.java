@@ -10,30 +10,33 @@
 
 package sandbox.panama;
 
-import jdk.incubator.foreign.*;
-
+import java.lang.foreign.Arena;
+import java.lang.foreign.FunctionDescriptor;
+import java.lang.foreign.Linker;
+import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.nio.charset.StandardCharsets;
 
+@SuppressWarnings("preview")
 public class TryStuff {
   public static void main(String[] args) throws Throwable {
     var tryStuff = new TryStuff();
     System.out.println("pid: " + tryStuff.c_getpid_smokeTest());
-    tryStuff.c_printf_smokeTest("Hello C");
-    tryStuff.c_strlen("Hello C");
+    tryStuff.c_printf_smokeTest("Hello C\n");
+    tryStuff.c_strlen_smokeTest("Hello C");
 
     tryStuff.thread_dump();
   }
 
-  private void c_strlen(String str) throws Throwable {
-    var linker = CLinker.systemCLinker();
+  private void c_strlen_smokeTest(String str) throws Throwable {
+    var linker = Linker.nativeLinker();
     MethodHandle strlen = linker.downcallHandle(
-            linker.lookup("strlen").get(),
+            linker.defaultLookup().find("strlen").get(),
             FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS)
     );
 
-    try (var scope = ResourceScope.newConfinedScope()) {
-      var cString = MemorySegment.allocateNative(str.length() + 1, scope);
+    try (var arena = Arena.ofConfined()) {
+      var cString = arena.allocate(str.length() + 1);
       cString.setUtf8String(0, str);
       long len = (long) strlen.invoke(cString);
 
@@ -42,24 +45,23 @@ public class TryStuff {
   }
 
   public long c_printf_smokeTest(String str) throws Throwable {
-    MethodHandle printf = CLinker.systemCLinker()
-                                 .downcallHandle(
-                                         CLinker.systemCLinker().lookup("printf").get(),
-                                         FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS)
-                                 );
+    MethodHandle printf = Linker.nativeLinker()
+                                .downcallHandle(
+                                        Linker.nativeLinker().defaultLookup().find("printf").get(),
+                                        FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS)
+                                );
 
-    try (var scope = ResourceScope.newConfinedScope()) {
-      var allocator = SegmentAllocator.nativeAllocator(scope);
-      return (long) printf.invoke(allocator.allocateUtf8String(str).address());
+    try (var arena = Arena.ofConfined()) {
+      return (long) printf.invoke(arena.allocateUtf8String(str));
     }
   }
 
   public long c_getpid_smokeTest() throws Throwable {
-    var getpid = CLinker.systemCLinker()
-                        .downcallHandle(
-                                CLinker.systemCLinker().lookup("getpid").get(),
-                                FunctionDescriptor.of(ValueLayout.JAVA_LONG)
-                        );
+    var getpid = Linker.nativeLinker()
+                       .downcallHandle(
+                               Linker.nativeLinker().defaultLookup().find("getpid").get(),
+                               FunctionDescriptor.of(ValueLayout.JAVA_LONG)
+                       );
 
     return (long) getpid.invokeExact();
   }
@@ -96,17 +98,17 @@ public class TryStuff {
     //    printf("!! signal caught !!\n");
     // }
 
-    MethodHandle raise = CLinker.systemCLinker()
-                                .downcallHandle(
-                                        CLinker.systemCLinker().lookup("raise").get(),
-                                        FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT)
-                                );
-
-    MethodHandle kill = CLinker.systemCLinker()
+    MethodHandle raise = Linker.nativeLinker()
                                .downcallHandle(
-                                       CLinker.systemCLinker().lookup("kill").get(),
-                                       FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)
+                                       Linker.nativeLinker().defaultLookup().find("raise").get(),
+                                       FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT)
                                );
+
+    MethodHandle kill = Linker.nativeLinker()
+                              .downcallHandle(
+                                      Linker.nativeLinker().defaultLookup().find("kill").get(),
+                                      FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_LONG, ValueLayout.JAVA_LONG)
+                              );
 
     var resultKill = (int) kill.invoke(ProcessHandle.current().pid(), 3);
     var resultRaise = (int) raise.invoke(3);

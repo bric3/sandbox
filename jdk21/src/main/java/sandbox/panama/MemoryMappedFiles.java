@@ -9,15 +9,13 @@
  */
 package sandbox.panama;
 
-import jdk.incubator.foreign.MemorySegment;
-import jdk.incubator.foreign.ResourceScope;
-import jdk.incubator.foreign.ValueLayout.OfByte;
-import jdk.jfr.consumer.RecordingStream;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.System.Logger.Level;
+import java.lang.foreign.Arena;
+import java.lang.foreign.ValueLayout.OfByte;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -25,6 +23,8 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import jdk.jfr.consumer.RecordingStream;
 
 public class MemoryMappedFiles {
 
@@ -36,7 +36,10 @@ public class MemoryMappedFiles {
     List<Path> paths = null;
     switch (args.length) {
       case 0, 1 -> {
-        System.err.println("Usage: MemoryMappedFiles <mmap|panama> <files>");
+        System.err.println("""
+        Missing parameters.
+        Usage: MemoryMappedFiles <mmap|panama> <files>
+        """);
         System.exit(1);
       }
       default -> {
@@ -56,7 +59,7 @@ public class MemoryMappedFiles {
         String _mode = mode;
         paths.forEach(p -> {
           switch (_mode) {
-            case "mbb" -> useMappedFileBuffer(p);
+            case "mbb" -> useMappedByteBuffer(p);
             case "panama" -> useMemorySegment(p);
           }
         });
@@ -97,7 +100,7 @@ public class MemoryMappedFiles {
   }
 
 
-  static void useMappedFileBuffer(Path src) {
+  static void useMappedByteBuffer(Path src) {
     try (var fileChannel = FileChannel.open(src, StandardOpenOption.READ)) {
       // A mapped byte buffer and the file mapping that it represents remain
       // valid until the buffer itself is garbage-collected.
@@ -123,14 +126,15 @@ public class MemoryMappedFiles {
   }
 
   static void useMemorySegment(Path src) {
-    try (var scope = ResourceScope.newConfinedScope()) {
+    try (var channel = FileChannel.open(src);
+         var arena = Arena.ofConfined()) {
       var fileSize = Files.size(src);
-      var mappedFile = MemorySegment.mapFile(
-              src,
+      var mappedFile = channel.map(
+              MapMode.READ_ONLY,
               0,
               fileSize,
-              FileChannel.MapMode.READ_ONLY,
-              scope);
+              arena
+      );
 
       var position = 0;
       var size = 8192;

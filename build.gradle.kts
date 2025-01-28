@@ -15,28 +15,6 @@ plugins {
   alias(libs.plugins.ideaExt)
 }
 
-val jmhProjects = setOf(
-  project(":jmh-stuff"),
-  project(":jmh-panama")
-)
-val nativeProjects = setOf<Project>(
-  project(":native:cmem"),
-  project(":native:dlopen"),
-  // Swift language broken on sequoia (swift 6) and after Gradle 8.3
-  // project(":swift-app"),
-  // project(":swift-library")
-)
-// lookout for TYPESAFE_PROJECT_ACCESSORS feature preview
-val javaProjects = subprojects - jmhProjects - nativeProjects
-
-configure(javaProjects) {
-  apply(plugin = "java-library")
-
-  repositories {
-    mavenCentral()
-  }
-}
-
 idea {
   project.settings {
     withIDEADir {

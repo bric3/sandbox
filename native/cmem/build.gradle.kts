@@ -14,10 +14,13 @@ plugins {
 application {
   baseName = "test-cmem"
 
-  binaries.configureEach {
+  binaries.configureEach(CppExecutable::class.java) {
     this.compileTask.get()
       .source
       .from(fileTree("src/main/c") { include("**/*.c") })
+
+    // casting this as CppExecutable is necessary to access the linkTask property
+    val binaryLinkTask = linkTask.get()
   }
 }
 
@@ -39,6 +42,7 @@ tasks.withType<CppCompile>().configureEach {
 }
 
 // With nokee (not working since Gradle 8.3, see https://github.com/nokeedev/gradle-native/issues/853)
+//
 // import dev.nokee.platform.nativebase.ExecutableBinary
 // import dev.nokee.platform.nativebase.internal.linking.NativeLinkTaskUtils
 //
