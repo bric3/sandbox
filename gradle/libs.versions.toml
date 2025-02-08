@@ -46,6 +46,7 @@ junit-jupiter-vintage-engine = { module = "org.junit.vintage:junit-vintage-engin
 assertj = { module = "org.assertj:assertj-core", version = "3.27.3" }
 testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 
 jna = { module = "net.java.dev.jna:jna", version = "5.17.0" }
