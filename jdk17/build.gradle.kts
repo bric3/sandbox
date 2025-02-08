@@ -79,8 +79,8 @@ tasks.register<JavaExec>("touchId") {
 
 sourceSets {
   val jextract by creating  {
-    java.srcDirs(layout.buildDirectory.map { it.dir("/generated/sources/jextract/java") })
-    resources.srcDirs(layout.buildDirectory.map { it.dir("/generated/sources/jextract/resources") })
+    java.srcDirs(layout.buildDirectory.map { it.dir("generated/sources/jextract/java") })
+    resources.srcDirs(layout.buildDirectory.map { it.dir("generated/sources/jextract/resources") })
   }
   @Suppress("UNUSED_VARIABLE")
   val main by getting {
