@@ -14,7 +14,7 @@ junit-jupiter =  "5.12.1"
 graalvm = "24.2.0"
 flexmark = "0.64.8"
 flatlaf = "3.5.4"
-jsvg = "1.6.1"
+jsvg = "1.7.1"
 
 mockito = "5.17.0"
 mockito-kotlin = "5.4.0"
