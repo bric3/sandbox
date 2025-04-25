@@ -5,7 +5,6 @@ import java.awt.Component
 import java.awt.Shape
 import java.io.StringWriter
 import java.lang.System.Logger.Level.ERROR
-import java.util.StringTokenizer
 import javax.swing.JEditorPane
 import javax.swing.JFrame
 import javax.swing.JScrollPane
@@ -81,28 +80,48 @@ object JEditorPaneScrollableExample {
 
       // language=HTML
       val content = """
-                 
-                    <html>
+                 <html>
                  <body>
-                    <p>Above the scrollable section</p>
-                    <div name="custom" style="overflow-x: scroll;"> <!-- overflow-x not supported by Swing CSS -->
-                        <table border='1'>
-                            <thead>
-                                <tr>
-                                    <th>Header 1</th><th>Header 2</th><th>Header 3</th><th>Header 4</th><th>Header 5</th><th>Header 6</th><th>Header 7</th><th>Header 8</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Data 1</td><td>Data 2</td><td>Data 3</td><td>Data 4</td><td>Data 5</td><td>Data 6</td><td>Data 7</td><td>Data 8</td>
-                                </tr>
-                                <tr>
-                                    <td>Data 9</td><td>Data 10</td><td>Data 11</td><td>Data 12</td><td>Data 13</td><td>Data 14</td><td>Data 15</td><td>Data 16</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p>Below the scrollable section</p>
+                 <p>Above the scrollable section</p>
+                 <div name="custom" style="overflow-x: scroll;"> <!-- overflow-x not supported by Swing CSS -->
+                     <table border='1'>
+                         <thead>
+                         <tr>
+                             <th>Header 1</th>
+                             <th>Header 2</th>
+                             <th>Header 3</th>
+                             <th>Header 4</th>
+                             <th>Header 5</th>
+                             <th>Header 6</th>
+                             <th>Header 7</th>
+                             <th>Header 8</th>
+                         </tr>
+                         </thead>
+                         <tbody>
+                         <tr>
+                             <td>Data 1</td>
+                             <td>Data 2</td>
+                             <td>Data 3</td>
+                             <td>Data 4</td>
+                             <td>Data 5</td>
+                             <td>Data 6</td>
+                             <td>Data 7</td>
+                             <td>Data 8</td>
+                         </tr>
+                         <tr>
+                             <td>Data 9</td>
+                             <td>Data 10</td>
+                             <td>Data 11</td>
+                             <td>Data 12</td>
+                             <td>Data 13</td>
+                             <td>Data 14</td>
+                             <td>Data 15</td>
+                             <td>Data 16</td>
+                         </tr>
+                         </tbody>
+                     </table>
+                 </div>
+                 <p>Below the scrollable section</p>
                  </body>
                  </html>
                  
@@ -139,7 +158,7 @@ object JEditorPaneScrollableExample {
       )
       scrollPane.setBorder(null)
       scrollPane.setViewportView(innerPane)
-      scrollPane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE)
+      scrollPane.viewport.setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE)
       return scrollPane
     }
 
@@ -149,7 +168,7 @@ object JEditorPaneScrollableExample {
       // See:
       // HTMLEditorKit::read -> HTMLDocument$HTMLReader::flush -> HTMLDocument$HTMLReader::adjustEndElement -> HTMLDocument::fireChangedUpdate
 
-      innerPane.text = getInnerHTML(element, innerPane!!.getEditorKit())
+      innerPane.text = getInnerHTML(element, innerPane.getEditorKit())
     }
 
     private fun getInnerHTML(elem: Element, kit: EditorKit): String = try {
@@ -170,10 +189,10 @@ object JEditorPaneScrollableExample {
       get() {
         var c = getContainer()
         while ((c != null) && c !is JEditorPane) {
-          c = c.getParent()
+          c = c.parent
         }
         checkNotNull(c) { "No JEditorPane found in the hierarchy" }
-        return c
+        return c as JEditorPane
       }
   }
 }
