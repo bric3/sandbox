@@ -10,8 +10,8 @@
 package sandbox.swing.imageio
 
 import com.github.weisj.jsvg.SVGDocument
-import com.github.weisj.jsvg.attributes.ViewBox
-import com.github.weisj.jsvg.geometry.size.FloatSize
+import com.github.weisj.jsvg.view.ViewBox
+import com.github.weisj.jsvg.view.FloatSize
 import com.github.weisj.jsvg.parser.LoaderContext
 import com.github.weisj.jsvg.parser.SVGLoader
 import java.awt.Component
