@@ -2,8 +2,10 @@ package sandbox.methodhandles;
 
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandleProxies;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntUnaryOperator;
 
@@ -12,6 +14,7 @@ public class LambdaMetaFactoryPlayground {
     BasicHelloWorld.demo();
     LambdaWithArgExample.demo();
     CapturedFirstArgLambdaExample.demo();
+    CapturedOutOfOrderExample.demo();
     DynamicFunctionWithMethodHandle.demo();
     MultiTargetWithTargetMHModificationsLambdaExample.demo();
     UniversalLambdaFactory.demo();
@@ -166,6 +169,45 @@ class CapturedFirstArgLambdaExample {
   // The actual method used in the lambda — takes base and x
   public static int add(int base, int x) {
     return x + base;
+  }
+}
+
+// Make a simple proxy using an SAM from a method handle
+// and capture some arguments
+class CapturedOutOfOrderExample {
+
+  public static void main(String[] args) throws Throwable {
+    demo();
+  }
+
+  public static void demo() throws Throwable {
+    var lookup = MethodHandles.lookup();
+
+    // Method: combine(a, b, c, d)
+    var mh = lookup.findStatic(
+            CapturedOutOfOrderExample.class,
+            "combine",
+            MethodType.methodType(String.class, String.class, String.class, String.class, String.class)
+    );
+
+    // Let's reorder parameters so we can capture b and d
+    // Target order: (b, d, a, c) so that b and d are captured via `insertArguments`
+    var permuted = MethodHandles.permuteArguments(
+            mh,
+            MethodType.methodType(String.class, String.class, String.class, String.class, String.class),
+            2, // moves b to 2nd position (third)
+            0, // moves b to 0th position (first)
+            3, // moves c to 3rd position (last)
+            1 // moves d to 1st position (second)
+    );
+
+    MethodHandle captured = MethodHandles.insertArguments(permuted, 0, "b.fixed", "d.fixed");
+
+    System.out.println(MethodHandleProxies.asInterfaceInstance(BiFunction.class, captured).apply("A", "C"));
+  }
+
+  public static String combine(String a, String b, String c, String d) {
+    return a + "-" + b + "-" + c + "-" + d;
   }
 }
 
