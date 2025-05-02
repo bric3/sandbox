@@ -58,7 +58,7 @@ rootProject.name = "sandbox"
 includeBuild("conventions")
 include("kotlin")
 include("jmh-stuff", "jmh-panama")
-include("jdk11", "jdk17", "jdk21", "jdk23", "jdk24")
+include("jdk11", "jdk17", "jdk21", "jdk24")
 include("native:cmem", "native:dlopen")
 include("jmh-panama")
 include("graal:run-with-graal", "graal:run-with-libgraal")
