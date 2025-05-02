@@ -39,6 +39,7 @@ dependencies {
 
   implementation("org.violetlib:vaqua:13")
   // implementation("com.github.weisj:java-native-foundation:1.1.0:zip")
+  implementation(libs.jsvg)
   implementation(libs.miglayout)
   implementation(libs.bundles.flatlaf)
 }
