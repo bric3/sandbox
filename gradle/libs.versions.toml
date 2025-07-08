@@ -8,7 +8,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #
 [versions]
-okhttp =  "5.0.0"
+okhttp =  "5.1.0"
 bytebuddy = "1.17.6"
 junit-jupiter =  "5.13.3"
 graalvm = "24.2.1"
