@@ -32,7 +32,7 @@ dependencies {
   // libsodium with JNR
   implementation("org.apache.tuweni:tuweni-crypto:2.3.1")
 
-  implementation("org.apache.commons:commons-lang3:3.17.0")
+  implementation("org.apache.commons:commons-lang3:3.18.0")
 }
 
 
