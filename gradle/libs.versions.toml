@@ -13,7 +13,7 @@ bytebuddy = "1.17.6"
 junit-jupiter =  "5.13.3"
 graalvm = "24.2.1"
 flexmark = "0.64.8"
-flatlaf = "3.6"
+flatlaf = "3.6.1"
 jsvg = "2.0.0"
 
 mockito = "5.18.0"
