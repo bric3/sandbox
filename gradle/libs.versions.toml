@@ -43,7 +43,7 @@ bytebuddy-agent = { group = "net.bytebuddy", name = "byte-buddy-agent", version.
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
 junit-jupiter-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit-jupiter" }
-assertj = { module = "org.assertj:assertj-core", version = "3.27.3" }
+assertj = { module = "org.assertj:assertj-core", version = "3.27.4" }
 testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
