@@ -46,7 +46,7 @@ pluginManagement {
 
 plugins {
   id("org.gradle.toolchains.foojay-resolver-convention") version("1.0.0")
-  id("com.gradle.develocity") version "4.1.1"
+  id("com.gradle.develocity") version "4.2"
 }
 
 // Doc https://docs.gradle.org/7.2/userguide/platforms.html
@@ -74,4 +74,11 @@ if (os.isMacOsX) {
     "swift-app",
     "swift-library",
   )
+}
+
+develocity {
+  buildScan {
+    termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
+    // termsOfUseAgree is handled by .gradle/init.d/configure-develocity.init.gradle.kts
+  }
 }
