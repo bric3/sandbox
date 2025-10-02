@@ -21,7 +21,7 @@ mockito-kotlin = "6.0.0"
 
 testcontainers = "1.21.3"
 
-flightRecorder = "9.1.0"
+flightRecorder = "9.1.1"
 
 jmh = "1.37"
 
