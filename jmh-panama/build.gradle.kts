@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
   implementation("net.java.dev.jna:jna-platform:5.18.1")
-  implementation("com.github.jnr:jnr-ffi:2.2.17")
+  implementation("com.github.jnr:jnr-ffi:2.2.18")
 
   // https://github.com/joshjdevl/libsodium-jni
   // Note this lib doesn't include the JNI glue library, see https://github.com/joshjdevl/libsodium-jni/issues/66
