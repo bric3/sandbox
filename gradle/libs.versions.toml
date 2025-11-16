@@ -10,7 +10,7 @@
 [versions]
 okhttp =  "5.3.1"
 bytebuddy = "1.17.8"
-junit-jupiter =  "6.0.0"
+junit-jupiter =  "6.0.1"
 graalvm = "25.0.1"
 flexmark = "0.64.8"
 flatlaf = "3.6.2"
