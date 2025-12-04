@@ -30,7 +30,7 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kandy-lets-plot:0.8.1")
   implementation("org.jetbrains.kotlinx:kandy-util:0.8.1")
   // currently on a private repository, see https://github.com/Kotlin/kandy/issues/284
-  implementation("org.jetbrains.kotlinx:kotlin-statistics-jvm:0.5.0")
+  implementation("org.jetbrains.kotlinx:kotlin-statistics-jvm:0.8.3")
 
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.kotlinCoroutines.get()}")
   testImplementation(platform("org.junit:junit-bom:${libs.versions.junit.jupiter.get()}"))
