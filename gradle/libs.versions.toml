@@ -19,7 +19,7 @@ jsvg = "2.0.0"
 mockito = "5.20.0"
 mockito-kotlin = "6.1.0"
 
-testcontainers = "1.21.3"
+testcontainers = "1.21.4"
 
 flightRecorder = "9.1.1"
 
