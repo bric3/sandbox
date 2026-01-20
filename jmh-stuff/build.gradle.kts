@@ -30,7 +30,7 @@ jmh {
 }
 
 
-tasks.create("increments") {
+tasks.register("increments") {
   jmh.includes.add("Increments")
   jmh.resultsFile.set(layout.buildDirectory.file("/reports/jmh/increments-results.txt"))
   finalizedBy("jmh")

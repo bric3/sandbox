@@ -64,7 +64,6 @@ include("native:cmem", "native:dlopen")
 include("jmh-panama")
 include("graal:run-with-graal", "graal:run-with-libgraal")
 include("swing")
-include("sa-agent")
 
 // Swift language broken on sequoia (swift 6)
 // See https://github.com/gradle/gradle-native/issues/1116

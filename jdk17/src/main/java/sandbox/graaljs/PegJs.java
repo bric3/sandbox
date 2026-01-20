@@ -8,17 +8,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 ///usr/bin/env jbang "$0" ; exit $?
-//JAVA 11
-//DEPS org.graalvm.js:js:22.1.0.1
-//DEPS org.graalvm.js:js-scriptengine:22.1.0.1
+//JAVA 17
+//DEPS org.graalvm.polyglot:js:25.0.1
+//DEPS org.graalvm.js:js-scriptengine:25.0.1
 
 
 package sandbox.graaljs;
 
 import com.oracle.truffle.api.debug.Breakpoint;
 import com.oracle.truffle.api.debug.Debugger;
-import com.oracle.truffle.js.lang.JavaScriptLanguage;
-import com.oracle.truffle.js.runtime.JSContextOptions;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.HostAccess;
@@ -29,7 +27,6 @@ import org.graalvm.polyglot.TypeLiteral;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyObject;
-import org.jetbrains.annotations.NotNull;
 import sandbox.graaljs.PegJs.IOUtils.IOSupplier;
 
 import javax.script.ScriptException;
@@ -55,8 +52,9 @@ import java.util.stream.Collectors;
 // replacement is to use https://github.com/peggyjs/peggy
 public class PegJs implements AutoCloseable {
 
+  private static final String JS = "js";
   private static final Function<Value, String> stringify = value -> value.getContext()
-                                                                         .eval("js", "JSON.stringify")
+                                                                         .eval(JS, "JSON.stringify")
                                                                          .execute(value)
                                                                          .asString();
   private static final TypeLiteral<List<Object>> LIST_OF_OBJECT = new TypeLiteral<>() {};
@@ -125,7 +123,7 @@ public class PegJs implements AutoCloseable {
 
     jsRunner.run(
             IOSupplier.uncheckIO(
-                    () -> Source.newBuilder(JavaScriptLanguage.ID,
+                    () -> Source.newBuilder(JS,
                                             Objects.requireNonNullElse(
                                                     PegJs.class.getResource("/peggy.min.js"),
                                                     // ⚠️ No SRI verification
@@ -136,7 +134,7 @@ public class PegJs implements AutoCloseable {
             )
     );
 
-    peggyObject = jsRunner.run(Source.newBuilder(JavaScriptLanguage.ID, "peggy", "peg-js-object")
+    peggyObject = jsRunner.run(Source.newBuilder(JS, "peggy", "peg-js-object")
                                      .mimeType("application/javascript")
                                      .buildLiteral());
   }
@@ -185,7 +183,7 @@ public class PegJs implements AutoCloseable {
       if (parser.isString()) {
         this.source = parser.asString();
         var _parser = jsRunner.run(
-                Source.newBuilder(JavaScriptLanguage.ID, source, "parser-generated-source")
+                Source.newBuilder(JS, source, "parser-generated-source")
                       .mimeType("application/javascript")
                       .buildLiteral()
         );
@@ -433,7 +431,7 @@ public class PegJs implements AutoCloseable {
             OutputStream out,
             OutputStream err
     ) {
-      return Context.newBuilder(JavaScriptLanguage.ID)
+      return Context.newBuilder(JS)
                     .engine(makePolyglotEngine().build())
                     .out(out)
                     .err(err)
@@ -441,17 +439,16 @@ public class PegJs implements AutoCloseable {
                     .allowHostAccess(getHostAccess()) // Allow JS access to public Java methods/members
                     .allowHostClassLookup(className -> true) // Allow JS access to public Java classes
                     .allowIO(false)
-                    .option(JSContextOptions.ECMASCRIPT_VERSION_NAME, "2022")
+                    .option("js.ecmascript-version", "2022")
                     // Allow getMember(), when they are exported in js 'export ...'
                     // https://www.graalvm.org/22.3/reference-manual/js/Modules/#experimental-module-namespace-exports
-                    .option(JSContextOptions.ESM_EVAL_RETURNS_EXPORTS_NAME, "true")
-                    // .option(JSContextOptions.FOREIGN_OBJECT_PROTOTYPE_NAME, "true") // Needed for sort, shift, etc.
-                    .option(JSContextOptions.LOAD_FROM_CLASSPATH_NAME, "true")
-                    .option(JSContextOptions.ECMASCRIPT_VERSION_NAME, "2022")
+                    .option("js.esm-eval-returns-exports", "true")
+                    // .option("js.foreign-object-prototype", "true") // Needed for sort, shift, etc.
+                    .option("js.load-from-classpath", "true")
+                    .option("js.ecmascript-version", "2022")
                     .build();
     }
 
-    @NotNull
     private static Engine.Builder makePolyglotEngine() {
       // When graalvm is used as dependency only the interpreter mode is available
       // Indeed without using UseJVMCICompiler and patching the module path (--module-path --upgrade-module-path)

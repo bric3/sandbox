@@ -11,8 +11,10 @@
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
 
 plugins {
+    alias(libs.plugins.download)
     id("sandbox.java-conventions")
 }
 
@@ -23,6 +25,9 @@ javaConvention {
 
 dependencies {
   implementation("org.jsoup:jsoup:1.22.1")
+  implementation(libs.bundles.graal.js)
+  implementation(libs.bundles.graal.deps)
+  compileOnly("org.jetbrains:annotations:24.0.0")
 }
 
 // See https://docs.gradle.org/current/userguide/cross_project_publications.html
@@ -176,4 +181,37 @@ tasks.compileJava {
     options.debugOptions.debugLevel
 
     options.isDebug
+}
+
+val downloadPegjs by tasks.registering(de.undercouch.gradle.tasks.download.Download::class) {
+  // https://cdnjs.com/libraries/pegjs/0.9.0
+  src("https://cdn.jsdelivr.net/npm/peggy@2.0.1/browser/peggy.min.js")
+  dest(file("${sourceSets.main.get().output.resourcesDir}/peg.min.js"))
+  onlyIfModified(true)
+  useETag(true) // Use the ETag on GH
+}
+
+val verifyPegjs by tasks.registering(de.undercouch.gradle.tasks.download.Verify::class) {
+  dependsOn(downloadPegjs)
+  src(file("${sourceSets.main.get().output.resourcesDir}/peg.min.js"))
+  // https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity
+  // https://cdn.jsdelivr.net/npm/peggy@2.0.1/browser/peggy.min.js
+  val pegJsSri = "sha256-rc8x8rCn3MX/3jqUGfnqeIurZfNJY2vuHuoP7UfQyV8="
+  algorithm(
+    when(pegJsSri.substringBefore('-')) {
+      "sha256" -> "SHA-256"
+      "sha384" -> "SHA-384"
+      "sha512" -> "SHA-512"
+      else -> throw IllegalArgumentException("Unknown algorithm")
+    }
+  )
+  checksum(
+    Base64.getDecoder().decode(pegJsSri.substringAfter('-')).joinToString("") {
+      "%02x".format(it)
+    }
+  )
+}
+
+tasks.processResources {
+  dependsOn(verifyPegjs)
 }

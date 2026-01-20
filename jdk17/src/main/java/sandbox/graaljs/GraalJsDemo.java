@@ -8,15 +8,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 ///usr/bin/env jbang "$0" ; exit $?
-//JAVA 11
-//DEPS org.graalvm.js:js:22.1.0.1
-//DEPS org.graalvm.js:js-scriptengine:22.1.0.1
+//JAVA 17
+//DEPS org.graalvm.polyglot:js:25.0.1
+//DEPS org.graalvm.js:js-scriptengine:25.0.1
 
 
 package sandbox.graaljs;
 
-import com.oracle.truffle.js.lang.JavaScriptLanguage;
-import com.oracle.truffle.js.runtime.JSContextOptions;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
@@ -36,6 +34,8 @@ import java.util.Date;
 import java.util.Map;
 
 public class GraalJsDemo {
+  private static final String JS = "js";
+
   public static void main(String[] args) throws ScriptException {
     (new ScriptEngineManager())
             .getEngineFactories()
@@ -62,24 +62,24 @@ public class GraalJsDemo {
     }
 
     {
-      var print = Source.create(JavaScriptLanguage.ID, printStatement);
-      var consoleLog = Source.create(JavaScriptLanguage.ID, consoleLogStatement);
-      var stringifyFunction = Source.create(JavaScriptLanguage.ID, stringifyFunctionStatement);
+      var print = Source.create(JS, printStatement);
+      var consoleLog = Source.create(JS, consoleLogStatement);
+      var stringifyFunction = Source.create(JS, stringifyFunctionStatement);
       var out = new ByteArrayOutputStream();
       try (var ctx = usingGraalVMPolyglotApi(out)) {
         ctx.eval(print);
         ctx.eval(consoleLog);
 
         // bindings
-        ctx.getBindings(JavaScriptLanguage.ID).putMember("r", new Record());
-        Value evalResult0 = ctx.eval(JavaScriptLanguage.ID, "r.name = 'John'; r.age = 42; " +
+        ctx.getBindings(JS).putMember("r", new Record());
+        Value evalResult0 = ctx.eval(JS, "r.name = 'John'; r.age = 42; " +
                                                             "print('Is java obj: ' + Java.isJavaObject(r)); " +
                                                             "({ n: r.name, i: 42 }) " +
                                                             "");
 
         System.out.println(evalResult0.as(Map.class));
 
-        Value evalResult1 = ctx.eval(JavaScriptLanguage.ID, "var nativeDate = new Date(new Date().toLocaleString(\"en-US\", {timeZone: \"Europe/Berlin\"}));\n" +
+        Value evalResult1 = ctx.eval(JS, "var nativeDate = new Date(new Date().toLocaleString(\"en-US\", {timeZone: \"Europe/Berlin\"}));\n" +
                                                             "nativeDate.setHours(12);\n" +
                                                             "nativeDate.setMinutes(0);\n" +
                                                             "nativeDate.setSeconds(0);\n" +
@@ -118,8 +118,8 @@ public class GraalJsDemo {
   }
 
   private static Context usingGraalVMPolyglotApi(ByteArrayOutputStream out) {
-    return Context.newBuilder(JavaScriptLanguage.ID)
-                  .option(JSContextOptions.ECMASCRIPT_VERSION_NAME, "2022")
+    return Context.newBuilder(JS)
+                  .option("js.ecmascript-version", "2022")
                   .engine(Engine.newBuilder()
                                 .option("engine.WarnInterpreterOnly", "false")
                                 .build()
@@ -130,8 +130,8 @@ public class GraalJsDemo {
                   .allowHostAccess(getHostAccess()) // Allow JS access to public Java methods/members
                   .allowHostClassLookup(className -> true) // Allow JS access to public Java classes
                   .allowIO(false)
-                  .option(JSContextOptions.LOAD_FROM_CLASSPATH_NAME, "true")
-                  .option(JSContextOptions.ECMASCRIPT_VERSION_NAME, "2022")
+                  .option("js.load-from-classpath", "true")
+                  .option("js.ecmascript-version", "2022")
                   // https://www.graalvm.org/latest/tools/chrome-debugger/#programmatic-launch-of-inspector-backend
                   // https://stackoverflow.com/questions/68762814/how-to-add-sourcemaps-to-graalvm-js-inspection
                   // .option("inspect", "4444")
@@ -144,15 +144,15 @@ public class GraalJsDemo {
             Engine.newBuilder()
                   .option("engine.WarnInterpreterOnly", "false")
                   .build(),
-            Context.newBuilder(JavaScriptLanguage.ID)
+            Context.newBuilder(JS)
                    .allowExperimentalOptions(true) // Needed for loading from classpath
                    .allowHostAccess(getHostAccess()) // Allow JS access to public Java methods/members
                    .allowHostClassLookup(className -> true) // Allow JS access to public Java classes
 
                    .allowIO(false)
-                   .option(JSContextOptions.LOAD_FROM_CLASSPATH_NAME, "true")
-                   .option(JSContextOptions.ECMASCRIPT_VERSION_NAME, "2022")
-                   .option(JSContextOptions.FOREIGN_OBJECT_PROTOTYPE_NAME, "true")
+                   .option("js.load-from-classpath", "true")
+                   .option("js.ecmascript-version", "2022")
+                   .option("js.foreign-object-prototype", "true")
     );
     // Or by
     // ScriptEngineManager manager = new ScriptEngineManager();
