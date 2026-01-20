@@ -10,8 +10,11 @@
 [versions]
 okhttp =  "5.3.2"
 bytebuddy = "1.18.7"
-junit-jupiter =  "5.14.0"
-junit-launcher = "1.14.3"
+# JUnit 5.x (supports Java 8+)
+junit5-jupiter = "5.14.0"
+junit5-launcher = "1.14.3"
+# JUnit 6.x (requires Java 17+) - platform launcher now uses same version as Jupiter
+junit6-jupiter = "6.0.2"
 graalvm = "25.0.2"
 flexmark = "0.64.8"
 flatlaf = "3.7"
@@ -41,10 +44,18 @@ conscrypt = { module = "org.conscrypt:conscrypt-openjdk-uber", version = "2.5.2"
 bytebuddy = { group = "net.bytebuddy", name = "byte-buddy", version.ref = "bytebuddy" }
 bytebuddy-agent = { group = "net.bytebuddy", name = "byte-buddy-agent", version.ref = "bytebuddy" }
 
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
-junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
-junit-jupiter-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit-jupiter" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-launcher" }
+# JUnit 5.x (for projects < Java 17)
+junit5-bom = { module = "org.junit:junit-bom", version.ref = "junit5-jupiter" }
+junit5-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5-jupiter" }
+junit5-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5-jupiter" }
+junit5-jupiter-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit5-jupiter" }
+junit5-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit5-launcher" }
+# JUnit 6.x (for projects >= Java 17)
+junit6-bom = { module = "org.junit:junit-bom", version.ref = "junit6-jupiter" }
+junit6-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit6-jupiter" }
+junit6-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit6-jupiter" }
+junit6-jupiter-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit6-jupiter" }
+junit6-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit6-jupiter" }
 assertj = { module = "org.assertj:assertj-core", version = "3.27.7" }
 testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
@@ -94,7 +105,8 @@ flightRecorder = ['flightRecorder', 'flightRecorder-writer', 'flightRecorder-rul
 
 flatlaf = ['flatlaf', 'flatlaf-extras', 'flatlaf-fonts-inter', 'flatlaf-fonts-roboto-mono']
 
-junit-jupiter = ["junit-jupiter-api", "junit-jupiter-engine", "junit-jupiter-vintage-engine"]
+junit5-jupiter = ["junit5-jupiter-api", "junit5-jupiter-engine", "junit5-jupiter-vintage-engine"]
+junit6-jupiter = ["junit6-jupiter-api", "junit6-jupiter-engine", "junit6-jupiter-vintage-engine"]
 mockito = ["mockito-core", "mockito-kotlin"]
 
 graal-js = ["graal-js", "graal-js-scriptengine", "graal-js-chromeinspector"]

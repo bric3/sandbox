@@ -24,7 +24,8 @@ dependencies {
 
   implementation(files("lib/spring-jdbc-4.1.6.RELEASE.jar"))
 
-  testImplementation(libs.bundles.junit.jupiter)
+  testImplementation(libs.bundles.junit5.jupiter)
+  testRuntimeOnly(libs.junit5.platform.launcher)
   testImplementation(libs.assertj)
   testImplementation(libs.testcontainers)
 }
@@ -32,6 +33,7 @@ dependencies {
 
 javaConvention {
     languageVersion = 11
+    enablePreview = false  // Java 11 preview features not needed for this module
 }
 
 tasks {

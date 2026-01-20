@@ -22,7 +22,8 @@ javaConvention {
 dependencies {
   implementation(libs.bundles.flightRecorder)
   implementation(libs.flexmark.all)
-  testImplementation(libs.bundles.junit.jupiter)
+  testImplementation(libs.bundles.junit6.jupiter)
+  testRuntimeOnly(libs.junit6.platform.launcher)
   testImplementation(libs.bundles.mockito)
 }
 

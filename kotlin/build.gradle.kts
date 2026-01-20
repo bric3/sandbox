@@ -33,8 +33,9 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlin-statistics-jvm:0.8.3")
 
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.kotlinCoroutines.get()}")
-  testImplementation(platform("org.junit:junit-bom:${libs.versions.junit.jupiter.get()}"))
+  testImplementation(platform(libs.junit6.bom))
   testImplementation("org.junit.jupiter:junit-jupiter")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher")
   testImplementation("app.cash.turbine:turbine:1.2.1")
 
   testImplementation(libs.mockito.core)
