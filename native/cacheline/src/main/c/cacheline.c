@@ -16,12 +16,18 @@
   #include <sys/sysctl.h>
 #endif
 
-int main (int argc, char *argv[])
+#if defined(_WIN32) || defined(_WIN64)
+  #define EXPORT __declspec(dllexport)
+#else
+  #define EXPORT __attribute__((visibility("default")))
+#endif
+
+EXPORT size_t get_cacheline_size(void)
 {
   size_t cacheline_size;
 
   // We're interested in L1 Data Cache line size (the smallest unit of data
-  // trasnfer between cache and main memory).
+  // transfer between cache and main memory).
   // When the CPU reads a single byte from memory, it actually loads an entire
   // cache line (typically 64 bytes on modern systems) because of spatial
   // locality.
@@ -29,28 +35,31 @@ int main (int argc, char *argv[])
   #if defined(__linux__)
     long result = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
     if (result == -1) {
-      perror("sysconf");
-      return 1;
+      return 0;
     }
     cacheline_size = (size_t)result;
   #elif defined(__APPLE__)
     size_t size = sizeof(cacheline_size);
     if (sysctlbyname("hw.cachelinesize", &cacheline_size, &size, NULL, 0) != 0) {
-      perror("sysctlbyname");
-      return 1;
+      return 0;
     }
   #else
     // TODO
     //  * BSDs : sysctlbyname("machdep.cacheline_size", &cacheline_size, &size, NULL, 0)
     //  * Windows
     //  * ...
-    printf("Unsupported platform\n");
-    return 1;
+    return 0;
   #endif
 
-  printf("Cache line size: %zu bytes\n", cacheline_size);
+  return cacheline_size;
+}
 
-  // Show CPU model
+EXPORT int get_cpu_model(char *buffer, size_t buffer_size)
+{
+  if (buffer == NULL || buffer_size == 0) {
+    return -1;
+  }
+
   #if defined(__linux__)
     FILE *cpuinfo = fopen("/proc/cpuinfo", "r");
     if (cpuinfo) {
@@ -59,21 +68,34 @@ int main (int argc, char *argv[])
         if (strncmp(line, "model name", 10) == 0) {
           char *colon = strchr(line, ':');
           if (colon) {
-            printf("CPU model:%s", colon + 1);  // colon+1 includes leading space
+            // Skip colon and leading space
+            colon += 2;
+            // Remove trailing newline
+            char *newline = strchr(colon, '\n');
+            if (newline) {
+              *newline = '\0';
+            }
+            strncpy(buffer, colon, buffer_size - 1);
+            buffer[buffer_size - 1] = '\0';
+            fclose(cpuinfo);
+            return 0;
           }
           break;
         }
       }
       fclose(cpuinfo);
     }
+    return -1;
   #elif defined(__APPLE__)
     char cpu_brand[256];
     size_t cpu_brand_size = sizeof(cpu_brand);
     if (sysctlbyname("machdep.cpu.brand_string", cpu_brand, &cpu_brand_size, NULL, 0) == 0) {
-      printf("CPU model: %s\n", cpu_brand);
+      strncpy(buffer, cpu_brand, buffer_size - 1);
+      buffer[buffer_size - 1] = '\0';
+      return 0;
     }
+    return -1;
+  #else
+    return -1;
   #endif
-
-  return 0;
 }
-
