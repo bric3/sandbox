@@ -46,7 +46,7 @@ pluginManagement {
 
 plugins {
   id("org.gradle.toolchains.foojay-resolver-convention") version("1.0.0")
-  id("com.gradle.develocity") version "4.3.1"
+  id("com.gradle.develocity") version "4.3.2"
 }
 
 // Doc https://docs.gradle.org/7.2/userguide/platforms.html
