@@ -67,7 +67,7 @@ flatlaf-fonts-jetbrains-mono = { module = "com.formdev:flatlaf-fonts-jetbrains-m
 
 jsvg = { module = "com.github.weisj:jsvg", version.ref = "jsvg" }
 
-miglayout = { module = "com.miglayout:miglayout-swing", version = "11.4.2" }
+miglayout = { module = "com.miglayout:miglayout-swing", version = "11.4.3" }
 
 graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }
 graal-truffle-api = { module = "org.graalvm.truffle:truffle-api", version.ref = "graalvm" }
