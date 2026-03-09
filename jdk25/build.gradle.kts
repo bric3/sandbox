@@ -12,7 +12,7 @@ plugins {
 }
 
 javaConvention {
-  languageVersion = 24
+  languageVersion = 25
   openedModules = mapOf(
     "java.base/jdk.internal.vm" to "ALL-UNNAMED"
   )

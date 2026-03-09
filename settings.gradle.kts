@@ -45,6 +45,7 @@ pluginManagement {
 }
 
 plugins {
+  id("sandbox.build-stats-conventions")
   id("org.gradle.toolchains.foojay-resolver-convention") version("1.0.0")
   id("com.gradle.develocity") version "4.4.0"
 }
@@ -59,7 +60,7 @@ rootProject.name = "sandbox"
 includeBuild("conventions")
 include("kotlin")
 include("jmh-stuff", "jmh-panama")
-include("jdk11", "jdk17", "jdk21", "jdk24")
+include("jdk11", "jdk17", "jdk21", "jdk25")
 include("native:cmem", "native:dlopen", "native:cacheline")
 include("jmh-panama")
 include("graal:run-with-graal", "graal:run-with-libgraal")
