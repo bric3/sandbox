@@ -27,7 +27,7 @@ dependencies {
   implementation("org.jsoup:jsoup:1.22.1")
   implementation(libs.bundles.graal.js)
   implementation(libs.bundles.graal.deps)
-  compileOnly("org.jetbrains:annotations:24.1.0")
+  compileOnly("org.jetbrains:annotations:26.1.0")
 }
 
 // See https://docs.gradle.org/current/userguide/cross_project_publications.html
