@@ -17,7 +17,7 @@ junit5-launcher = "1.14.3"
 junit6-jupiter = "6.0.3"
 graalvm = "25.0.2"
 flexmark = "0.64.8"
-flatlaf = "3.7"
+flatlaf = "3.7.1"
 jsvg = "2.0.0"
 
 mockito = "5.22.0"
