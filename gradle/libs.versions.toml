@@ -21,7 +21,7 @@ flatlaf = "3.7.1"
 jsvg = "2.0.0"
 
 mockito = "5.23.0"
-mockito-kotlin = "6.2.3"
+mockito-kotlin = "6.3.0"
 
 testcontainers = "1.21.4"
 
