@@ -29,7 +29,7 @@ flightRecorder = "9.1.2"
 
 jmh = "1.37"
 
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 kotlinCoroutines = "1.8.1"
 
 [libraries]
