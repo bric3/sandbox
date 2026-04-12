@@ -17,6 +17,7 @@ plugins {
   // Solution: Use `java-base` (minimal Java support without configurations) and manually configure
   // Java compilation tasks with custom configurations (javaImplementation, javaTestImplementation, etc.)
   `java-base`
+  `jvm-toolchains`
 }
 
 library {
