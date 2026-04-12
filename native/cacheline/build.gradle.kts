@@ -10,6 +10,7 @@
  */
 plugins {
   `cpp-library`
+  `jvm-toolchains`
 
   // Cannot use `java` plugin or `sandbox.java-conventions` because they conflict with `cpp-library`:
   // Both plugins try to create an "implementation" configuration, causing a build error.
@@ -56,6 +57,13 @@ repositories {
 }
 
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+val javaLanguageVersion = JavaLanguageVersion.of(25)
+val javaToolchainCompiler = javaToolchains.compilerFor {
+  languageVersion = javaLanguageVersion
+}
+val javaToolchainLauncher = javaToolchains.launcherFor {
+  languageVersion = javaLanguageVersion
+}
 
 // Manually create configurations for Java dependencies to avoid conflicts with cpp-library
 val javaImplementation by configurations.registering
@@ -77,7 +85,10 @@ val compileJava by tasks.registering(JavaCompile::class) {
     include("**/*.java")
   }
   classpath = files()
+  javaCompiler.set(javaToolchainCompiler)
   destinationDirectory.set(layout.buildDirectory.dir("classes/java/main"))
+  options.release.set(javaLanguageVersion.asInt())
+  options.encoding = "UTF-8"
   dependsOn("linkDebug")
 }
 
@@ -89,7 +100,10 @@ val compileTestJava by tasks.registering(JavaCompile::class) {
     compileJava.get().destinationDirectory,
     javaTestImplementation
   )
+  javaCompiler.set(javaToolchainCompiler)
   destinationDirectory.set(layout.buildDirectory.dir("classes/java/test"))
+  options.release.set(javaLanguageVersion.asInt())
+  options.encoding = "UTF-8"
   dependsOn(compileJava, "linkDebug")
 }
 
@@ -104,6 +118,7 @@ val test by tasks.registering(Test::class) {
   )
 
   useJUnitPlatform()
+  javaLauncher.set(javaToolchainLauncher)
 
   val nativeLibPath = layout.buildDirectory
     .dir("lib/main/debug")
@@ -121,6 +136,7 @@ val test by tasks.registering(Test::class) {
 tasks.withType<JavaExec>().configureEach {
   group = "class-with-main"
   classpath = files(compileJava.get().destinationDirectory)
+  javaLauncher.set(javaToolchainLauncher)
 
   val nativeLibPath = layout.buildDirectory
     .dir("lib/main/debug")
