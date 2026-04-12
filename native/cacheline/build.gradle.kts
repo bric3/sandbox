@@ -20,6 +20,19 @@ plugins {
   `jvm-toolchains`
 }
 
+// Native sources should use the cpp-library component model rather than JVM SourceSetContainer.
+// Cannot use Gradle's built-in Java sourceSets here because creating main/test source sets
+// also creates implementation-style configurations that conflict with cpp-library.
+val java: SourceDirectorySet = objects.sourceDirectorySet("java", "Java sources").apply {
+  srcDir("src/main/java")
+  include("**/*.java")
+}
+
+val testJava: SourceDirectorySet = objects.sourceDirectorySet("testJava", "Java test sources").apply {
+  srcDir("src/test/java")
+  include("**/*.java")
+}
+
 library {
   binaries.configureEach(CppBinary::class.java) {
     compileTask.get().apply {
@@ -82,9 +95,7 @@ dependencies {
 
 // Manually create Java compile tasks (can't use java plugin due to conflict with cpp-library)
 val compileJava by tasks.registering(JavaCompile::class) {
-  source = fileTree("src/main/java") {
-    include("**/*.java")
-  }
+  source = java.asFileTree
   classpath = files()
   javaCompiler.set(javaToolchainCompiler)
   destinationDirectory.set(layout.buildDirectory.dir("classes/java/main"))
@@ -94,9 +105,7 @@ val compileJava by tasks.registering(JavaCompile::class) {
 }
 
 val compileTestJava by tasks.registering(JavaCompile::class) {
-  source = fileTree("src/test/java") {
-    include("**/*.java")
-  }
+  source = testJava.asFileTree
   classpath = files(
     compileJava.get().destinationDirectory,
     javaTestImplementation
