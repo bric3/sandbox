@@ -12,6 +12,7 @@ package sandbox.buildstats
 import com.jakewharton.picnic.TextBorder
 import com.jakewharton.picnic.renderText
 import com.jakewharton.picnic.table
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
@@ -33,9 +34,7 @@ abstract class StatisticsService :
 
   interface Parameters : BuildServiceParameters {
     val enabled: Property<Boolean>
-    val showBuildStats: Property<Boolean>
-    val showProjectStats: Property<Boolean>
-    val showSlowTasks: Property<Boolean>
+    val sections: ListProperty<BuildStatsSection>
     val minTaskDurationMs: Property<Long>
   }
 
@@ -128,87 +127,96 @@ abstract class StatisticsService :
       .filter { it.durationMs >= parameters.minTaskDurationMs.get() }
       .sortedByDescending { it.durationMs }
       .take(15)
+    parameters.sections.get().forEach { section ->
+      when (section) {
+        BuildStatsSection.BUILD_STATS -> {
+          println("Build Stats")
+          println(
+            table {
+              header {
+                row("Metric", "Value")
+              }
+              row("Observed tasks", allTasks.size)
+              row("Build span", totalDuration)
+              row("Executed", outcomeCounts.getValue(Outcome.EXECUTED))
+              row("Up-to-date", outcomeCounts.getValue(Outcome.UP_TO_DATE))
+              row("From cache", outcomeCounts.getValue(Outcome.FROM_CACHE))
+              row("Skipped", outcomeCounts.getValue(Outcome.SKIPPED))
+              row("No source", outcomeCounts.getValue(Outcome.NO_SOURCE))
+              row("Failed", outcomeCounts.getValue(Outcome.FAILED))
+              row(
+                "Cacheable reuse",
+                percent(outcomeCounts.getValue(Outcome.FROM_CACHE), allTasks.size)
+              )
 
-    if (parameters.showBuildStats.get()) {
-      println("Build Stats")
-      println(
-        table {
-          header {
-            row("Metric", "Value")
-          }
-          row("Observed tasks", allTasks.size)
-          row("Build span", totalDuration)
-          row("Executed", outcomeCounts.getValue(Outcome.EXECUTED))
-          row("Up-to-date", outcomeCounts.getValue(Outcome.UP_TO_DATE))
-          row("From cache", outcomeCounts.getValue(Outcome.FROM_CACHE))
-          row("Skipped", outcomeCounts.getValue(Outcome.SKIPPED))
-          row("No source", outcomeCounts.getValue(Outcome.NO_SOURCE))
-          row("Failed", outcomeCounts.getValue(Outcome.FAILED))
-          row(
-            "Cacheable reuse",
-            percent(outcomeCounts.getValue(Outcome.FROM_CACHE), allTasks.size)
+              cellStyle {
+                paddingLeft = 1
+                paddingRight = 1
+                border = true
+              }
+            }.renderText(border = TextBorder.ROUNDED)
           )
+        }
 
-          cellStyle {
-            paddingLeft = 1
-            paddingRight = 1
-            border = true
-          }
-        }.renderText(border = TextBorder.ROUNDED)
-      )
-    }
+        BuildStatsSection.PROJECT_STATS -> {
+          println("Project Stats")
+          println(
+            table {
+              header {
+                row("Project", "Tasks", "Executed", "From cache", "Failed", "Duration", "% build")
+              }
+              projectStats.forEach { project ->
+                row(
+                  project.path,
+                  project.taskCount,
+                  project.executedCount,
+                  project.cacheHitCount,
+                  project.failedCount,
+                  project.durationMs.milliseconds,
+                  percent(project.durationMs, totalDurationMs)
+                )
+              }
 
-    if (parameters.showProjectStats.get()) {
-      println("Project Stats")
-      println(
-        table {
-          header {
-            row("Project", "Tasks", "Executed", "From cache", "Failed", "Duration", "% build")
-          }
-          projectStats.forEach { project ->
-            row(
-              project.path,
-              project.taskCount,
-              project.executedCount,
-              project.cacheHitCount,
-              project.failedCount,
-              project.durationMs.milliseconds,
-              percent(project.durationMs, totalDurationMs)
+              cellStyle {
+                paddingLeft = 1
+                paddingRight = 1
+                border = true
+              }
+            }.renderText(border = TextBorder.ROUNDED)
+          )
+        }
+
+        BuildStatsSection.SLOW_TASKS -> {
+          if (slowTasks.isNotEmpty()) {
+            println("Slow Tasks")
+            println(
+              table {
+                header {
+                  row("Task path", "Outcome", "Duration", "% build")
+                }
+                slowTasks.forEach { task ->
+                  row(
+                    task.path,
+                    task.outcome.name.lowercase(),
+                    task.durationMs.milliseconds,
+                    percent(task.durationMs, totalDurationMs)
+                  )
+                }
+
+                cellStyle {
+                  paddingLeft = 1
+                  paddingRight = 1
+                  border = true
+                }
+              }.renderText(border = TextBorder.ROUNDED)
             )
           }
+        }
 
-          cellStyle {
-            paddingLeft = 1
-            paddingRight = 1
-            border = true
-          }
-        }.renderText(border = TextBorder.ROUNDED)
-      )
-    }
-
-    if (parameters.showSlowTasks.get() && slowTasks.isNotEmpty()) {
-      println("Slow Tasks")
-      println(
-        table {
-          header {
-            row("Task path", "Outcome", "Duration", "% build")
-          }
-          slowTasks.forEach { task ->
-            row(
-              task.path,
-              task.outcome.name.lowercase(),
-              task.durationMs.milliseconds,
-              percent(task.durationMs, totalDurationMs)
-            )
-          }
-
-          cellStyle {
-            paddingLeft = 1
-            paddingRight = 1
-            border = true
-          }
-        }.renderText(border = TextBorder.ROUNDED)
-      )
+        BuildStatsSection.LIFECYCLE_TIMINGS,
+        BuildStatsSection.PROJECT_CONFIGURATION_TIMINGS,
+        BuildStatsSection.DIAGNOSTICS -> Unit
+      }
     }
   }
 

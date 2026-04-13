@@ -10,13 +10,23 @@
 package sandbox.buildstats
 
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
 import javax.inject.Inject
 
 abstract class BuildStatsExtension @Inject constructor(objects: ObjectFactory) {
   val enabled = objects.property(Boolean::class.java).convention(true)
-  val showBuildStats = objects.property(Boolean::class.java).convention(true)
-  val showProjectStats = objects.property(Boolean::class.java).convention(true)
-  val showSlowTasks = objects.property(Boolean::class.java).convention(true)
+  val configurationStats = objects.property(Boolean::class.java)
+  val sections: ListProperty<BuildStatsSection> = objects.listProperty(BuildStatsSection::class.java)
+    .convention(
+      listOf(
+        BuildStatsSection.BUILD_STATS,
+        BuildStatsSection.PROJECT_STATS,
+        BuildStatsSection.SLOW_TASKS,
+        BuildStatsSection.LIFECYCLE_TIMINGS,
+        BuildStatsSection.PROJECT_CONFIGURATION_TIMINGS,
+        BuildStatsSection.DIAGNOSTICS,
+      )
+    )
 
   val minTaskDurationMillis = objects.property(Long::class.java).convention(500)
 }

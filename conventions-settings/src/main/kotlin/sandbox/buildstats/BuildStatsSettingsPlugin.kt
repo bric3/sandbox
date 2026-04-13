@@ -10,6 +10,7 @@
 package sandbox.buildstats
 
 import org.gradle.api.Plugin
+import org.gradle.api.configuration.BuildFeatures
 import org.gradle.api.initialization.Settings
 import org.gradle.api.model.ObjectFactory
 import org.gradle.build.event.BuildEventsListenerRegistry
@@ -21,7 +22,8 @@ import javax.inject.Inject
  */
 class BuildStatsSettingsPlugin @Inject constructor(
   private val objects: ObjectFactory,
-  private val buildEventsListenerRegistry: BuildEventsListenerRegistry
+  private val buildEventsListenerRegistry: BuildEventsListenerRegistry,
+  private val buildFeatures: BuildFeatures,
 ) : Plugin<Settings> {
   override fun apply(settings: Settings) {
     val statsExtension = settings.extensions.create(
@@ -29,19 +31,29 @@ class BuildStatsSettingsPlugin @Inject constructor(
       BuildStatsExtension::class.java,
       objects
     )
+    statsExtension.configurationStats.convention(
+      buildFeatures.configurationCache.requested
+        .orElse(true)
+    )
 
     val statsListener = settings.gradle.sharedServices.registerIfAbsent(
       STATS_LISTENER_SERVICE,
       StatisticsService::class.java
     ) {
       parameters.enabled.set(statsExtension.enabled)
-      parameters.showBuildStats.set(statsExtension.showBuildStats)
-      parameters.showProjectStats.set(statsExtension.showProjectStats)
-      parameters.showSlowTasks.set(statsExtension.showSlowTasks)
+      parameters.sections.set(statsExtension.sections)
       parameters.minTaskDurationMs.set(statsExtension.minTaskDurationMillis)
     }
 
     buildEventsListenerRegistry.onTaskCompletion(statsListener)
+
+    settings.gradle.addListener(
+      ConfigurationCacheIncompatibleLifecycleCollector(
+        settings = settings,
+        extension = statsExtension,
+        configurationCacheRequested = buildFeatures.configurationCache.requested,
+      )
+    )
   }
 
   companion object {
