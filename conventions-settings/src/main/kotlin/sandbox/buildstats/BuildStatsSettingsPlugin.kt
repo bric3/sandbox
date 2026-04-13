@@ -13,12 +13,11 @@ import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
 import org.gradle.api.model.ObjectFactory
 import org.gradle.build.event.BuildEventsListenerRegistry
-import org.gradle.tooling.events.ProgressEvent
-import org.gradle.tooling.events.ProgressListener
 import javax.inject.Inject
 
 /**
- * This whole plugin is completely experimental, beware if you get inspired from it.
+ * Uses Gradle's build-events listener registry so task reporting still works when configuration
+ * cache is enabled. Older listener APIs such as BuildListener/TaskExecutionListener do not.
  */
 class BuildStatsSettingsPlugin @Inject constructor(
   private val objects: ObjectFactory,
@@ -31,40 +30,22 @@ class BuildStatsSettingsPlugin @Inject constructor(
       objects
     )
 
-    settings.gradle.taskGraph.whenReady {
-      val statsListener = settings.gradle.sharedServices.registerIfAbsent(
-        STATS_LISTENER_SERVICE,
-        StatisticsService::class.java
-      ) {
-        parameters.minTaskDurationMs.set(statsExtension.minTaskDurationMillis)
-      }
-
-      buildEventsListenerRegistry.onTaskCompletion(statsListener)
-    }
-
     val statsListener = settings.gradle.sharedServices.registerIfAbsent(
-      STATS_REPORTER_SERVICE,
-      WorkInProgress_BuildStatsReporter::class.java
+      STATS_LISTENER_SERVICE,
+      StatisticsService::class.java
     ) {
       parameters.enabled.set(statsExtension.enabled)
-    }.map {
-      it.settings = settings
-      it
+      parameters.showBuildStats.set(statsExtension.showBuildStats)
+      parameters.showProjectStats.set(statsExtension.showProjectStats)
+      parameters.showSlowTasks.set(statsExtension.showSlowTasks)
+      parameters.minTaskDurationMs.set(statsExtension.minTaskDurationMillis)
     }
 
-    settings.gradle.addListener(BuildStatsCollector(statsListener))
-
-    settings.gradle.addListener(object : ProgressListener {
-      override fun statusChanged(event: ProgressEvent) {
-        println("${event::class.simpleName} ~> $event")
-      }
-    })
+    buildEventsListenerRegistry.onTaskCompletion(statsListener)
   }
 
   companion object {
     const val BUILD_STATS_EXTENSION = "buildStats"
-    const val STATS_REPORTER_SERVICE = "statsReporter"
     const val STATS_LISTENER_SERVICE = "statsListener"
   }
 }
-

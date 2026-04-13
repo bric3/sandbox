@@ -14,6 +14,9 @@ import javax.inject.Inject
 
 abstract class BuildStatsExtension @Inject constructor(objects: ObjectFactory) {
   val enabled = objects.property(Boolean::class.java).convention(true)
+  val showBuildStats = objects.property(Boolean::class.java).convention(true)
+  val showProjectStats = objects.property(Boolean::class.java).convention(true)
+  val showSlowTasks = objects.property(Boolean::class.java).convention(true)
 
   val minTaskDurationMillis = objects.property(Long::class.java).convention(500)
 }
