@@ -9,11 +9,25 @@
  */
 package sandbox.buildstats
 
+/**
+ * Ordered report sections that can be rendered by the `buildStats` extension.
+ */
 enum class BuildStatsSection {
+  /** Summary of observed task outcomes and overall build span. */
   BUILD_STATS,
+
+  /** Per-project aggregation of observed task execution outcomes and time. */
   PROJECT_STATS,
+
+  /** Slowest observed tasks, including execution reasons when Gradle provides them. */
   SLOW_TASKS,
+
+  /** Build lifecycle phase timings gathered from configuration-cache-incompatible listeners. */
   LIFECYCLE_TIMINGS,
+
+  /** Per-project configuration timings gathered from configuration-cache-incompatible listeners. */
   PROJECT_CONFIGURATION_TIMINGS,
+
+  /** Extra build diagnostics such as task count, parallelism, and configuration-cache state. */
   DIAGNOSTICS,
 }
