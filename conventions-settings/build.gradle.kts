@@ -25,24 +25,27 @@ gradlePlugin {
 }
 
 dependencies {
-    // implementation(libs.gradleplugin.kotlin.jvm)
+  // Expose typed accessors for external plugins used by precompiled settings scripts.
+  implementation(libs.gradleplugin.foojay.resolver.convention)
+  implementation(libs.gradleplugin.develocity)
+  // implementation(libs.gradleplugin.kotlin.jvm)
   implementation("com.jakewharton.picnic:picnic:0.7.0")
 }
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_11
+        jvmTarget = JvmTarget.JVM_17
     }
 }
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 
 java {
     javaToolchains {
-        version = JavaLanguageVersion.of(11)
+        version = JavaLanguageVersion.of(17)
     }
 }
