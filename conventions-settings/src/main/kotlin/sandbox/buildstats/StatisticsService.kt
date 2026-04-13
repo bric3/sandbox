@@ -15,6 +15,7 @@ import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.tooling.events.FinishEvent
 import org.gradle.tooling.events.OperationCompletionListener
+import org.gradle.tooling.events.task.TaskExecutionResult
 import org.gradle.tooling.events.task.TaskFailureResult
 import org.gradle.tooling.events.task.TaskFinishEvent
 import org.gradle.tooling.events.task.TaskSkippedResult
@@ -50,6 +51,7 @@ abstract class StatisticsService :
     taskStats[event.descriptor.taskPath] = TaskStat(
       path = event.descriptor.taskPath,
       durationMs = durationMs,
+      executionReasons = executionReasons(event.result),
       outcome = when (val result = event.result) {
         is TaskFailureResult -> TaskOutcome.FAILED
         is TaskSkippedResult ->
@@ -65,6 +67,13 @@ abstract class StatisticsService :
       }
     )
   }
+
+  private fun executionReasons(result: Any): List<String> =
+    if (result is TaskExecutionResult) {
+      runCatching { result.executionReasons ?: emptyList() }.getOrDefault(emptyList())
+    } else {
+      emptyList()
+    }
 
   override fun close() {
     if (!parameters.enabled.get() || taskStats.isEmpty()) {

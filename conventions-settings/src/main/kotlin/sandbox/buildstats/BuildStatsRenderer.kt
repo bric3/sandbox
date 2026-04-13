@@ -100,7 +100,12 @@ object BuildStatsRenderer {
             blocks += "Slow Tasks\n" + table {
               header { row("Task path", "Outcome", "Duration", "% build") }
               slowTasks.forEach { task ->
-                row(task.path, task.outcome.name.lowercase(), task.durationMs.milliseconds, percent(task.durationMs, totalDurationMs))
+                row(
+                  buildSlowTaskCell(task),
+                  task.outcome.name.lowercase(),
+                  task.durationMs.milliseconds,
+                  percent(task.durationMs, totalDurationMs)
+                )
               }
               cellStyle {
                 paddingLeft = 1
@@ -183,6 +188,19 @@ object BuildStatsRenderer {
 
   private fun buildProjectCell(project: ProjectConfigurationStat): String =
     listOfNotNull(project.path, project.failureSummary).joinToString("\n")
+
+  private fun buildSlowTaskCell(task: TaskStat): String {
+    val reasons = task.executionReasons
+      .map(String::trim)
+      .filter(String::isNotEmpty)
+      .take(3)
+      .map { "reason: $it" }
+
+    return listOfNotNull(
+      task.path,
+      *reasons.toTypedArray()
+    ).joinToString("\n")
+  }
 
   private fun formatNanos(value: Long?): String =
     if (value == null || value < 0L) "n/a" else value.nanoseconds.toString()

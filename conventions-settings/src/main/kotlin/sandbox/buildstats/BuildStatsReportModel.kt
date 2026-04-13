@@ -22,6 +22,7 @@ data class TaskStat(
   val path: String,
   val durationMs: Long,
   val outcome: TaskOutcome,
+  val executionReasons: List<String> = emptyList(),
 ) {
   val projectPath: String
     get() = path.substringBeforeLast(":", missingDelimiterValue = ":").ifBlank { ":" }
