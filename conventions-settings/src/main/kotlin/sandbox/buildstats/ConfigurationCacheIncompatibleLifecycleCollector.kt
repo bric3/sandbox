@@ -9,9 +9,6 @@
  */
 package sandbox.buildstats
 
-import com.jakewharton.picnic.TextBorder
-import com.jakewharton.picnic.renderText
-import com.jakewharton.picnic.table
 import org.gradle.BuildListener
 import org.gradle.BuildResult
 import org.gradle.StartParameter
@@ -26,7 +23,6 @@ import org.gradle.api.initialization.Settings
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskState
-import kotlin.time.Duration.Companion.nanoseconds
 
 /**
  * Legacy build lifecycle timings, similar in spirit to Gradle's profile report.
@@ -38,16 +34,6 @@ class ConfigurationCacheIncompatibleLifecycleCollector(
   private val extension: BuildStatsExtension,
   private val configurationCacheRequested: Provider<Boolean>,
 ) : BuildListener, ProjectEvaluationListener, TaskExecutionGraphListener, TaskExecutionListener {
-
-  private data class ProjectConfigurationStat(
-    val path: String,
-    val configurationNanos: Long,
-    val executionNanos: Long,
-    val failureSummary: String?,
-  ) {
-    val totalNanos: Long
-      get() = configurationNanos + executionNanos
-  }
 
   private val createdAtNanos = System.nanoTime()
   private var settingsEvaluatedAtNanos = -1L
@@ -126,105 +112,36 @@ class ConfigurationCacheIncompatibleLifecycleCollector(
       return
     }
 
-    extension.sections.get().forEach { section ->
-      when (section) {
-        BuildStatsSection.LIFECYCLE_TIMINGS -> {
-          println("Lifecycle Timings (Configuration Cache Incompatible)")
-          println(
-            table {
-              header {
-                row("Phase", "Duration")
-              }
-              row("Settings script", duration(createdAtNanos, settingsEvaluatedAtNanos))
-              row("Project loading", duration(settingsEvaluatedAtNanos, projectsLoadedAtNanos))
-              row("Project configuration", duration(projectsLoadedAtNanos, projectsEvaluatedAtNanos))
-              row("Task graph calculation", duration(projectsEvaluatedAtNanos, taskGraphReadyAtNanos))
-              row("Task execution", duration(taskGraphReadyAtNanos, buildFinishedAtNanos))
-              row("Total", duration(createdAtNanos, buildFinishedAtNanos))
-
-              cellStyle {
-                paddingLeft = 1
-                paddingRight = 1
-                border = true
-              }
-            }.renderText(border = TextBorder.ROUNDED)
-          )
-        }
-
-        BuildStatsSection.PROJECT_CONFIGURATION_TIMINGS -> {
-          val projectsByDuration = projectConfigurationStats.values
-            .map { project ->
-              project.copy(executionNanos = projectExecutionNanos[project.path] ?: project.executionNanos)
-            }
-            .sortedByDescending { it.totalNanos }
-            .take(15)
-
-          if (projectsByDuration.isNotEmpty()) {
-            println("Project Configuration Timings (Configuration Cache Incompatible)")
-            println(
-              table {
-                header {
-                  row("Project", "Duration", "Execution", "Configuration")
-                }
-                projectsByDuration.forEach { project ->
-                  row(
-                    buildProjectCell(project),
-                    project.totalNanos.nanoseconds,
-                    project.executionNanos.nanoseconds,
-                    project.configurationNanos.nanoseconds,
-                  )
-                }
-
-                cellStyle {
-                  paddingLeft = 1
-                  paddingRight = 1
-                  border = true
-                }
-              }.renderText(border = TextBorder.ROUNDED)
-            )
-          }
-        }
-
-        BuildStatsSection.DIAGNOSTICS -> {
-          val startParameter = settings.startParameter
-          val ccRequested = configurationCacheRequested.orNull ?: reflectiveConfigurationCacheRequested(startParameter)
-          println("Build Diagnostics (Configuration Cache Incompatible)")
-          println(
-            table {
-              header {
-                row("Signal", "Value")
-              }
-              row("Projects discovered", projectCount)
-              row("Projects evaluated", evaluatedProjectCount)
-              row("Projects failed during evaluation", failedProjectCount)
-              row("Tasks scheduled", scheduledTaskCount)
-              row("Parallel execution", startParameter.isParallelProjectExecutionEnabled)
-              row("Configuration on demand", startParameter.isConfigureOnDemand)
-              row("Configuration cache requested", ccRequested?.toString() ?: "unknown")
-              row("Build failed", result.failure != null)
-              row("Warning", diagnosticsWarning(startParameter, ccRequested))
-
-              cellStyle {
-                paddingLeft = 1
-                paddingRight = 1
-                border = true
-              }
-            }.renderText(border = TextBorder.ROUNDED)
-          )
-        }
-
-        BuildStatsSection.BUILD_STATS,
-        BuildStatsSection.PROJECT_STATS,
-        BuildStatsSection.SLOW_TASKS -> Unit
-      }
-    }
-  }
-
-  private fun duration(start: Long, end: Long): String {
-    if (start < 0L || end < 0L || end < start) {
-      return "n/a"
-    }
-    return (end - start).nanoseconds.toString()
+    val startParameter = settings.startParameter
+    val ccRequested = configurationCacheRequested.orNull ?: reflectiveConfigurationCacheRequested(startParameter)
+    val snapshot = BuildStatsSnapshot(
+      sections = extension.sections.get(),
+      lifecycleTimings = LifecycleTimings(
+        settingsScriptNanos = elapsed(createdAtNanos, settingsEvaluatedAtNanos),
+        projectLoadingNanos = elapsed(settingsEvaluatedAtNanos, projectsLoadedAtNanos),
+        projectConfigurationNanos = elapsed(projectsLoadedAtNanos, projectsEvaluatedAtNanos),
+        taskGraphCalculationNanos = elapsed(projectsEvaluatedAtNanos, taskGraphReadyAtNanos),
+        taskExecutionNanos = elapsed(taskGraphReadyAtNanos, buildFinishedAtNanos),
+        totalNanos = elapsed(createdAtNanos, buildFinishedAtNanos),
+      ),
+      projectConfigurationStats = projectConfigurationStats.values
+        .map { project ->
+          project.copy(executionNanos = projectExecutionNanos[project.path] ?: project.executionNanos)
+        },
+      diagnostics = Diagnostics(
+        projectCount = projectCount,
+        evaluatedProjectCount = evaluatedProjectCount,
+        failedProjectCount = failedProjectCount,
+        scheduledTaskCount = scheduledTaskCount,
+        parallelExecutionEnabled = startParameter.isParallelProjectExecutionEnabled,
+        configurationOnDemand = startParameter.isConfigureOnDemand,
+        configurationCacheRequested = ccRequested,
+        buildFailed = result.failure != null,
+        warning = diagnosticsWarning(startParameter, ccRequested),
+      ),
+      configurationCacheIncompatible = true,
+    )
+    BuildStatsRenderer.render(snapshot).forEach(::println)
   }
 
   private fun diagnosticsWarning(startParameter: StartParameter, configurationCacheRequested: Boolean?): String =
@@ -245,9 +162,6 @@ class ConfigurationCacheIncompatibleLifecycleCollector(
         ?.invoke(startParameter) as? Boolean
     }.getOrNull()
 
-  private fun buildProjectCell(project: ProjectConfigurationStat): String =
-    listOfNotNull(project.path, project.failureSummary).joinToString("\n")
-
   private fun renderFailureSummary(error: Throwable): String {
     val rootCause = generateSequence(error) { it.cause }.last()
     val type = rootCause::class.simpleName ?: rootCause.javaClass.simpleName
@@ -256,4 +170,7 @@ class ConfigurationCacheIncompatibleLifecycleCollector(
       .joinToString(": ")
       .take(180)
   }
+
+  private fun elapsed(start: Long, end: Long): Long? =
+    if (start < 0L || end < 0L || end < start) null else end - start
 }

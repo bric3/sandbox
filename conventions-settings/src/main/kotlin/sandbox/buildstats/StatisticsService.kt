@@ -9,9 +9,6 @@
  */
 package sandbox.buildstats
 
-import com.jakewharton.picnic.TextBorder
-import com.jakewharton.picnic.renderText
-import com.jakewharton.picnic.table
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.services.BuildService
@@ -24,7 +21,6 @@ import org.gradle.tooling.events.task.TaskSkippedResult
 import org.gradle.tooling.events.task.TaskSuccessResult
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.atomic.AtomicLong
-import kotlin.time.Duration.Companion.milliseconds
 
 // inspired by https://github.com/gradle/gradle/issues/20151#issuecomment-1751927564
 abstract class StatisticsService :
@@ -37,34 +33,6 @@ abstract class StatisticsService :
     val sections: ListProperty<BuildStatsSection>
     val minTaskDurationMs: Property<Long>
   }
-
-  private enum class Outcome {
-    EXECUTED,
-    UP_TO_DATE,
-    FROM_CACHE,
-    SKIPPED,
-    NO_SOURCE,
-    FAILED,
-  }
-
-  private data class TaskStat(
-    val path: String,
-    val durationMs: Long,
-    val outcome: Outcome,
-  ) {
-    val projectPath: String
-      get() = path.substringBeforeLast(":", missingDelimiterValue = ":")
-        .ifBlank { ":" }
-  }
-
-  private data class ProjectStat(
-    val path: String,
-    val durationMs: Long,
-    val taskCount: Int,
-    val executedCount: Int,
-    val cacheHitCount: Int,
-    val failedCount: Int,
-  )
 
   private val taskStats = ConcurrentSkipListMap<String, TaskStat>()
   private val firstTaskStartMs = AtomicLong(Long.MAX_VALUE)
@@ -83,17 +51,17 @@ abstract class StatisticsService :
       path = event.descriptor.taskPath,
       durationMs = durationMs,
       outcome = when (val result = event.result) {
-        is TaskFailureResult -> Outcome.FAILED
+        is TaskFailureResult -> TaskOutcome.FAILED
         is TaskSkippedResult ->
-          if (result.skipMessage.equals("NO-SOURCE", ignoreCase = true)) Outcome.NO_SOURCE else Outcome.SKIPPED
+          if (result.skipMessage.equals("NO-SOURCE", ignoreCase = true)) TaskOutcome.NO_SOURCE else TaskOutcome.SKIPPED
 
         is TaskSuccessResult -> when {
-          result.isFromCache -> Outcome.FROM_CACHE
-          result.isUpToDate -> Outcome.UP_TO_DATE
-          else -> Outcome.EXECUTED
+          result.isFromCache -> TaskOutcome.FROM_CACHE
+          result.isUpToDate -> TaskOutcome.UP_TO_DATE
+          else -> TaskOutcome.EXECUTED
         }
 
-        else -> Outcome.EXECUTED
+        else -> TaskOutcome.EXECUTED
       }
     )
   }
@@ -103,130 +71,12 @@ abstract class StatisticsService :
       return
     }
 
-    val allTasks = taskStats.values.toList()
-    val totalDurationMs = lastTaskEndMs.get() - firstTaskStartMs.get()
-    val totalDuration = totalDurationMs.milliseconds
-    val outcomeCounts = Outcome.entries.associateWith { outcome ->
-      allTasks.count { it.outcome == outcome }
-    }
-    val projectStats = allTasks
-      .groupBy { it.projectPath }
-      .map { (projectPath, tasks) ->
-        ProjectStat(
-          path = projectPath,
-          durationMs = tasks.sumOf { it.durationMs },
-          taskCount = tasks.size,
-          executedCount = tasks.count { it.outcome == Outcome.EXECUTED },
-          cacheHitCount = tasks.count { it.outcome == Outcome.FROM_CACHE },
-          failedCount = tasks.count { it.outcome == Outcome.FAILED },
-        )
-      }
-      .sortedByDescending { it.durationMs }
-      .take(10)
-    val slowTasks = allTasks
-      .filter { it.durationMs >= parameters.minTaskDurationMs.get() }
-      .sortedByDescending { it.durationMs }
-      .take(15)
-    parameters.sections.get().forEach { section ->
-      when (section) {
-        BuildStatsSection.BUILD_STATS -> {
-          println("Build Stats")
-          println(
-            table {
-              header {
-                row("Metric", "Value")
-              }
-              row("Observed tasks", allTasks.size)
-              row("Build span", totalDuration)
-              row("Executed", outcomeCounts.getValue(Outcome.EXECUTED))
-              row("Up-to-date", outcomeCounts.getValue(Outcome.UP_TO_DATE))
-              row("From cache", outcomeCounts.getValue(Outcome.FROM_CACHE))
-              row("Skipped", outcomeCounts.getValue(Outcome.SKIPPED))
-              row("No source", outcomeCounts.getValue(Outcome.NO_SOURCE))
-              row("Failed", outcomeCounts.getValue(Outcome.FAILED))
-              row(
-                "Cacheable reuse",
-                percent(outcomeCounts.getValue(Outcome.FROM_CACHE), allTasks.size)
-              )
-
-              cellStyle {
-                paddingLeft = 1
-                paddingRight = 1
-                border = true
-              }
-            }.renderText(border = TextBorder.ROUNDED)
-          )
-        }
-
-        BuildStatsSection.PROJECT_STATS -> {
-          println("Project Stats")
-          println(
-            table {
-              header {
-                row("Project", "Tasks", "Executed", "From cache", "Failed", "Duration", "% build")
-              }
-              projectStats.forEach { project ->
-                row(
-                  project.path,
-                  project.taskCount,
-                  project.executedCount,
-                  project.cacheHitCount,
-                  project.failedCount,
-                  project.durationMs.milliseconds,
-                  percent(project.durationMs, totalDurationMs)
-                )
-              }
-
-              cellStyle {
-                paddingLeft = 1
-                paddingRight = 1
-                border = true
-              }
-            }.renderText(border = TextBorder.ROUNDED)
-          )
-        }
-
-        BuildStatsSection.SLOW_TASKS -> {
-          if (slowTasks.isNotEmpty()) {
-            println("Slow Tasks")
-            println(
-              table {
-                header {
-                  row("Task path", "Outcome", "Duration", "% build")
-                }
-                slowTasks.forEach { task ->
-                  row(
-                    task.path,
-                    task.outcome.name.lowercase(),
-                    task.durationMs.milliseconds,
-                    percent(task.durationMs, totalDurationMs)
-                  )
-                }
-
-                cellStyle {
-                  paddingLeft = 1
-                  paddingRight = 1
-                  border = true
-                }
-              }.renderText(border = TextBorder.ROUNDED)
-            )
-          }
-        }
-
-        BuildStatsSection.LIFECYCLE_TIMINGS,
-        BuildStatsSection.PROJECT_CONFIGURATION_TIMINGS,
-        BuildStatsSection.DIAGNOSTICS -> Unit
-      }
-    }
-  }
-
-  private fun percent(part: Int, whole: Int): String =
-    percent(part.toLong(), whole.toLong())
-
-  private fun percent(part: Long, whole: Long): String {
-    if (whole <= 0L) {
-      return "0.0%"
-    }
-    return "%.1f%%".format((part.toDouble() * 100.0) / whole.toDouble())
+    val snapshot = BuildStatsSnapshot(
+      sections = parameters.sections.get(),
+      taskStats = taskStats.values.toList(),
+      totalDurationMs = lastTaskEndMs.get() - firstTaskStartMs.get(),
+      minTaskDurationMs = parameters.minTaskDurationMs.get(),
+    )
+    BuildStatsRenderer.render(snapshot).forEach(::println)
   }
 }
