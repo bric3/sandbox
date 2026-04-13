@@ -31,6 +31,8 @@ jmh = "1.37"
 
 kotlin = "2.3.20"
 kotlinCoroutines = "1.8.1"
+foojayResolverConvention = "1.0.0"
+develocity = "4.4.0"
 
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
@@ -97,6 +99,8 @@ jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
 
 # Gradle plugins declared in build conventions
 gradleplugin-kotlin-jvm = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+gradleplugin-foojay-resolver-convention = { module = "org.gradle.toolchains.foojay-resolver-convention:org.gradle.toolchains.foojay-resolver-convention.gradle.plugin", version.ref = "foojayResolverConvention" }
+gradleplugin-develocity = { module = "com.gradle.develocity:com.gradle.develocity.gradle.plugin", version.ref = "develocity" }
 
 [bundles]
 okhttp = ['okhttp', 'okhttp-tls', 'okhttp-dnsoverhttps', 'okhttp-logging']

@@ -10,44 +10,13 @@
 
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
-// Required for nokee...
-// See
-// * https://github.com/nokeedev/gradle-native/issues/349
-// * https://github.com/nokeedev/gradle-native/issues/350
 pluginManagement {
   includeBuild("conventions-settings")
-
-  repositories {
-    maven {
-      name = "Nokee Release Repository"
-      url = uri("https://repo.nokee.dev/release")
-      mavenContent {
-        includeGroupByRegex("dev\\.nokee.*")
-        includeGroupByRegex("dev\\.gradleplugins.*")
-      }
-    }
-    maven {
-      name = "Nokee Snapshot Repository"
-      url = uri("https://repo.nokee.dev/snapshot")
-      mavenContent {
-        includeGroupByRegex("dev\\.nokee.*")
-        includeGroupByRegex("dev\\.gradleplugins.*")
-      }
-    }
-    gradlePluginPortal()
-  }
-  val nokeeVersion = "0.4.3129-202303171612.d413fb13"  // found on https://services.nokee.dev/versions/latest-snapshot.json
-  resolutionStrategy {
-    eachPlugin {
-      if (requested.id.id.startsWith("dev.nokee.")) {
-        useModule("${requested.id.id}:${requested.id.id}.gradle.plugin:${nokeeVersion}")
-      }
-    }
-  }
 }
 
 plugins {
   id("sandbox.conventions")
+  id("sandbox.nokee-conventions")
 }
 
 // Doc https://docs.gradle.org/7.2/userguide/platforms.html
