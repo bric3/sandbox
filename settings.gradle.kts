@@ -15,6 +15,8 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 // * https://github.com/nokeedev/gradle-native/issues/349
 // * https://github.com/nokeedev/gradle-native/issues/350
 pluginManagement {
+  includeBuild("conventions-settings")
+
   repositories {
     maven {
       name = "Nokee Release Repository"
@@ -45,7 +47,7 @@ pluginManagement {
 }
 
 plugins {
-  id("sandbox.build-stats-conventions")
+  id("sandbox.conventions")
   id("org.gradle.toolchains.foojay-resolver-convention") version("1.0.0")
   id("com.gradle.develocity") version "4.4.0"
 }
