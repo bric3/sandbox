@@ -10,7 +10,6 @@
  */
 plugins {
   `cpp-library`
-  `jvm-toolchains`
 
   // Cannot use `java` plugin or `sandbox.java-conventions` because they conflict with `cpp-library`:
   // Both plugins try to create an "implementation" configuration, causing a build error.
