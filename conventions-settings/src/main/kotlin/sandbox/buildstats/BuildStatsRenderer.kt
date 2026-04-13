@@ -18,6 +18,7 @@ import kotlin.time.Duration.Companion.nanoseconds
 object BuildStatsRenderer {
   fun render(snapshot: BuildStatsSnapshot): List<String> {
     val blocks = mutableListOf<String>()
+    blocks += snapshot.notices
     val allTasks = snapshot.taskStats
     val totalDurationMs = snapshot.totalDurationMs ?: 0L
     val projectTaskStats = allTasks

@@ -15,7 +15,6 @@ import javax.inject.Inject
 
 abstract class BuildStatsExtension @Inject constructor(objects: ObjectFactory) {
   val enabled = objects.property(Boolean::class.java).convention(true)
-  val configurationStats = objects.property(Boolean::class.java)
   val sections: ListProperty<BuildStatsSection> = objects.listProperty(BuildStatsSection::class.java)
     .convention(
       listOf(

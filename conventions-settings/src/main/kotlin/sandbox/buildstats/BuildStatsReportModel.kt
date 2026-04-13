@@ -75,6 +75,7 @@ data class BuildStatsSnapshot(
   val lifecycleTimings: LifecycleTimings? = null,
   val projectConfigurationStats: List<ProjectConfigurationStat> = emptyList(),
   val diagnostics: Diagnostics? = null,
+  val notices: List<String> = emptyList(),
   val configurationCacheIncompatible: Boolean = false,
   val minTaskDurationMs: Long = 500,
 )

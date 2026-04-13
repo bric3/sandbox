@@ -32,6 +32,7 @@ abstract class StatisticsService :
   interface Parameters : BuildServiceParameters {
     val enabled: Property<Boolean>
     val sections: ListProperty<BuildStatsSection>
+    val configurationCacheRequested: Property<Boolean>
     val minTaskDurationMs: Property<Long>
   }
 
@@ -80,10 +81,24 @@ abstract class StatisticsService :
       return
     }
 
+    val incompatibleSections = parameters.sections.get().filter {
+      it == BuildStatsSection.LIFECYCLE_TIMINGS ||
+        it == BuildStatsSection.PROJECT_CONFIGURATION_TIMINGS ||
+        it == BuildStatsSection.DIAGNOSTICS
+    }
+    val notices = buildList {
+      if (parameters.configurationCacheRequested.get() && incompatibleSections.isNotEmpty()) {
+        add(
+          "Unavailable sections when Configuration Cache is requested: " +
+            incompatibleSections.joinToString(", ")
+        )
+      }
+    }
     val snapshot = BuildStatsSnapshot(
       sections = parameters.sections.get(),
       taskStats = taskStats.values.toList(),
       totalDurationMs = lastTaskEndMs.get() - firstTaskStartMs.get(),
+      notices = notices,
       minTaskDurationMs = parameters.minTaskDurationMs.get(),
     )
     BuildStatsRenderer.render(snapshot).forEach(::println)

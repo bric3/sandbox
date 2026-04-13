@@ -31,10 +31,6 @@ class BuildStatsSettingsPlugin @Inject constructor(
       BuildStatsExtension::class.java,
       objects
     )
-    statsExtension.configurationStats.convention(
-      buildFeatures.configurationCache.requested
-        .orElse(true)
-    )
 
     val statsListener = settings.gradle.sharedServices.registerIfAbsent(
       STATS_LISTENER_SERVICE,
@@ -42,18 +38,28 @@ class BuildStatsSettingsPlugin @Inject constructor(
     ) {
       parameters.enabled.set(statsExtension.enabled)
       parameters.sections.set(statsExtension.sections)
+      parameters.configurationCacheRequested.set(buildFeatures.configurationCache.requested.orElse(false))
       parameters.minTaskDurationMs.set(statsExtension.minTaskDurationMillis)
     }
 
     buildEventsListenerRegistry.onTaskCompletion(statsListener)
 
-    settings.gradle.addListener(
-      ConfigurationCacheIncompatibleLifecycleCollector(
-        settings = settings,
-        extension = statsExtension,
-        configurationCacheRequested = buildFeatures.configurationCache.requested,
+    val requestedSections = statsExtension.sections.get()
+    val hasConfigurationCacheIncompatibleSections = requestedSections.any {
+      it == BuildStatsSection.LIFECYCLE_TIMINGS ||
+        it == BuildStatsSection.PROJECT_CONFIGURATION_TIMINGS ||
+        it == BuildStatsSection.DIAGNOSTICS
+    }
+    val configurationCacheRequested = buildFeatures.configurationCache.requested.orNull == true
+
+    if (hasConfigurationCacheIncompatibleSections && !configurationCacheRequested) {
+      settings.gradle.addListener(
+        ConfigurationCacheIncompatibleLifecycleCollector(
+          settings = settings,
+          extension = statsExtension,
+        )
       )
-    )
+    }
   }
 
   companion object {

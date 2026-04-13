@@ -21,18 +21,16 @@ import org.gradle.api.execution.TaskExecutionGraphListener
 import org.gradle.api.execution.TaskExecutionListener
 import org.gradle.api.initialization.Settings
 import org.gradle.api.invocation.Gradle
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskState
 
 /**
  * Legacy build lifecycle timings, similar in spirit to Gradle's profile report.
  * This relies on listener APIs that are not configuration-cache-compatible, so it is
- * only enabled when buildStats.configurationStats is set to false.
+ * only used when configuration-cache-incompatible sections are explicitly requested.
  */
 class ConfigurationCacheIncompatibleLifecycleCollector(
   private val settings: Settings,
   private val extension: BuildStatsExtension,
-  private val configurationCacheRequested: Provider<Boolean>,
 ) : BuildListener, ProjectEvaluationListener, TaskExecutionGraphListener, TaskExecutionListener {
 
   private val createdAtNanos = System.nanoTime()
@@ -108,12 +106,11 @@ class ConfigurationCacheIncompatibleLifecycleCollector(
   override fun buildFinished(result: BuildResult) {
     buildFinishedAtNanos = System.nanoTime()
 
-    if (!extension.enabled.get() || !extension.configurationStats.get()) {
+    if (!extension.enabled.get()) {
       return
     }
 
     val startParameter = settings.startParameter
-    val ccRequested = configurationCacheRequested.orNull ?: reflectiveConfigurationCacheRequested(startParameter)
     val snapshot = BuildStatsSnapshot(
       sections = extension.sections.get(),
       lifecycleTimings = LifecycleTimings(
@@ -135,32 +132,22 @@ class ConfigurationCacheIncompatibleLifecycleCollector(
         scheduledTaskCount = scheduledTaskCount,
         parallelExecutionEnabled = startParameter.isParallelProjectExecutionEnabled,
         configurationOnDemand = startParameter.isConfigureOnDemand,
-        configurationCacheRequested = ccRequested,
+        configurationCacheRequested = false,
         buildFailed = result.failure != null,
-        warning = diagnosticsWarning(startParameter, ccRequested),
+        warning = diagnosticsWarning(startParameter),
       ),
       configurationCacheIncompatible = true,
     )
     BuildStatsRenderer.render(snapshot).forEach(::println)
   }
 
-  private fun diagnosticsWarning(startParameter: StartParameter, configurationCacheRequested: Boolean?): String =
+  private fun diagnosticsWarning(startParameter: StartParameter): String =
     when {
-      configurationCacheRequested == true ->
-        "These lifecycle timings rely on deprecated listeners and may not be reliable with configuration cache."
-
       scheduledTaskCount == 0 ->
         "No tasks were scheduled, so task execution timing is not representative."
 
       else -> "none"
     }
-
-  private fun reflectiveConfigurationCacheRequested(startParameter: StartParameter): Boolean? =
-    runCatching {
-      startParameter.javaClass.methods
-        .firstOrNull { it.name == "isConfigurationCacheRequested" && it.parameterCount == 0 }
-        ?.invoke(startParameter) as? Boolean
-    }.getOrNull()
 
   private fun renderFailureSummary(error: Throwable): String {
     val rootCause = generateSequence(error) { it.cause }.last()
