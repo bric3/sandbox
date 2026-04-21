@@ -30,13 +30,13 @@ flightRecorder = "9.1.2"
 jmh = "1.37"
 
 kotlin = "2.3.20"
-kotlinCoroutines = "1.8.1"
+kotlinCoroutines = "1.10.2"
 foojayResolverConvention = "1.0.0"
 develocity = "4.4.0"
 
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
-guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
+guava = { module = "com.google.guava:guava", version = "33.6.0-jre" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-tls = { group = "com.squareup.okhttp3", name = "okhttp-tls", version.ref = "okhttp" }
 okhttp-dnsoverhttps = { group = "com.squareup.okhttp3", name = "okhttp-dnsoverhttps", version.ref = "okhttp" }
