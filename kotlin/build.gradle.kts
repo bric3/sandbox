@@ -27,10 +27,10 @@ dependencies {
 
   implementation("org.jetbrains.lets-plot:lets-plot-kotlin-jvm:4.13.0")
   implementation("org.jetbrains.lets-plot:lets-plot-batik:4.9.0")
-  implementation("org.jetbrains.kotlinx:kandy-lets-plot:0.8.3")
-  implementation("org.jetbrains.kotlinx:kandy-util:0.8.3")
+  implementation("org.jetbrains.kotlinx:kandy-lets-plot:0.8.4")
+  implementation("org.jetbrains.kotlinx:kandy-util:0.8.4")
   // currently on a private repository, see https://github.com/Kotlin/kandy/issues/284
-  implementation("org.jetbrains.kotlinx:kotlin-statistics-jvm:0.8.3")
+  implementation("org.jetbrains.kotlinx:kotlin-statistics-jvm:0.8.4")
 
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.kotlinCoroutines.get()}")
   testImplementation(platform(libs.junit6.bom))
