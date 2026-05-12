@@ -11,8 +11,8 @@
 okhttp =  "5.3.2"
 bytebuddy = "1.18.8"
 # JUnit 5.x (supports Java 8+)
-junit5-jupiter = "5.14.4"
-junit5-launcher = "1.14.4"
+junit5-jupiter = "6.0.3"
+junit5-launcher = "6.0.3"
 # JUnit 6.x (requires Java 17+) - platform launcher now uses same version as Jupiter
 junit6-jupiter = "6.0.3"
 graalvm = "25.0.3"
