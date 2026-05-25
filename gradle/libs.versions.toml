@@ -14,7 +14,7 @@ bytebuddy = "1.18.8"
 junit5-jupiter = "5.14.4"
 junit5-launcher = "1.14.4"
 # JUnit 6.x (requires Java 17+) - platform launcher now uses same version as Jupiter
-junit6-jupiter = "6.0.3"
+junit6-jupiter = "6.1.0"
 graalvm = "25.0.3"
 flexmark = "0.64.8"
 flatlaf = "3.7.1"
