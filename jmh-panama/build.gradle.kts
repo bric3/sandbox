@@ -19,7 +19,7 @@ repositories {
 
 
 dependencies {
-  implementation("net.java.dev.jna:jna-platform:5.18.1")
+  implementation("net.java.dev.jna:jna-platform:5.19.0")
   implementation("com.github.jnr:jnr-ffi:2.2.19")
 
   // https://github.com/joshjdevl/libsodium-jni

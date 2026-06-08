@@ -9,7 +9,7 @@
 #
 [versions]
 okhttp =  "5.3.2"
-bytebuddy = "1.18.8"
+bytebuddy = "1.18.10"
 # JUnit 5.x (supports Java 8+)
 junit5-jupiter = "5.14.4"
 junit5-launcher = "1.14.4"
@@ -29,10 +29,10 @@ flightRecorder = "9.1.2"
 
 jmh = "1.37"
 
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 kotlinCoroutines = "1.11.0"
 foojayResolverConvention = "1.0.0"
-develocity = "4.4.1"
+develocity = "4.4.2"
 
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
@@ -64,7 +64,7 @@ mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 
-jna = { module = "net.java.dev.jna:jna", version = "5.18.1" }
+jna = { module = "net.java.dev.jna:jna", version = "5.19.0" }
 jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.19" }
 
 flightRecorder = { module = "org.openjdk.jmc:flightrecorder", version.ref = "flightRecorder" }
