@@ -11,7 +11,7 @@
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
 pluginManagement {
-  includeBuild("conventions-settings")
+  includeBuild("build-logic-settings")
 }
 
 plugins {
@@ -26,7 +26,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "sandbox"
 
-includeBuild("conventions")
+includeBuild("build-logic")
 include("kotlin")
 include("jmh-stuff", "jmh-panama")
 include("jdk11", "jdk17", "jdk21", "jdk25")

@@ -27,4 +27,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "conventions"
+rootProject.name = "build-logic"
+include("conventions")

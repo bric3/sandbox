@@ -35,11 +35,11 @@ class BuildStatsSettingsPlugin @Inject constructor(
     val statsListener = settings.gradle.sharedServices.registerIfAbsent(
       STATS_LISTENER_SERVICE,
       StatisticsService::class.java
-    ) {
-      parameters.enabled.set(statsExtension.enabled)
-      parameters.sections.set(statsExtension.sections)
-      parameters.configurationCacheRequested.set(buildFeatures.configurationCache.requested.orElse(false))
-      parameters.minTaskDurationMs.set(statsExtension.minTaskDurationMillis)
+    ) { spec ->
+      spec.parameters.enabled.set(statsExtension.enabled)
+      spec.parameters.sections.set(statsExtension.sections)
+      spec.parameters.configurationCacheRequested.set(buildFeatures.configurationCache.requested.orElse(false))
+      spec.parameters.minTaskDurationMs.set(statsExtension.minTaskDurationMillis)
     }
 
     buildEventsListenerRegistry.onTaskCompletion(statsListener)

@@ -15,21 +15,12 @@ plugins {
     `kotlin-dsl`
 }
 
-gradlePlugin {
-    plugins {
-        create("buildStats") {
-            id = "sandbox.build-stats"
-            implementationClass = "sandbox.buildstats.BuildStatsSettingsPlugin"
-        }
-    }
-}
-
 dependencies {
+  implementation(project(":build-stat"))
   // Expose typed accessors for external plugins used by precompiled settings scripts.
   implementation(libs.gradleplugin.foojay.resolver.convention)
   implementation(libs.gradleplugin.develocity)
   // implementation(libs.gradleplugin.kotlin.jvm)
-  implementation("com.jakewharton.picnic:picnic:0.7.0")
 }
 
 tasks.withType<KotlinCompile>().configureEach {
