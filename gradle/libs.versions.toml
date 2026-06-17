@@ -8,7 +8,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #
 [versions]
-okhttp =  "5.3.2"
+okhttp =  "5.4.0"
 bytebuddy = "1.18.10"
 # JUnit 5.x (supports Java 8+)
 junit5-jupiter = "5.14.4"
@@ -64,7 +64,7 @@ mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 
-jna = { module = "net.java.dev.jna:jna", version = "5.19.0" }
+jna = { module = "net.java.dev.jna:jna", version = "5.19.1" }
 jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.2.19" }
 
 flightRecorder = { module = "org.openjdk.jmc:flightrecorder", version.ref = "flightRecorder" }
