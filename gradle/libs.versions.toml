@@ -32,7 +32,7 @@ jmh = "1.37"
 kotlin = "2.4.0"
 kotlinCoroutines = "1.11.0"
 foojayResolverConvention = "1.0.0"
-develocity = "4.4.2"
+develocity = "4.4.3"
 
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
