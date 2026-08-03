@@ -15,7 +15,7 @@ junit5-jupiter = "5.14.4"
 junit5-launcher = "1.14.4"
 # JUnit 6.x (requires Java 17+) - platform launcher now uses same version as Jupiter
 junit6-jupiter = "6.1.2"
-graalvm = "25.1.3"
+graalvm = "25.2.4"
 flexmark = "0.64.8"
 flatlaf = "3.7.2"
 jsvg = "2.1.0"
