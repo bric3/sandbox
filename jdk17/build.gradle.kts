@@ -24,7 +24,7 @@ javaConvention {
 }
 
 dependencies {
-  implementation("org.jsoup:jsoup:1.23.1")
+  implementation("org.jsoup:jsoup:1.23.2")
   implementation(libs.bundles.graal.js)
   implementation(libs.bundles.graal.deps)
   compileOnly("org.jetbrains:annotations:26.1.0")
