@@ -9,7 +9,7 @@
 #
 [versions]
 okhttp =  "5.5.0"
-bytebuddy = "1.18.12"
+bytebuddy = "1.18.13"
 # JUnit 5.x (supports Java 8+)
 junit5-jupiter = "5.14.4"
 junit5-launcher = "1.14.4"
@@ -29,7 +29,7 @@ flightRecorder = "9.1.2"
 
 jmh = "1.37"
 
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 kotlinCoroutines = "1.11.0"
 foojayResolverConvention = "1.0.0"
 develocity = "4.5.0"
@@ -41,7 +41,7 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 okhttp-tls = { group = "com.squareup.okhttp3", name = "okhttp-tls", version.ref = "okhttp" }
 okhttp-dnsoverhttps = { group = "com.squareup.okhttp3", name = "okhttp-dnsoverhttps", version.ref = "okhttp" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-conscrypt = { module = "org.conscrypt:conscrypt-openjdk-uber", version = "2.6.3" }
+conscrypt = { module = "org.conscrypt:conscrypt-openjdk-uber", version = "2.7.0" }
 
 bytebuddy = { group = "net.bytebuddy", name = "byte-buddy", version.ref = "bytebuddy" }
 bytebuddy-agent = { group = "net.bytebuddy", name = "byte-buddy-agent", version.ref = "bytebuddy" }
