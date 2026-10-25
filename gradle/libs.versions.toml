@@ -8,8 +8,8 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #
 [versions]
-okhttp =  "5.5.0"
-bytebuddy = "1.18.14"
+okhttp =  "5.5.1"
+bytebuddy = "1.18.15"
 # JUnit 5.x (supports Java 8+)
 junit5-jupiter = "5.14.4"
 junit5-launcher = "1.14.4"
@@ -32,7 +32,7 @@ jmh = "1.37"
 kotlin = "2.4.21"
 kotlinCoroutines = "1.11.0"
 foojayResolverConvention = "1.0.0"
-develocity = "4.6.0"
+develocity = "4.6.1"
 
 [libraries]
 commons-math = { group = "org.apache.commons", name = "commons-math3", version = "3.6.1" }
@@ -41,7 +41,7 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 okhttp-tls = { group = "com.squareup.okhttp3", name = "okhttp-tls", version.ref = "okhttp" }
 okhttp-dnsoverhttps = { group = "com.squareup.okhttp3", name = "okhttp-dnsoverhttps", version.ref = "okhttp" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-conscrypt = { module = "org.conscrypt:conscrypt-openjdk-uber", version = "2.7.0" }
+conscrypt = { module = "org.conscrypt:conscrypt-openjdk-uber", version = "2.8.0" }
 
 bytebuddy = { group = "net.bytebuddy", name = "byte-buddy", version.ref = "bytebuddy" }
 bytebuddy-agent = { group = "net.bytebuddy", name = "byte-buddy-agent", version.ref = "bytebuddy" }
@@ -65,7 +65,7 @@ mockito-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = 
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 
 jna = { module = "net.java.dev.jna:jna", version = "5.19.1" }
-jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.3.3" }
+jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.3.4" }
 
 flightRecorder = { module = "org.openjdk.jmc:flightrecorder", version.ref = "flightRecorder" }
 flightRecorder-writer = { module = "org.openjdk.jmc:flightrecorder.writer", version.ref = "flightRecorder" }
@@ -82,7 +82,7 @@ flatlaf-fonts-jetbrains-mono = { module = "com.formdev:flatlaf-fonts-jetbrains-m
 
 jsvg = { module = "com.github.weisj:jsvg", version.ref = "jsvg" }
 
-miglayout = { module = "com.miglayout:miglayout-swing", version = "11.5.1" }
+miglayout = { module = "com.miglayout:miglayout-swing", version = "11.5.2" }
 
 graal-sdk = { module = "org.graalvm.sdk:graal-sdk", version.ref = "graalvm" }
 graal-truffle-api = { module = "org.graalvm.truffle:truffle-api", version.ref = "graalvm" }
