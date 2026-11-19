@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
   implementation("net.java.dev.jna:jna-platform:5.19.1")
-  implementation("com.github.jnr:jnr-ffi:2.3.4")
+  implementation("com.github.jnr:jnr-ffi:2.3.7")
 
   // https://github.com/joshjdevl/libsodium-jni
   // Note this lib doesn't include the JNI glue library, see https://github.com/joshjdevl/libsodium-jni/issues/66
@@ -32,7 +32,7 @@ dependencies {
   // libsodium with JNR
   implementation("org.apache.tuweni:tuweni-crypto:2.3.1")
 
-  implementation("org.apache.commons:commons-lang3:3.21.0")
+  implementation("org.apache.commons:commons-lang3:3.22.0")
 }
 
 
