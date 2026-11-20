@@ -9,15 +9,15 @@
 #
 [versions]
 okhttp =  "5.5.1"
-bytebuddy = "1.18.15"
+bytebuddy = "1.18.17-jdk5"
 # JUnit 5.x (supports Java 8+)
 junit5-jupiter = "5.14.4"
 junit5-launcher = "1.14.4"
 # JUnit 6.x (requires Java 17+) - platform launcher now uses same version as Jupiter
 junit6-jupiter = "6.1.3"
-graalvm = "25.4.4.1.1"
+graalvm = "25.5.5.0.3"
 flexmark = "0.64.8"
-flatlaf = "3.7.2"
+flatlaf = "3.8"
 jsvg = "2.2.0"
 
 mockito = "5.24.0"
@@ -41,7 +41,7 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 okhttp-tls = { group = "com.squareup.okhttp3", name = "okhttp-tls", version.ref = "okhttp" }
 okhttp-dnsoverhttps = { group = "com.squareup.okhttp3", name = "okhttp-dnsoverhttps", version.ref = "okhttp" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-conscrypt = { module = "org.conscrypt:conscrypt-openjdk-uber", version = "2.8.0" }
+conscrypt = { module = "org.conscrypt:conscrypt-openjdk-uber", version = "2.9.0" }
 
 bytebuddy = { group = "net.bytebuddy", name = "byte-buddy", version.ref = "bytebuddy" }
 bytebuddy-agent = { group = "net.bytebuddy", name = "byte-buddy-agent", version.ref = "bytebuddy" }
@@ -65,7 +65,7 @@ mockito-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = 
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 
 jna = { module = "net.java.dev.jna:jna", version = "5.19.1" }
-jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.3.4" }
+jnr-ffi = { module = "com.github.jnr:jnr-ffi", version = "2.3.7" }
 
 flightRecorder = { module = "org.openjdk.jmc:flightrecorder", version.ref = "flightRecorder" }
 flightRecorder-writer = { module = "org.openjdk.jmc:flightrecorder.writer", version.ref = "flightRecorder" }
@@ -119,6 +119,6 @@ graal-deps = ["graal-sdk", "graal-truffle-api"]
 
 [plugins]
 download = { id = "de.undercouch.download", version = "5.7.0" }
-jmh = { id = "me.champeau.jmh", version = "0.7.3" }
+jmh = { id = "me.champeau.jmh", version = "0.7.4" }
 ideaExt = { id = "org.jetbrains.gradle.plugin.idea-ext", version = "1.4.1" }
 testLogger = { id = "com.adarshr.test-logger", version = "4.0.0" }
